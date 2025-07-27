@@ -4,4 +4,4 @@
 
 Library for polynomial conversions between NP-hard problems
 
-Developed as a masters thesis of Paweł Stanik
+Developed as a masters thesis of Paweł Stanik in the Wrocław University of Science and Technology
