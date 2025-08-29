@@ -2,17 +2,140 @@ using Test
 using JuMP, CPLEX
 using Conplete
 
-@testset "Conplete.jl" begin
+solver = CPLEX.Optimizer
+matrix = [
+  13 15 -5 0
+  5 -13 -9 0
+  -2 -13 -9 0
+  -16 18 19 0
+  -6 14 5 0
+  -7 4 11 0
+  -15 19 14 0
+  20 -3 -19 0
+  -20 -9 -11 0
+  2 -6 -10 0
+  13 -6 3 0
+  9 11 -8 0
+  -9 -19 7 0
+  -17 -20 12 0
+  -17 4 -16 0
+  20 -5 -7 0
+  -10 -4 11 0
+  5 9 -1 0
+  17 -1 19 0
+  -1 -2 -6 0
+  15 17 -19 0
+  15 -14 18 0
+  -16 -15 19 0
+  -16 6 -15 0
+  -20 5 -3 0
+  -10 20 16 0
+  -6 17 -7 0
+  7 2 -16 0
+  -18 5 13 0
+  -17 13 12 0
+  -14 -6 -12 0
+  14 -2 -9 0
+  3 -14 -17 0
+  -1 18 -6 0
+  14 -18 -8 0
+  7 -3 -19 0
+  -18 -20 -5 0
+  20 12 15 0
+  5 3 15 0
+  16 -6 -18 0
+  8 5 -18 0
+  4 6 -15 0
+  6 3 4 0
+  9 -11 -12 0
+  12 9 5 0
+  4 18 -8 0
+  16 -8 1 0
+  3 1 -7 0
+  15 -9 -4 0
+  -5 -3 -10 0
+  -16 -12 -19 0
+  12 -3 -16 0
+  4 -18 -6 0
+  5 -7 -3 0
+  15 -1 -5 0
+  -16 9 10 0
+  -9 17 5 0
+  -2 4 10 0
+  16 9 -11 0
+  1 -7 -15 0
+  -20 -8 3 0
+  3 9 17 0
+  -11 9 6 0
+  8 16 19 0
+  2 8 -3 0
+  -5 15 18 0
+  1 16 2 0
+  -18 -11 -9 0
+  5 7 -12 0
+  -13 -10 20 0
+  11 -20 1 0
+  -13 19 2 0
+  17 -3 15 0
+  -2 4 13 0
+  5 -19 12 0
+  -12 -5 7 0
+  19 -4 2 0
+  -5 -14 10 0
+  -6 -1 -12 0
+  20 -18 -11 0
+  14 16 4 0
+  5 12 -10 0
+  10 3 -6 0
+  -15 -3 5 0
+  12 -13 -1 0
+  20 -9 -8 0
+  -10 18 -6 0
+  16 12 -18 0
+  -14 15 -2 0
+  3 19 10 0
+  15 20 13 0]
+
+@testset "Solvers" begin
   # Write your tests here.
-  
+
+  @testset let
+    problem = SAT3(20, matrix)
+    @test solve(solver, problem)
+
+  end
+
+  @testset let
+    model = Model(solver)
+
+    set_silent(model)
+
+    problem = SAT3(20, matrix)
+    @variable(model, x[0:problem.variable_count], Bin)
+    rows = size(problem.parts, 1)
+
+    function translate(var)
+      if var < 0
+        return (1 - x[abs(var)])
+      else
+        x[var]
+      end
+    end
+
+    @constraint(model, [r = 1:rows], translate(matrix[r, 1]) + translate(matrix[r, 2]) + translate(matrix[r, 3]) >= 1)
+
+    @objective(model, Min, 1)
+
+    # println(model)
+
+    optimize!(model)
+
+    # display(value(x))
+
+    @test is_solved_and_feasible(model)
+
+  end
 end
 
-@testset "3SAT" begin
-  model = CPLEX.Optimizer
-    matrix = [
-      3 2 1
-      2 -4 5
-    ]
-    @test solve(model, SAT3(5, matrix))
-    
-  end
+
+
