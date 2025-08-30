@@ -1,12 +1,9 @@
-using JuMP
-using Conplete
-
 function Conplete.solve(solver, problem::SAT3)
     model = Model(solver)
 
     set_silent(model)
     @variable(model, x[0:problem.variable_count], Bin)
-    rows = size(problem.parts, 1)
+    rows = size(problem.clauses, 1)
 
     function translate(var)
       if var < 0
@@ -16,7 +13,7 @@ function Conplete.solve(solver, problem::SAT3)
       end
     end
 
-    @constraint(model, [r = 1:rows], translate(problem.parts[r, 1]) + translate(problem.parts[r, 2]) + translate(problem.parts[r, 3]) >= 1)
+    @constraint(model, [r = 1:rows], translate(problem.clauses[r, 1]) + translate(problem.clauses[r, 2]) + translate(problem.clauses[r, 3]) >= 1)
 
     @objective(model, Min, 1)
 

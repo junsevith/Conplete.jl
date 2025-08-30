@@ -2,8 +2,9 @@ module Solvers
 
 using Conplete
 using JuMP
+using Graphs
 
 include("SAT3.jl")
-export solve_3sat
+include("VertexCover.jl")
 
 end

@@ -1,4 +1,9 @@
 struct SAT3
   variable_count::UInt
-  parts::Matrix{Int}
+  clauses::Matrix{Int}
+end
+
+struct VertexCover
+  graph::SimpleGraph
+  size::UInt
 end

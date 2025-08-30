@@ -1,6 +1,7 @@
 using Test
 using JuMP, CPLEX
 using Conplete
+using Graphs
 
 solver = CPLEX.Optimizer
 matrix = [
@@ -103,36 +104,13 @@ matrix = [
     problem = SAT3(20, matrix)
     @test solve(solver, problem)
 
+    vc = VertexCover(problem)
+
+    @test solve(solver, vc)
+
   end
 
   @testset let
-    model = Model(solver)
-
-    set_silent(model)
-
-    problem = SAT3(20, matrix)
-    @variable(model, x[0:problem.variable_count], Bin)
-    rows = size(problem.parts, 1)
-
-    function translate(var)
-      if var < 0
-        return (1 - x[abs(var)])
-      else
-        x[var]
-      end
-    end
-
-    @constraint(model, [r = 1:rows], translate(matrix[r, 1]) + translate(matrix[r, 2]) + translate(matrix[r, 3]) >= 1)
-
-    @objective(model, Min, 1)
-
-    # println(model)
-
-    optimize!(model)
-
-    # display(value(x))
-
-    @test is_solved_and_feasible(model)
 
   end
 end
