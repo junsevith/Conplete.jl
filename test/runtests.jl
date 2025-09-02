@@ -18,6 +18,8 @@ solver = CPLEX.Optimizer
 
     @test solve(solver, vc)
 
+    ham = HamiltonianCircuit(problem)
+
   end
 
   @testset let

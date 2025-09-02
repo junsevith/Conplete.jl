@@ -1,3 +1,9 @@
+struct VertexCover
+  graph::SimpleGraph
+  size::UInt
+end
+
+
 """
 conversion of 3SAT to VertexCover problem
 """
@@ -5,20 +11,11 @@ function VertexCover(sat3::SAT3)
 
     # vertex x corresponds to variable x in 3sat
     # vertex 2x correspontd to ¬x
-    # vertex clausemap((i,j)) corresponds to element j of clause i
+    # vertex 2*sat3.variable_count + 3*(i-1) + (j-1) corresponds to element j of clause i
 
-    clauseMap = Dict()
     graph = SimpleGraph(sat3.variable_count * 2 + length(sat3.clauses))
 
-    # we create mapping for elements of clauses
-
-    elementsStart = 2 * sat3.variable_count + 1
-
-    for i in axes(sat3.clauses, 1), j in axes(sat3.clauses, 2)
-        clauseMap[(i, j)] = elementsStart
-        elementsStart += 1
-    end
-
+    elementsCounter = 2 * sat3.variable_count
     # we add edge between variable and its negation
 
     for v in 1:sat3.variable_count
@@ -35,9 +32,9 @@ function VertexCover(sat3::SAT3)
     end
 
     for i in axes(sat3.clauses, 1)
-        first = clauseMap[(i, 1)]
-        second = clauseMap[(i, 2)]
-        third = clauseMap[(i, 3)]
+        first = elementsCounter += 1
+        second = elementsCounter += 1
+        third = elementsCounter += 1
 
         # we add edges between elements in clauses
 

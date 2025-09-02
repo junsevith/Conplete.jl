@@ -2,14 +2,16 @@ module Conplete
 
 using Graphs
 
+include("SAT3.jl")
+include("VertexCover.jl")
+include("Hamiltonian.jl")
+
 export SAT3
 export VertexCover
-include("problems.jl")
-
-
-include("VertexCover.jl")
-
+export HamiltonianCircuit
 export solve
+
+
 """
 Solve problem with JuMP using given solver
 """
