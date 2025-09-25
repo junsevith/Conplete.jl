@@ -75,7 +75,7 @@ uuid = "e66e0078-7015-5450-92f7-15fbd957f2ae"
 version = "1.1.1+0"
 
 [[deps.Conplete]]
-deps = ["Graphs"]
+deps = ["DataStructures", "Graphs"]
 path = ".."
 uuid = "ad4576df-0cfb-40d1-a195-8ac8b2a72e08"
 version = "1.0.0-DEV"
@@ -119,9 +119,9 @@ version = "0.9.5"
 
 [[deps.ForwardDiff]]
 deps = ["CommonSubexpressions", "DiffResults", "DiffRules", "LinearAlgebra", "LogExpFunctions", "NaNMath", "Preferences", "Printf", "Random", "SpecialFunctions"]
-git-tree-sha1 = "ce15956960057e9ff7f1f535400ffa14c92429a4"
+git-tree-sha1 = "dc41303865a16274ecb8450c220021ce1e0cf05f"
 uuid = "f6369f11-7733-5829-9624-2563aa707210"
-version = "1.1.0"
+version = "1.2.1"
 weakdeps = ["StaticArrays"]
 
     [deps.ForwardDiff.extensions]
@@ -186,9 +186,9 @@ version = "1.14.3"
 
 [[deps.JuMP]]
 deps = ["LinearAlgebra", "MacroTools", "MathOptInterface", "MutableArithmetics", "OrderedCollections", "PrecompileTools", "Printf", "SparseArrays"]
-git-tree-sha1 = "d05a696a5abaf9d1f8bce948ee53ed1533fadfdb"
+git-tree-sha1 = "b201ac010ecdcc3617649175fa59c3dbd9bf96a0"
 uuid = "4076af6c-e467-56ae-b986-b466b2749572"
-version = "1.28.0"
+version = "1.29.1"
 
     [deps.JuMP.extensions]
     JuMPDimensionalDataExt = "DimensionalData"
@@ -243,9 +243,9 @@ version = "0.1.1"
 
 [[deps.MathOptInterface]]
 deps = ["BenchmarkTools", "CodecBzip2", "CodecZlib", "DataStructures", "ForwardDiff", "JSON3", "LinearAlgebra", "MutableArithmetics", "NaNMath", "OrderedCollections", "PrecompileTools", "Printf", "SparseArrays", "SpecialFunctions", "Test"]
-git-tree-sha1 = "583abfbd38f15198adde0658e1b1222ece232ae2"
+git-tree-sha1 = "700acfa97a2b23569c0a6dcfcd85f183d7258e31"
 uuid = "b8f27783-ece8-5eb3-8dc8-9495eed66fee"
-version = "1.43.0"
+version = "1.45.0"
 
 [[deps.Mmap]]
 uuid = "a63ad114-7e13-5084-954f-fe012c677804"
@@ -253,9 +253,9 @@ version = "1.11.0"
 
 [[deps.MutableArithmetics]]
 deps = ["LinearAlgebra", "SparseArrays", "Test"]
-git-tree-sha1 = "491bdcdc943fcbc4c005900d7463c9f216aabf4c"
+git-tree-sha1 = "a03ae6a640a92191615fb53baae6a74b74bce56d"
 uuid = "d8a4904e-b15c-11e9-3269-09a3773c0cb0"
-version = "1.6.4"
+version = "1.6.5"
 
 [[deps.NaNMath]]
 deps = ["OpenLibm_jll"]

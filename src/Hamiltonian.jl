@@ -1,119 +1,163 @@
+using DataStructures
+
 struct HamiltonianCircuit
     graph::SimpleDiGraph
 end
 
-mutable struct VariableSubgraph
-    start::UInt
-    finish::UInt
-    left::Array{UInt,1}
-    right::Array{UInt,1}
-    leftCounter::UInt
-    rightCounter::UInt
-    VariableSubgraph() = new(0, 0, [], [], 0, 0)
-end
-
 function HamiltonianCircuit(sat3::SAT3)
 
-    graph = SimpleDiGraph(6 * size(sat3.clauses, 1))
+    variables = 1:sat3.variable_count
 
-    variableSubgraphs = [VariableSubgraph() for _ in 1:sat3.variable_count]
+    #Count how many vertices do we need to initialize the graph
+    countp = [0 for _ in variables]
+    countn = [0 for _ in variables]
 
-    vertCounter = 6 * size(sat3.clauses, 1)
-
-    function connect_detour(inV::UInt, outV::UInt, varSg::Int)
-        varSg = variableSubgraphs[abs(varSg)]
-
-        # when variable is first used we create initial subgraph
-        if varSg.start == 0
-            add_vertices!(graph, 5)
-            varSg.start = vertCounter += 1
-            push!(varSg.left, vertCounter += 1, vertCounter += 1)
-            push!(varSg.right, vertCounter += 1, vertCounter += 1)
-            varSg.leftCounter = 1
-            varSg.rightCounter = 1
-
-            add_edge!(graph, varSg.start, varSg.left[1])
-            add_edge!(graph, varSg.start, varSg.right[1])
-
-            add_edge!(graph, varSg.left[1], varSg.right[1])
-            add_edge!(graph, varSg.right[1], varSg.left[1])
-
-            add_edge!(graph, varSg.left[1], varSg.right[2])
-            add_edge!(graph, varSg.right[1], varSg.left[2])
-
-            add_edge!(graph, varSg.left[2], varSg.right[2])
-            add_edge!(graph, varSg.right[2], varSg.left[2])
-        end
-
-        subgLen = length(varSg.left)
-
-        # we have not enough vertices in subgraph
-        if subgLen == max(varSg.rightCounter, varSg.leftCounter)
-            add_vertices!(graph, 2)
-            push!(varSg.left, vertCounter += 1)
-            push!(varSg.right, vertCounter += 1)
-
-            subgLen += 1
-
-            add_edge!(graph, varSg.left[subgLen-1], varSg.right[subgLen])
-            add_edge!(graph, varSg.right[subgLen-1], varSg.left[subgLen])
-
-            add_edge!(graph, varSg.left[subgLen], varSg.right[subgLen])
-            add_edge!(graph, varSg.right[subgLen], varSg.left[subgLen])
-        end
-
-        #we connect variable subgraph with clause subgraph
-        if var > 0
-            add_edge!(graph, varSg.right[varSg.rightCounter], inV)
-            add_edge!(graph, outV, varSg.left[varSg.rightCounter+1])
-
-            varSg.rightCounter += 1
+    for i in axes(sat3.clauses, 1), j in 1:3
+        el = sat3.clauses[i, j]
+        if el < 0
+            countn[-el] += 1
         else
-            add_edge!(graph, varSg.left[varSg.rightCounter], inV)
-            add_edge!(graph, outV, varSg.right[varSg.rightCounter+1])
+            countp[el] += 1
+        end
+    end
 
-            varSg.leftCounter += 1
+    vertex_count = size(sat3.clauses, 1)
+
+    for i in variables
+        max_v = max(countn[i], countp[i])
+        if max_v > 0
+            vertex_count += 3 * max_v + 3
+        end
+    end
+
+    #initialization
+    g = SimpleDiGraph(vertex_count)
+
+    posq = [Queue{UInt}() for _ in variables]
+    negq = [Queue{UInt}() for _ in variables]
+    start = [0 for _ in variables]
+
+    vertex_counter = 0
+
+    function next_slot(var, qs, qs2)
+        q = qs[var]
+        q2 = qs2[var]
+        len = length(q)
+
+        #we initialize the variable subgraph
+        if len == 0
+            a = vertex_counter += 1
+            b = vertex_counter += 1
+            c = vertex_counter += 1
+
+            start[var] = a
+            push!(q, c)
+            push!(q2, c)
+
+            add_edge!(g, a, b)
+            add_edge!(g, b, c)
+            add_edge!(g, c, b)
+            add_edge!(g, b, a)
         end
 
+        #variable subgraph is too short
+        if len < 3
+            #we add 3 more vertices
+            a = vertex_counter += 1
+            b = vertex_counter += 1
+            c = vertex_counter += 1
 
+            #vertex c will not be used now so we put it in queue
+            #vertex a will be used now for slot so there is no point in putting it in queue
+            push!(q, c)
+
+            push!(q2, a)
+            push!(q2, c)
+
+            #there always has to be a at least one vertex in subgraph at this point
+            s = popfirst!(q)
+
+            #we add connection between edges
+            add_edge!(g, s, a)
+            add_edge!(g, a, b)
+            add_edge!(g, b, c)
+            add_edge!(g, c, b)
+            add_edge!(g, b, a)
+            add_edge!(g, a, s)
+
+            return (s, a)
+        else
+            #queue has enough vertices so we just pop two
+            s = popfirst!(q)
+            f = popfirst!(q)
+            return (s, f)
+        end
 
     end
 
+    #we add clauses 
     for i in axes(sat3.clauses, 1)
-        in1 = (i - 1) * 6 + 1
-        in2 = in1 + 1
-        in3 = in1 + 2
+        clause_vertex = vertex_counter += 1
+        for j in 1:3
+            var = sat3.clauses[i, j]
 
-        out1 = in1 + 3
-        out2 = in1 + 4
-        out3 = in1 + 5
+            #we connect clauses to variables
+            s = Nothing
+            f = Nothing
+            if var < 0
+                (f, s) = next_slot(-var, negq, posq)
+            else
+                (s, f) = next_slot(var, posq, negq)
+            end
 
-        add_edge!(graph, in1, in2)
-        add_edge!(graph, in2, in3)
-        add_edge!(graph, in3, in1)
-
-        add_edge!(graph, in1, out1)
-        add_edge!(graph, in2, out2)
-        add_edge!(graph, in3, out3)
-
-        add_edge!(graph, out3, out2)
-        add_edge!(graph, out2, out1)
-        add_edge!(graph, out1, out3)
-
-        connect_detour(in1, out1, sat3.clauses[i, 1])
-        connect_detour(in2, out2, sat3.clauses[i, 2])
-        connect_detour(in3, out3, sat3.clauses[i, 3])
-    end
-
-    prevEnd = 0
-
-    for varSg in variableSubgraphs
-        if varSg.start != 0
-            add_vertex!(graph)
-            varSg.finish = vertCounter += 1
-            add_edge!(graph, last(varSg.left))
+            add_edge!(g, s, clause_vertex)
+            add_edge!(g, clause_vertex, f)
         end
-
     end
 
+    bb = 0 # beginning before
+    eb = 0 # end before
+
+    bf = 0 # beginning first
+    ef = 0 # end first
+
+    #we connect variable subgraphs together
+    for i in variables
+        b = start[i]
+
+        #we skip variable if it doesnt have any vertices
+        if b > 0
+            e = if length(posq[i]) == 1
+                popfirst!(posq[i])
+            else #one of the queues always has to have length 1
+                popfirst!(negq[i])
+            end
+
+            #first variable
+            if bf == 0
+                bf = b
+                ef = e
+
+                bb = b
+                eb = e
+            else
+                add_edge!(g, bb, b)
+                add_edge!(g, bb, e)
+                add_edge!(g, eb, b)
+                add_edge!(g, eb, e)
+
+                bb = b
+                eb = e
+            end
+        end
+    end
+
+    #we connect first and last variable subgraph
+    add_edge!(g, bb, bf)
+    add_edge!(g, bb, ef)
+    add_edge!(g, eb, bf)
+    add_edge!(g, eb, ef)
+
+    return HamiltonianCircuit(g)
 end
+

@@ -6,12 +6,14 @@ using Graphs
 solver = try
   using CPLEX
 
-   CPLEX.Optimizer
+  CPLEX.Optimizer
 catch
   using HiGHS
 
   HiGHS.Optimizer
 end
+
+include("data.jl")
 
 @testset "Solvers" begin
   # Write your tests here.
@@ -20,6 +22,7 @@ end
 
   @testset let
     problem = SAT3("../test_data/uf20-91/uf20-01.cnf")
+    # problem = SAT3(matrix2)
 
     @test solve(solver, problem)
 
@@ -27,13 +30,12 @@ end
 
     @test solve(solver, vc)
 
-    # ham = HamiltonianCircuit(problem)
+    ham = HamiltonianCircuit(problem)
+
+    @test solve(solver, ham)
 
   end
 
-  @testset let
-
-  end
 end
 
 
