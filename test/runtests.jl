@@ -3,10 +3,20 @@ using JuMP
 using Conplete
 using Graphs
 
-include("solver.jl")
+solver = try
+  using CPLEX
+
+   CPLEX.Optimizer
+catch
+  using HiGHS
+
+  HiGHS.Optimizer
+end
 
 @testset "Solvers" begin
   # Write your tests here.
+  print("Using solver: ")
+  println(solver)
 
   @testset let
     problem = SAT3("../test_data/uf20-91/uf20-01.cnf")
@@ -22,7 +32,7 @@ include("solver.jl")
   end
 
   @testset let
-    
+
   end
 end
 
