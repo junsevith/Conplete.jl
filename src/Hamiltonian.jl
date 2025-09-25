@@ -110,8 +110,10 @@ function HamiltonianCircuit(sat3::SAT3)
     for varSg in variableSubgraphs
         if varSg.start != 0
             add_vertex!(graph)
+            varSg.finish = vertCounter += 1
+            add_edge!(graph, last(varSg.left))
         end
-        
+
     end
 
 end

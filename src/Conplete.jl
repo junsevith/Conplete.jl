@@ -4,7 +4,7 @@ using Graphs
 
 include("SAT3.jl")
 include("VertexCover.jl")
-include("Hamiltonian.jl")
+# include("Hamiltonian.jl")
 
 export SAT3
 export VertexCover
