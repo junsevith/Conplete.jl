@@ -12,6 +12,4 @@ JuMP = "4076af6c-e467-56ae-b986-b466b2749572"
 [extensions]
 Solvers = "JuMP"
 
-[compat]
-julia = "1.6.7"
-Graphs = "1.13.1"
+
