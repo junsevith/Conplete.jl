@@ -10,7 +10,7 @@ conversion of 3SAT to VertexCover problem
 function VertexCover(sat3::SAT3)
 
     # vertex x corresponds to variable x in 3sat
-    # vertex 2x correspontd to ¬x
+    # vertex sat3.variable_count + x correspontd to ¬x
     # vertex 2*sat3.variable_count + 3*(i-1) + (j-1) corresponds to element j of clause i
 
     graph = SimpleGraph(sat3.variable_count * 2 + length(sat3.clauses))
@@ -19,13 +19,13 @@ function VertexCover(sat3::SAT3)
     # we add edge between variable and its negation
 
     for v in 1:sat3.variable_count
-        add_edge!(graph, v, 2 * v)
+        add_edge!(graph, v, sat3.variable_count + v)
     end
 
     function variable(i, j)
         el = sat3.clauses[i, j]
         return if el < 0
-            abs(el) * 2
+            abs(el) + sat3.variable_count
         else
             el
         end
