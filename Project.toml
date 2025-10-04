@@ -16,4 +16,5 @@ Solvers = "JuMP"
 [compat]
 DataStructures = "0.19.1"
 Graphs = "1.13.1"
+JuMP = "1"
 julia = "1.6.7"
