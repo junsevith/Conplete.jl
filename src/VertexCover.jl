@@ -1,8 +1,22 @@
-struct VertexCover
-  graph::SimpleGraph
-  size::UInt
+struct VertexCover <: Problem
+    graph::SimpleGraph
+    size::UInt
+    unpack_data::Array{UnpackData}
 end
 
+struct VertexCoverSolution <: Solution
+    cover::Set{UInt}
+end
+
+function validate(solution::VertexCoverSolution, problem::VertexCover)
+    for v in solution.cover
+    end
+end
+
+
+struct sat3_vc <: UnpackData
+    variable_count::UInt
+end
 
 """
 conversion of 3SAT to VertexCover problem
@@ -54,6 +68,6 @@ function VertexCover(sat3::SAT3)
 
     vcSize = sat3.variable_count + 2 * size(sat3.clauses, 1)
 
-    return VertexCover(graph, vcSize)
+    return VertexCover(graph, vcSize, [sat3_vc(sat3.variable_count) ; sat3.unpack_data])
 
 end

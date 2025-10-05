@@ -1,11 +1,23 @@
 using DataStructures
 
-struct HamiltonianCircuit
+struct HamiltonianCircuit <: Problem
     graph::SimpleDiGraph
+    unpack_data::Array{UnpackData}
+end
+
+struct HamiltonianSolution <: Solution
+    cycle::Array{Tuple{UInt,UInt}}
+end
+
+function validate(solution::HamiltonianSolution, problem::HamiltonianCircuit)
+
+end
+
+struct sat3_ham <: UnpackData
+    variable_count::UInt
 end
 
 function HamiltonianCircuit(sat3::SAT3)
-
     variables = 1:sat3.variable_count
 
     #Count how many vertices do we need to initialize the graph
@@ -21,12 +33,12 @@ function HamiltonianCircuit(sat3::SAT3)
         end
     end
 
-    vertex_count = size(sat3.clauses, 1)
+    vertex_count = size(sat3.clauses, 1) + 2 * sat3.variable_count
 
     for i in variables
         max_v = max(countn[i], countp[i])
         if max_v > 0
-            vertex_count += 3 * max_v + 3
+            vertex_count += 3 * max_v + 1
         end
     end
 
@@ -35,9 +47,8 @@ function HamiltonianCircuit(sat3::SAT3)
 
     posq = [Queue{UInt}() for _ in variables]
     negq = [Queue{UInt}() for _ in variables]
-    start = [0 for _ in variables]
 
-    vertex_counter = 0
+    vertex_counter = 2 * sat3.variable_count
 
     function next_slot(var, qs, qs2)
         q = qs[var]
@@ -46,11 +57,10 @@ function HamiltonianCircuit(sat3::SAT3)
 
         #we initialize the variable subgraph
         if len == 0
-            a = vertex_counter += 1
-            b = vertex_counter += 1
+            a = var
+            b = sat3.variable_count + var
             c = vertex_counter += 1
 
-            start[var] = a
             push!(q, c)
             push!(q2, c)
 
@@ -123,11 +133,12 @@ function HamiltonianCircuit(sat3::SAT3)
 
     #we connect variable subgraphs together
     for i in variables
-        b = start[i]
+        l = length(posq[i])
 
         #we skip variable if it doesnt have any vertices
-        if b > 0
-            e = if length(posq[i]) == 1
+        if l > 0
+            b = i
+            e = if l == 1
                 popfirst!(posq[i])
             else #one of the queues always has to have length 1
                 popfirst!(negq[i])
@@ -149,6 +160,10 @@ function HamiltonianCircuit(sat3::SAT3)
                 bb = b
                 eb = e
             end
+        else
+            println("dupa")
+            rem_vertex!(g, i)
+            rem_vertex!(g, i + sat3.variable_count)
         end
     end
 
@@ -158,6 +173,17 @@ function HamiltonianCircuit(sat3::SAT3)
     add_edge!(g, eb, bf)
     add_edge!(g, eb, ef)
 
-    return HamiltonianCircuit(g)
+    return HamiltonianCircuit(g, [sat3_ham(sat3.variable_count); sat3.unpack_data])
 end
 
+function unpackSolution(solution::HamiltonianSolution, unpackData::sat3_ham)
+    eval = [false for _ in 1:(unpackData.variable_count)]
+
+    for (v, u) in solution.cycle
+        if v <= unpackData.variable_count && u == v + unpackData.variable_count
+            eval[v] = true
+        end
+    end
+
+    return SAT3Solution(eval)
+end

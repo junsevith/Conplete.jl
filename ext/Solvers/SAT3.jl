@@ -2,7 +2,7 @@ function Conplete.solve(solver, problem::SAT3)
     model = Model(solver)
 
     set_silent(model)
-    @variable(model, x[0:problem.variable_count], Bin)
+    @variable(model, x[1:problem.variable_count], Bin)
     rows = size(problem.clauses, 1)
 
     function translate(var)
@@ -23,5 +23,9 @@ function Conplete.solve(solver, problem::SAT3)
 
     # display(value(x))
 
-    return is_solved_and_feasible(model)
+    if is_solved_and_feasible(model)
+      return SAT3Solution(value(x))
+    else
+      return Nothing
+    end
 end

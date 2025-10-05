@@ -1,9 +1,14 @@
-struct SAT3
+struct SAT3 <: Problem
   variable_count::UInt
   clauses::Matrix{Int}
+  unpack_data::Array{UnpackData}
 end
 
-# finde the variable count of given clauses
+struct SAT3Solution <: Solution
+  evaluation::Array{Bool}
+end
+
+# find the variable count of given clauses
 function SAT3(clauses::Matrix{Int})
   maxi = 0
 
@@ -11,7 +16,7 @@ function SAT3(clauses::Matrix{Int})
     maxi = max(maxi, abs(clauses[i, j]))
   end
 
-  return SAT3(maxi, clauses)
+  return SAT3(maxi, clauses, [])
 end
 
 
@@ -40,5 +45,31 @@ function SAT3(path::String)
     end
   end
 
-  return SAT3(vars, m)
+  return SAT3(vars, m, [])
+end
+
+function validate(solution::SAT3Solution, problem::SAT3)
+    if length(solution.evaluation) != problem.variable_count
+      return false
+    end
+
+    for i in axes(problem.clauses,1)
+      val = false
+      for j in 1:3
+
+        var = problem.clauses[i,j]
+        if var < 0
+          val |= !solution.evaluation[-var]
+        else
+          val |= solution.evaluation[var]
+        end
+      end
+
+      if val == false
+        return false
+      end
+
+    end
+
+    return true
 end
