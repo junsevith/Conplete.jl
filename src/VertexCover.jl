@@ -9,8 +9,18 @@ struct VertexCoverSolution <: Solution
 end
 
 function validate(solution::VertexCoverSolution, problem::VertexCover)
-    for v in solution.cover
+    if length(solution.cover) > problem.size
+        return ErrorException("solution too large")
     end
+
+    for e in edges(problem.graph)
+        if !(src(e) in solution.cover) && !(dst(e) in solution.cover)
+            println(e)
+            return ErrorException("edge that is not covered")
+        end
+    end
+
+    return true
 end
 
 
@@ -70,4 +80,8 @@ function VertexCover(sat3::SAT3)
 
     return VertexCover(graph, vcSize, [sat3_vc(sat3.variable_count) ; sat3.unpack_data])
 
+end
+
+function unpack_internal(solution::VertexCoverSolution, data::sat3_vc)
+    return SAT3Solution([in(v,solution.cover) for v in 1:(data.variable_count)])
 end

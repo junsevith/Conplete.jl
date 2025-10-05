@@ -28,30 +28,35 @@ include("data.jl")
 
     og_sol = solve(solver, problem)
 
-    display(og_sol)
+    @test validate(og_sol, problem)
 
-    @test !isnothing(og_sol)
-
+    #vertex cover
     vc = VertexCover(problem)
 
-    @test solve(solver, vc)
+    vc_sol = solve(solver, vc)
+
+    @test validate(vc_sol, vc)
+
+    vc_sat = unpack(vc_sol, vc)
+
+    @test validate(vc_sat, problem)
 
 
+    #hamiltonian
     ham = HamiltonianCircuit(problem)
 
     ham_sol = solve(solver, ham)
 
-    @test !isnothing(ham_sol)
+    @test validate(ham_sol, ham)
 
-    # display(ham_sol)
+    ham_sat = unpack(ham_sol, ham)
 
-    sat3_sol = unpack(ham_sol, ham)
+    @test validate(ham_sat, problem)
 
-    display(sat3_sol)
+    display(og_sol)
+    display(vc_sat)
+    display(ham_sat)
 
-    @test validate(sat3_sol, problem)
-
-    @test validate(og_sol, problem)
 
   end
 

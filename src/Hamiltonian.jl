@@ -5,11 +5,45 @@ struct HamiltonianCircuit <: Problem
     unpack_data::Array{UnpackData}
 end
 
+"""
+Solution to a Hamiltonian-Cycle problem containing cycle in following format:
+
+an array of length equal to number of vertices where value cycle[x] = y corresponds to edge (x,y) in cycle
+
+"""
 struct HamiltonianSolution <: Solution
-    cycle::Array{Tuple{UInt,UInt}}
+    cycle::Array{UInt}
 end
 
 function validate(solution::HamiltonianSolution, problem::HamiltonianCircuit)
+    if length(solution.cycle) != nv(problem.graph)
+        return false # ErrorException("invalid cycle length")
+    end
+    visited = [false for _ in vertices(problem.graph)]
+    cur = 1
+    visited[1] = true
+
+    for _ in vertices(problem.graph)
+        cur = solution.cycle[cur]
+
+        if visited[cur]
+            if cur == 1
+                break # cycle finished
+            else
+                return false # ErrorException("vertex twice in cycle")
+            end
+        else
+            visited[cur] = true
+        end
+    end
+
+    
+
+    if !all(visited)
+        return false # ErrorException("Cycle is too short")
+    else
+        return true
+    end
 
 end
 
@@ -176,11 +210,11 @@ function HamiltonianCircuit(sat3::SAT3)
     return HamiltonianCircuit(g, [sat3_ham(sat3.variable_count); sat3.unpack_data])
 end
 
-function unpackSolution(solution::HamiltonianSolution, unpackData::sat3_ham)
+function unpack_internal(solution::HamiltonianSolution, unpackData::sat3_ham)
     eval = [false for _ in 1:(unpackData.variable_count)]
 
-    for (v, u) in solution.cycle
-        if v <= unpackData.variable_count && u == v + unpackData.variable_count
+    for v in 1:unpackData.variable_count
+        if solution.cycle[v] == v + unpackData.variable_count
             eval[v] = true
         end
     end

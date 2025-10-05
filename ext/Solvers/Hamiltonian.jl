@@ -32,10 +32,10 @@ function Conplete.solve(solver, problem::HamiltonianCircuit)
 
     if is_solved_and_feasible(model)
         val = value(e)
-        cycle = []
+        cycle = [0 for _ in vertices(problem.graph)]
         for i in axes(val, 1), j in axes(val, 2)
             if val[i, j] > 0.5
-                push!(cycle,(i,j))
+                cycle[i] = j
             end
         end
         return HamiltonianSolution(cycle)

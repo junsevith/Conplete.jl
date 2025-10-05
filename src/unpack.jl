@@ -5,7 +5,7 @@ function unpack(solution::Solution, reductionData::Array{UnpackData}, depth::UIn
             return unpacked
         end
 
-        unpacked = unpackSolution(solution, d)
+        unpacked = unpack_internal(solution, d)
     end
 
     return unpacked
