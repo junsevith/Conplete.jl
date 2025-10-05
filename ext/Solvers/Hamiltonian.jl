@@ -1,5 +1,3 @@
-using SparseArrays
-
 function Conplete.solve(solver, problem::HamiltonianCircuit)
     model = Model(solver)
     vert = vertices(problem.graph)

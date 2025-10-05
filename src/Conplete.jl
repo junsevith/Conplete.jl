@@ -1,7 +1,6 @@
 module Conplete
 
 using Graphs
-using SparseArrays
 
 abstract type Problem end
 
