@@ -1,0 +1,2 @@
+struct HittingSet <: NPProblem 
+end

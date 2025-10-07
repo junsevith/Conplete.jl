@@ -1,0 +1,2 @@
+struct BinPacking <: NPProblem
+end

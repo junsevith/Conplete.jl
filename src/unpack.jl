@@ -1,20 +1,20 @@
-function unpack(solution::Solution, reductionData::Array{UnpackData}, depth::UInt)
-    unpacked = solution
+function extract(solution::NPSolution, reductionData::Array{TransformationRecord}, depth::UInt=typemax(UInt))
+    current = solution
     for d in reductionData
         if depth == 0
-            return unpacked
+            return current
         end
 
-        unpacked = unpack_internal(solution, d)
+        current = extract(current, d)
     end
 
-    return unpacked
+    return current
 end
 
-unpack(solution::Solution, reductionData::Array{UnpackData}) = unpack(solution, reductionData, typemax(UInt))
+# unpack(solution::HamiltonianCycleSolution, problem::HamiltonianCycle, depth::UInt) = unpack(solution, problem.record, depth)
+# unpack(solution::VertexCoverSolution, problem::VertexCover, depth::UInt) = unpack(solution, problem.record, depth)
 
-unpack(solution::HamiltonianSolution, problem::HamiltonianCircuit, depth::UInt) = unpack(solution, problem.unpack_data, depth)
-unpack(solution::VertexCoverSolution, problem::VertexCover, depth::UInt) = unpack(solution, problem.unpack_data, depth)
+extract(solution::NPSolution, problem::NPProblem, depth::UInt=typemax(UInt)) = extract(solution, getfield(problem, :record), depth)
 
 
-unpack(solution::Solution, problem::Problem) = unpack(solution, problem, typemax(UInt))
+

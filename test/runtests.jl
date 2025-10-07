@@ -37,19 +37,19 @@ include("data.jl")
 
     @test validate(vc_sol, vc)
 
-    vc_sat = unpack(vc_sol, vc)
+    vc_sat = extract(vc_sol, vc)
 
     @test validate(vc_sat, problem)
 
 
     #hamiltonian
-    ham = HamiltonianCircuit(problem)
+    ham = HamiltonianCycle(problem)
 
     ham_sol = solve(solver, ham)
 
     @test validate(ham_sol, ham)
 
-    ham_sat = unpack(ham_sol, ham)
+    ham_sat = extract(ham_sol, ham)
 
     @test validate(ham_sat, problem)
 
@@ -62,5 +62,41 @@ include("data.jl")
 
 end
 
+
+@testset "Structure" begin
+  problem = SAT3(matrix2)
+
+  chainpath = shortest_chain(SAT3, Knapsack)
+
+  chaindata = chain_transform(problem, chainpath)
+
+
+  target = transform(problem, Knapsack)
+
+end
+
+@testset "ProblemTree" begin
+  struct Pies <: NPProblem
+    dums::UInt64
+  end
+
+  struct Kot
+    smart::UInt64
+  end
+
+  function Pies(inst::SAT3)
+    return Pies(1)
+  end
+
+  @test add_problem(Pies) == 12
+
+  @test_throws MethodError add_problem(Kot)
+
+  @test add_transformation(Pies, SAT3)
+
+  @test_throws MethodError add_transformation(Pies, VertexCover)
+
+
+end
 
 

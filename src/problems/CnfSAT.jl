@@ -1,0 +1,2 @@
+struct CnfSAT <: NPProblem
+end

@@ -1,10 +1,10 @@
-struct VertexCover <: Problem
+struct VertexCover <: NPProblem
     graph::SimpleGraph
     size::UInt
-    unpack_data::Array{UnpackData}
+    record::Array{TransformationRecord}
 end
 
-struct VertexCoverSolution <: Solution
+struct VertexCoverSolution <: NPSolution
     cover::Set{UInt}
 end
 
@@ -24,7 +24,7 @@ function validate(solution::VertexCoverSolution, problem::VertexCover)
 end
 
 
-struct sat3_vc <: UnpackData
+struct sat3_vc <: TransformationRecord
     variable_count::UInt
 end
 
@@ -78,10 +78,10 @@ function VertexCover(sat3::SAT3)
 
     vcSize = sat3.variable_count + 2 * size(sat3.clauses, 1)
 
-    return VertexCover(graph, vcSize, [sat3_vc(sat3.variable_count) ; sat3.unpack_data])
+    return VertexCover(graph, vcSize, [sat3_vc(sat3.variable_count) ; sat3.record])
 
 end
 
-function unpack_internal(solution::VertexCoverSolution, data::sat3_vc)
+function extract(solution::VertexCoverSolution, data::sat3_vc)
     return SAT3Solution([in(v,solution.cover) for v in 1:(data.variable_count)])
 end

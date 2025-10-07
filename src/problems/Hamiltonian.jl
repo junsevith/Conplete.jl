@@ -1,8 +1,8 @@
 using DataStructures
 
-struct HamiltonianCircuit <: Problem
+struct HamiltonianCycle <: NPProblem
     graph::SimpleDiGraph
-    unpack_data::Array{UnpackData}
+    record::Array{TransformationRecord}
 end
 
 """
@@ -11,11 +11,11 @@ Solution to a Hamiltonian-Cycle problem containing cycle in following format:
 an array of length equal to number of vertices where value cycle[x] = y corresponds to edge (x,y) in cycle
 
 """
-struct HamiltonianSolution <: Solution
+struct HamiltonianCycleSolution <: NPSolution
     cycle::Array{UInt}
 end
 
-function validate(solution::HamiltonianSolution, problem::HamiltonianCircuit)
+function validate(solution::HamiltonianCycleSolution, problem::HamiltonianCycle)
     if length(solution.cycle) != nv(problem.graph)
         return false # ErrorException("invalid cycle length")
     end
@@ -47,11 +47,11 @@ function validate(solution::HamiltonianSolution, problem::HamiltonianCircuit)
 
 end
 
-struct sat3_ham <: UnpackData
+struct sat3_ham <: TransformationRecord
     variable_count::UInt
 end
 
-function HamiltonianCircuit(sat3::SAT3)
+function HamiltonianCycle(sat3::SAT3)
     variables = 1:sat3.variable_count
 
     #Count how many vertices do we need to initialize the graph
@@ -207,10 +207,10 @@ function HamiltonianCircuit(sat3::SAT3)
     add_edge!(g, eb, bf)
     add_edge!(g, eb, ef)
 
-    return HamiltonianCircuit(g, [sat3_ham(sat3.variable_count); sat3.unpack_data])
+    return HamiltonianCycle(g, [sat3_ham(sat3.variable_count); sat3.record])
 end
 
-function unpack_internal(solution::HamiltonianSolution, unpackData::sat3_ham)
+function extract(solution::HamiltonianCycleSolution, unpackData::sat3_ham)
     eval = [false for _ in 1:(unpackData.variable_count)]
 
     for v in 1:unpackData.variable_count

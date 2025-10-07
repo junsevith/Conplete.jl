@@ -2,27 +2,45 @@ module Conplete
 
 using Graphs
 
-abstract type Problem end
+abstract type NPProblem end
 
-abstract type UnpackData end
+abstract type TransformationRecord end
 
-abstract type Solution end
+abstract type NPSolution end
 
+include("problems/CnfSAT.jl")
+include("problems/SAT3.jl")
+include("problems/BinPacking.jl")
+include("problems/Clique.jl")
+include("problems/Hamiltonian.jl")
+include("problems/HittingSet.jl")
+include("problems/SubsetSum.jl")
+include("problems/Partition.jl")
+include("problems/TravellingSalesman.jl")
+include("problems/VertexCover.jl")
+include("problems/Knapsack.jl")
 
-include("SAT3.jl")
-include("VertexCover.jl")
-include("Hamiltonian.jl")
 include("unpack.jl")
+include("reductionGraph.jl")
+include("chain.jl")
 
 # abstract types
-export Problem
-export UnpackData
-export Solution
+export NPProblem
+export TransformationRecord
+export NPSolution
+
+# problem Graph
+
+export add_problem
+export add_transformation
 
 # function interfaces
 export solve
 export validate
-export unpack
+export extract
+export shortest_chain
+export chain_transform
+export transform
 
 # concrete types
 export SAT3
@@ -31,9 +49,20 @@ export SAT3Solution
 export VertexCover
 export VertexCoverSolution
 
-export HamiltonianCircuit
-export HamiltonianSolution
+export HamiltonianCycle
+export HamiltonianCycleSolution
 
+export SubsetSum
+
+export Partition
+
+export TravellingSalesman
+
+export Clique
+
+export HittingSet
+
+export Knapsack
 
 """
 Solve problem with JuMP using given solver

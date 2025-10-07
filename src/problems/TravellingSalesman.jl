@@ -1,0 +1,2 @@
+struct TravellingSalesman <: NPProblem
+end

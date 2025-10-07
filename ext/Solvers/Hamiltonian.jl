@@ -1,4 +1,4 @@
-function Conplete.solve(solver, problem::HamiltonianCircuit)
+function Conplete.solve(solver, problem::HamiltonianCycle)
     model = Model(solver)
     vert = vertices(problem.graph)
 
@@ -38,7 +38,7 @@ function Conplete.solve(solver, problem::HamiltonianCircuit)
                 cycle[i] = j
             end
         end
-        return HamiltonianSolution(cycle)
+        return HamiltonianCycleSolution(cycle)
     else
         return Nothing
     end

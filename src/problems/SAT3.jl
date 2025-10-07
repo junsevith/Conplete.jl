@@ -1,10 +1,10 @@
-struct SAT3 <: Problem
+struct SAT3 <: NPProblem
   variable_count::UInt
   clauses::Matrix{Int}
-  unpack_data::Array{UnpackData}
+  record::Array{TransformationRecord}
 end
 
-struct SAT3Solution <: Solution
+struct SAT3Solution <: NPSolution
   evaluation::Array{Bool}
 end
 
