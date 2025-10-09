@@ -23,6 +23,7 @@ include("problems/Knapsack.jl")
 include("unpack.jl")
 include("reductionGraph.jl")
 include("chain.jl")
+include("show.jl")
 
 # abstract types
 export NPProblem

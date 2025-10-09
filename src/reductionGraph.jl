@@ -42,11 +42,22 @@ global problemGraph = let
     g
 end
 
+"""
+    add_problem(new::Type{N}) where N<:NPProblem
+
+adsadasdsadasd
+"""
 function add_problem(new::Type{N}) where N<:NPProblem
     add_vertex!(problemGraph)
     problems[new] = nv(problemGraph)
 end
 
+"""
+    add_transformation(new::Type{N}, parent::Type{P}) where {N<:NPProblem,P<:NPProblem}
+
+
+asdasdasdas
+"""
 function add_transformation(new::Type{N}, parent::Type{P}) where {N<:NPProblem,P<:NPProblem}
     met = methods(new, [parent])
 
