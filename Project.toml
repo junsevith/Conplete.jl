@@ -1,7 +1,7 @@
 name = "Conplete"
 uuid = "ad4576df-0cfb-40d1-a195-8ac8b2a72e08"
 authors = ["Paweł-Stanik"]
-version = "1.0.0-DEV"
+version = "0.1"
 
 [deps]
 Bijections = "e2ed5e7c-b2de-5872-ae92-c73ca462fb04"

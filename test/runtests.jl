@@ -99,4 +99,15 @@ end
 
 end
 
+@testset "Construct" begin
+  problem = SAT3("../test_data/uf20-91/uf20-02.cnf")
 
+  og_sol = solve(solver, problem)
+
+  #vertex cover
+  vc = VertexCover(problem)
+
+  con = construct(og_sol, vc)
+
+  @test validate(con, vc)
+end

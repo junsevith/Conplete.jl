@@ -1,7 +1,7 @@
 using Bijections
 
 global problems = Bijection(
-    CnfSAT => 1,
+    CNFSAT => 1,
     SAT3 => 2,
     HamiltonianCycle => 3,
     VertexCover => 4,
@@ -45,7 +45,8 @@ end
 """
     add_problem(new::Type{N}) where N<:NPProblem
 
-adsadasdsadasd
+Add a custom NP complete problem to the transformation graph.
+This makes it available for using `add_transformation`.
 """
 function add_problem(new::Type{N}) where N<:NPProblem
     add_vertex!(problemGraph)
@@ -55,8 +56,8 @@ end
 """
     add_transformation(new::Type{N}, parent::Type{P}) where {N<:NPProblem,P<:NPProblem}
 
-
-asdasdasdas
+Add a transformation to the transformation graph, 
+This makes it available for transformation using `transform` and `chain_transform` functions.
 """
 function add_transformation(new::Type{N}, parent::Type{P}) where {N<:NPProblem,P<:NPProblem}
     met = methods(new, [parent])

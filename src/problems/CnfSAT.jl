@@ -1,2 +1,2 @@
-struct CnfSAT <: NPProblem
+struct CNFSAT <: NPProblem
 end

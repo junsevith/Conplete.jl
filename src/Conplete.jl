@@ -42,8 +42,11 @@ export extract
 export shortest_chain
 export chain_transform
 export transform
+export construct
 
 # concrete types
+export CNFSAT
+
 export SAT3
 export SAT3Solution
 
