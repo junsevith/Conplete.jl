@@ -44,7 +44,7 @@ Instance of problem VertexCover
     ```
 """
 function chain_transform(instance::NPProblem, target_type::Type{T}) where T <: NPProblem
-    chaindata = []
+    chaindata = [instance]
 
     inst = instance
     for problem_type in shortest_chain(typeof(instance), target_type)
@@ -78,7 +78,7 @@ Instance of problem VertexCover
     ```
 """
 function chain_transform(instance::NPProblem , chain_path::Array{DataType})
-    chaindata = []
+    chaindata = [instance]
 
     inst = instance
     for problem_type in chain_path

@@ -43,14 +43,15 @@ global problemGraph = let
 end
 
 """
-    add_problem(new::Type{N}) where N<:NPProblem
+    add_problem(instance_type, solution_type)
 
 Add a custom NP complete problem to the transformation graph.
 This makes it available for using `add_transformation`.
 """
-function add_problem(new::Type{N}) where N<:NPProblem
+function add_problem(inst::Type{N}, solution::Type{S}) where {N<:NPProblem,S<:NPSolution}
     add_vertex!(problemGraph)
-    problems[new] = nv(problemGraph)
+    problems[inst] = nv(problemGraph)
+    solutions[inst] = solution
 end
 
 """

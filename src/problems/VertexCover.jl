@@ -86,56 +86,103 @@ function extract(solution::VertexCoverSolution, data::sat3_vc)
     return SAT3Solution([in(v, solution.cover) for v in 1:(data.variable_count)])
 end
 
-function construct(solution::SAT3Solution, problem::VertexCover)
-    n = length(solution.evaluation)
-    vars = []
+"""
+conversion of 3SATSolution to VertexCoverSolution problem
+"""
+function VertexCoverSolution(solution::SAT3Solution, sat3::SAT3)
 
-    if typeof(problem.record[1]) != sat3_vc
-        return Nothing
-    end
+    # vertex x corresponds to variable x in 3sat
+    # vertex sat3.variable_count + x correspontd to ¬x
+    # vertex 2*sat3.variable_count + 3*(i-1) + (j-1) corresponds to element j of clause i
 
-    for x in axes(solution.evaluation, 1)
-        if solution.evaluation[x]
-            push!(vars, x)
+    elementsCounter = 2 * sat3.variable_count
+
+    vars = map(((num, eval),) -> if eval
+            num
         else
-            push!(vars, n + x)
-        end
-    end
+            sat3.variable_count + num
+        end, enumerate(solution.evaluation))
 
     cover = Set(vars)
 
-    clauses_num = (nv(problem.graph) - 2*n - 1) / 2
-
-    done = Set()
-
-    for v in vars
-        # println(neighbors(problem.graph, v))
-        for clause in neighbors(problem.graph, v)
-
-            if clause <= 2 * n
-                continue
-            end
-
-            cl_num = fld(clause - (2 * n + 1), 3)
-
-            if cl_num in done
-                continue
-            else
-                push!(done, cl_num)
-            end
-
-            for cl_el in neighbors(problem.graph, clause)
-                if cl_el != v
-                    push!(cover, cl_el)
-                end
-            end
-
-            if length(done) == clauses_num
-                return VertexCoverSolution(cover)
-            end
-
+    function eval(i, j)
+        el = sat3.clauses[i, j]
+        return if el < 0
+            !solution.evaluation[-el]
+        else
+            solution.evaluation[el]
         end
     end
 
+    for i in axes(sat3.clauses, 1)
+        first = elementsCounter += 1
+        second = elementsCounter += 1
+        third = elementsCounter += 1
+
+        if eval(i, 1)
+            push!(cover, second, third)
+        elseif eval(i, 2)
+            push!(cover, first, third)
+        else
+            push!(cover, first, second)
+        end
+
+    end
+
     return VertexCoverSolution(cover)
+
 end
+
+# function construct(solution::SAT3Solution, problem::VertexCover)
+#     n = length(solution.evaluation)
+#     vars = []
+
+#     if typeof(problem.record[1]) != sat3_vc
+#         return Nothing
+#     end
+
+#     for x in axes(solution.evaluation, 1)
+#         if solution.evaluation[x]
+#             push!(vars, x)
+#         else
+#             push!(vars, n + x)
+#         end
+#     end
+
+#     cover = Set(vars)
+
+#     clauses_num = (nv(problem.graph) - 2 * n - 1) / 2
+
+#     done = Set()
+
+#     for v in vars
+#         # println(neighbors(problem.graph, v))
+#         for clause in neighbors(problem.graph, v)
+
+#             if clause <= 2 * n
+#                 continue
+#             end
+
+#             cl_num = fld(clause - (2 * n + 1), 3)
+
+#             if cl_num in done
+#                 continue
+#             else
+#                 push!(done, cl_num)
+#             end
+
+#             for cl_el in neighbors(problem.graph, clause)
+#                 if cl_el != v
+#                     push!(cover, cl_el)
+#                 end
+#             end
+
+#             if length(done) == clauses_num
+#                 return VertexCoverSolution(cover)
+#             end
+
+#         end
+#     end
+
+#     return VertexCoverSolution(cover)
+# end

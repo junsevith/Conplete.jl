@@ -24,6 +24,7 @@ include("unpack.jl")
 include("reductionGraph.jl")
 include("chain.jl")
 include("show.jl")
+include("construct.jl")
 
 # abstract types
 export NPProblem
