@@ -10,7 +10,7 @@ Using `solution` of the base problem, construct the `target_solution` for proble
 function construct(solution::NPSolution, chain::Array{NPProblem})
 
     current = solution
-    for (parent, child) in partition(chain)
+    for (parent, child) in partition(chain,2,1)
         sol_type = solutions[typeof(child)]
         current = sol_type(solution, parent)
     end

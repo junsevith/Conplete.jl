@@ -1,4 +1,4 @@
-using DataStructures
+using DataStructures, IterTools
 
 struct HamiltonianCycle <: NPProblem
     graph::SimpleDiGraph
@@ -37,7 +37,7 @@ function validate(solution::HamiltonianCycleSolution, problem::HamiltonianCycle)
         end
     end
 
-    
+
 
     if !all(visited)
         return false # ErrorException("Cycle is too short")
@@ -51,33 +51,34 @@ struct sat3_ham <: TransformationRecord
     variable_count::UInt
 end
 
-function HamiltonianCycle(sat3::SAT3)
+function needed_vertices(sat3::SAT3)
     variables = 1:sat3.variable_count
 
     #Count how many vertices do we need to initialize the graph
-    countp = [0 for _ in variables]
-    countn = [0 for _ in variables]
+
+    #Count how many timex a variable has been used
+    positive = [0 for _ in variables]
+    negative = [0 for _ in variables]
 
     for i in axes(sat3.clauses, 1), j in 1:3
         el = sat3.clauses[i, j]
         if el < 0
-            countn[-el] += 1
+            negative[-el] += 1
         else
-            countp[el] += 1
+            positive[el] += 1
         end
     end
 
-    vertex_count = size(sat3.clauses, 1) + 2 * sat3.variable_count
+    return size(sat3.clauses, 1) + 2 * sat3.variable_count + mapreduce((x, y) -> 3 * max(x, y) + 1, +, positive, negative)
+end
 
-    for i in variables
-        max_v = max(countn[i], countp[i])
-        if max_v > 0
-            vertex_count += 3 * max_v + 1
-        end
-    end
+function HamiltonianCycle(sat3::SAT3)
+    variables = 1:sat3.variable_count
+
+    vertices = needed_vertices(sat3)
 
     #initialization
-    g = SimpleDiGraph(vertex_count)
+    g = SimpleDiGraph(vertices)
 
     posq = [Queue{UInt}() for _ in variables]
     negq = [Queue{UInt}() for _ in variables]
@@ -159,53 +160,41 @@ function HamiltonianCycle(sat3::SAT3)
         end
     end
 
-    bb = 0 # beginning before
-    eb = 0 # end before
+    ends = []
 
-    bf = 0 # beginning first
-    ef = 0 # end first
-
-    #we connect variable subgraphs together
+    # we find the ends for variable subgraphs
     for i in variables
         l = length(posq[i])
 
         #we skip variable if it doesnt have any vertices
         if l > 0
-            b = i
             e = if l == 1
                 popfirst!(posq[i])
             else #one of the queues always has to have length 1
                 popfirst!(negq[i])
             end
 
-            #first variable
-            if bf == 0
-                bf = b
-                ef = e
+            push!(ends, (i, e))
 
-                bb = b
-                eb = e
-            else
-                add_edge!(g, bb, b)
-                add_edge!(g, bb, e)
-                add_edge!(g, eb, b)
-                add_edge!(g, eb, e)
-
-                bb = b
-                eb = e
-            end
         else
-            println("dupa")
+            # if variable doesnt have any uses we remove its vertices
             rem_vertex!(g, i)
             rem_vertex!(g, i + sat3.variable_count)
         end
     end
 
-    #we connect first and last variable subgraph
-    add_edge!(g, bb, bf)
-    add_edge!(g, bb, ef)
-    add_edge!(g, eb, bf)
-    add_edge!(g, eb, ef)
+    push!(ends, ends[1])
+
+    # we connect the ends together
+    for ((pb, pe), (cb, ce)) in partition(ends, 2, 1)
+        # pb .. pe
+        # ↓ ⤩ ↓
+        # cb .. ce
+        add_edge!(g, pb, cb)
+        add_edge!(g, pb, ce)
+        add_edge!(g, pe, cb)
+        add_edge!(g, pe, ce)
+    end
 
     return HamiltonianCycle(g, [sat3_ham(sat3.variable_count); sat3.record])
 end
@@ -221,3 +210,4 @@ function extract(solution::HamiltonianCycleSolution, unpackData::sat3_ham)
 
     return SAT3Solution(eval)
 end
+

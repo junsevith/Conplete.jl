@@ -50,8 +50,8 @@ This makes it available for using `add_transformation`.
 """
 function add_problem(inst::Type{N}, solution::Type{S}) where {N<:NPProblem,S<:NPSolution}
     add_vertex!(problemGraph)
-    problems[inst] = nv(problemGraph)
     solutions[inst] = solution
+    problems[inst] = nv(problemGraph)
 end
 
 """

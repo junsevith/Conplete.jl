@@ -78,7 +78,7 @@ Instance of problem VertexCover
     ```
 """
 function chain_transform(instance::NPProblem , chain_path::Array{DataType})
-    chaindata = [instance]
+    chaindata = Vector{NPProblem}([instance])
 
     inst = instance
     for problem_type in chain_path
