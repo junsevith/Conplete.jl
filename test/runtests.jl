@@ -17,106 +17,109 @@ end
 
 include("data.jl")
 
-@testset "Solvers" begin
-  # Write your tests here.
-  print("Using solver: ")
-  println(solver)
+print("Using solver: ")
+println(solver)
 
-  @testset let
-    problem = SAT3("../test_data/uf20-91/uf20-02.cnf")
-    # problem = SAT3(matrix2)
-
-    og_sol = solve(solver, problem)
-
-    @test validate(og_sol, problem)
-
-    #vertex cover
-    vc = VertexCover(problem)
-
-    vc_sol = solve(solver, vc)
-
-    @test validate(vc_sol, vc)
-
-    vc_sat = extract(vc_sol, vc)
-
-    @test validate(vc_sat, problem)
+@testset verbose = true "All Tests" begin
 
 
-    #hamiltonian
-    ham = HamiltonianCycle(problem)
+  @testset verbose = true "Algorithms" begin
+    @testset "Transform" begin
+      @time begin
+        global sat3 = SAT3("../test_data/uf20-91/uf20-02.cnf")
+        # global sat3 = SAT3("../test_data/UF250.1065.100/uf250-01.cnf")
+        @test !isnothing(sat3)
+      end
 
-    ham_sol = solve(solver, ham)
+      @time begin
+        global vc = VertexCover(sat3)
+        @test !isnothing(vc)
+      end
 
-    @test validate(ham_sol, ham)
+      @time begin
+        global ham = HamiltonianCycle(sat3)
+        @test !isnothing(ham)
+      end
 
-    ham_sat = extract(ham_sol, ham)
+    end
 
-    @test validate(ham_sat, problem)
+    @testset "Solve" begin
+      global sat3_sol = solve(solver, sat3)
+      @test validate(sat3_sol, sat3)
 
-    display(og_sol)
-    display(vc_sat)
-    display(ham_sat)
+      global vc_sol = solve(solver, vc)
+      @test validate(vc_sol, vc)
 
+      global ham_sol = solve(solver, ham)
+      @test validate(ham_sol, ham)
+    end
+
+    @testset "Extract" begin
+      vc_sat = extract(vc_sol, vc)
+      @test validate(vc_sat, sat3)
+
+      ham_sat = extract(ham_sol, ham)
+      @test validate(ham_sat, sat3)
+    end
+
+    @testset "Construct" begin
+      vc_con = VertexCoverSolution(sat3_sol, sat3)
+      @test validate(vc_con, vc)
+
+      ham_con = HamiltonianCycleSolution(sat3_sol, sat3)
+      @test validate(ham_con, ham)
+
+    end
 
   end
 
-end
+  @testset verbose = true "Interfaces" begin
+    @testset "Problem Tree" begin
+      struct Pies <: NPProblem
+        dums::UInt64
+      end
 
+      struct Ogon <: NPSolution
+        dums::UInt64
+      end
 
-@testset "Structure" begin
-  problem = SAT3(matrix2)
+      struct Kot
+        smart::UInt64
+      end
 
-  chainpath = shortest_chain(SAT3, Knapsack)
+      function Pies(inst::SAT3)
+        return Pies(1)
+      end
 
-  chaindata = chain_transform(problem, chainpath)
+      @test add_problem(Pies, Ogon) == Nothing
 
-  @test typeof(last(chaindata)) == Knapsack
+      @test_throws MethodError add_problem(Pies, UInt)
 
-  target = transform(problem, Knapsack)
+      @test_throws MethodError add_problem(Kot, UInt)
 
-  @test typeof(target) == Knapsack
+      @test add_transformation(Pies, SAT3) == Nothing
 
-end
+      @test_throws MethodError add_transformation(Pies, VertexCover)
 
-@testset "ProblemTree" begin
-  struct Pies <: NPProblem
-    dums::UInt64
+    end
+
+    @testset "Chain Transform" begin
+
+      chainpath = shortest_chain(SAT3, Knapsack)
+
+      @test last(chainpath) == Knapsack
+
+      chaindata = chain_transform(sat3, chainpath)
+
+      @test typeof(first(chaindata)) == SAT3
+      @test typeof(last(chaindata)) == Knapsack
+
+      target = transform(sat3, Knapsack)
+
+      @test typeof(target) == Knapsack
+
+    end
   end
 
-  struct Ogon <: NPSolution
-    dums::UInt64
-  end
 
-  struct Kot
-    smart::UInt64
-  end
-
-  function Pies(inst::SAT3)
-    return Pies(1)
-  end
-
-  @test add_problem(Pies, Ogon) == 12
-
-  @test_throws MethodError add_problem(Pies, UInt)
-
-  @test_throws MethodError add_problem(Kot, UInt)
-
-  @test add_transformation(Pies, SAT3)
-
-  @test_throws MethodError add_transformation(Pies, VertexCover)
-
-
-end
-
-@testset "Construct" begin
-  problem = SAT3("../test_data/uf20-91/uf20-02.cnf")
-
-  og_sol = solve(solver, problem)
-
-  #vertex cover
-  vc = VertexCover(problem)
-
-  con = VertexCoverSolution(og_sol, problem)
-
-  @test validate(con, vc)
 end

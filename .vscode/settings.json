@@ -1,4 +1,3 @@
 {
-    "sarif-viewer.connectToGithubCodeScanning": "off",
-    "julia.environmentPath": "/home/juno/Dokumenty/GitHub/Conplete.jl"
+    "sarif-viewer.connectToGithubCodeScanning": "off"
 }

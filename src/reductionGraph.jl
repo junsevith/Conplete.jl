@@ -52,6 +52,8 @@ function add_problem(inst::Type{N}, solution::Type{S}) where {N<:NPProblem,S<:NP
     add_vertex!(problemGraph)
     solutions[inst] = solution
     problems[inst] = nv(problemGraph)
+
+    return Nothing
 end
 
 """
@@ -68,4 +70,6 @@ function add_transformation(new::Type{N}, parent::Type{P}) where {N<:NPProblem,P
     end
 
     add_edge!(problemGraph, problems[parent], problems[new])
+
+    return Nothing
 end
