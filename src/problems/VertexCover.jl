@@ -1,7 +1,6 @@
 struct VertexCover <: NPProblem
     graph::SimpleGraph
     size::UInt
-    record::Array{TransformationRecord}
 end
 
 struct VertexCoverSolution <: NPSolution
@@ -23,15 +22,10 @@ function validate(solution::VertexCoverSolution, problem::VertexCover)
     return true
 end
 
-
-struct sat3_vc <: TransformationRecord
-    variable_count::UInt
-end
-
 """
 conversion of 3SAT to VertexCover problem
 """
-function VertexCover(sat3::SAT3)
+function transform(sat3::SAT3, target::Type{VertexCover})
 
     # vertex x corresponds to variable x in 3sat
     # vertex sat3.variable_count + x correspontd to ¬x
@@ -78,18 +72,18 @@ function VertexCover(sat3::SAT3)
 
     vcSize = sat3.variable_count + 2 * size(sat3.clauses, 1)
 
-    return VertexCover(graph, vcSize, [sat3_vc(sat3.variable_count); sat3.record])
+    return VertexCover(graph, vcSize)
 
 end
 
-function extract(solution::VertexCoverSolution, data::sat3_vc)
-    return SAT3Solution([in(v, solution.cover) for v in 1:(data.variable_count)])
+function extract(solution::VertexCoverSolution, instance::SAT3)
+    return SAT3Solution([in(v, solution.cover) for v in 1:(instance.variable_count)])
 end
 
 """
 conversion of 3SATSolution to VertexCoverSolution problem
 """
-function VertexCoverSolution(solution::SAT3Solution, sat3::SAT3)
+function construct(target::Type{VertexCoverSolution}, solution::SAT3Solution, sat3::SAT3)
 
     # vertex x corresponds to variable x in 3sat
     # vertex sat3.variable_count + x correspontd to ¬x

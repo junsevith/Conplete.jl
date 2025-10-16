@@ -1,7 +1,6 @@
 struct SAT3 <: NPProblem
   variable_count::UInt
   clauses::Matrix{Int}
-  record::Array{TransformationRecord}
 end
 
 struct SAT3Solution <: NPSolution
@@ -16,7 +15,7 @@ function SAT3(clauses::Matrix{Int})
     maxi = max(maxi, abs(clauses[i, j]))
   end
 
-  return SAT3(maxi, clauses, [])
+  return SAT3(maxi, clauses)
 end
 
 
@@ -45,7 +44,7 @@ function SAT3(path::String)
     end
   end
 
-  return SAT3(vars, m, [])
+  return SAT3(vars, m)
 end
 
 function validate(solution::SAT3Solution, problem::SAT3)

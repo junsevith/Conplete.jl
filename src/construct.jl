@@ -10,7 +10,7 @@ Using `solution` of the base problem, construct the `target_solution` for proble
 function construct(solution::NPSolution, chain::Array{NPProblem})
 
     current = solution
-    for (parent, child) in partition(chain,2,1)
+    for (parent, child) in partition(chain, 2, 1)
         sol_type = solutions[typeof(child)]
         current = sol_type(solution, parent)
     end
@@ -19,7 +19,7 @@ end
 
 
 """
-    construct(solution, problem, target_type) -> target_solution
+    construct(target_type, solution, problem) -> target_solution
 
 Using `solution` of the base `problem`, construct the `target_solution` for problem of `target_type` that is result of the transformation of said base problem.
 
@@ -29,7 +29,7 @@ Therefore it is advised to use the method `construct(solution::NPSolution, chain
 
 See also: [`chain_transform`](@ref)
 """
-function construct(solution::NPSolution, problem::NPProblem, target::Type{P}) where P<:NPSolution
+function construct(target::Type{NPSolution}, solution::NPSolution, problem::NPProblem)
     return try
         target(solution, problem)
     catch
@@ -37,4 +37,4 @@ function construct(solution::NPSolution, problem::NPProblem, target::Type{P}) wh
     end
 end
 
-construct(solution::NPSolution, problem::NPProblem, target::Type{P}) where P<:NPProblem = construct(solution, problem, solutions[target])
+construct(target::Type{NPProblem}, solution::NPSolution, problem::NPProblem) = construct(solution, problem, solutions[target])

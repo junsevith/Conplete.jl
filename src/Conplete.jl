@@ -4,8 +4,6 @@ using Graphs
 
 abstract type NPProblem end
 
-abstract type TransformationRecord end
-
 abstract type NPSolution end
 
 include("problems/CnfSAT.jl")
@@ -20,9 +18,9 @@ include("problems/TravellingSalesman.jl")
 include("problems/VertexCover.jl")
 include("problems/Knapsack.jl")
 
-include("unpack.jl")
+include("extract.jl")
 include("reductionGraph.jl")
-include("chain.jl")
+include("transform.jl")
 include("show.jl")
 include("construct.jl")
 

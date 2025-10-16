@@ -1,8 +1,7 @@
 using DataStructures, IterTools
 
 struct HamiltonianCycle <: NPProblem
-    graph::SimpleDiGraph
-    record::Array{TransformationRecord}
+    graph::SimpleDiGraph{UInt}
 end
 
 """
@@ -50,10 +49,6 @@ function validate(solution::HamiltonianCycleSolution, problem::HamiltonianCycle)
 
 end
 
-struct sat3_ham <: TransformationRecord
-    variable_count::UInt
-end
-
 function needed_vertices(sat3::SAT3)
     variables = 1:sat3.variable_count
 
@@ -75,13 +70,13 @@ function needed_vertices(sat3::SAT3)
     return size(sat3.clauses, 1) + 2 * sat3.variable_count + mapreduce((x, y) -> 3 * max(x, y) + 1, +, positive, negative)
 end
 
-function HamiltonianCycle(sat3::SAT3)
+function transform(sat3::SAT3, target::Type{HamiltonianCycle})
     variables = 1:sat3.variable_count
 
     vertices = needed_vertices(sat3)
 
     #initialization
-    g = SimpleDiGraph(vertices)
+    g = SimpleDiGraph{UInt}(vertices)
 
     posq = [Queue{UInt}() for _ in variables]
     negq = [Queue{UInt}() for _ in variables]
@@ -150,8 +145,8 @@ function HamiltonianCycle(sat3::SAT3)
             var = sat3.clauses[i, j]
 
             #we connect clauses to variables
-            s = Nothing
-            f = Nothing
+            s = 0
+            f = 0
             if var < 0
                 (f, s) = next_slot(-var, negq, posq)
             else
@@ -163,7 +158,7 @@ function HamiltonianCycle(sat3::SAT3)
         end
     end
 
-    ends = []
+    ends = Vector{Tuple{UInt,UInt}}()
 
     # we find the ends for variable subgraphs
     for i in variables
@@ -199,14 +194,14 @@ function HamiltonianCycle(sat3::SAT3)
         add_edge!(g, pe, ce)
     end
 
-    return HamiltonianCycle(g, [sat3_ham(sat3.variable_count); sat3.record])
+    return HamiltonianCycle(g)
 end
 
-function extract(solution::HamiltonianCycleSolution, unpackData::sat3_ham)
-    eval = [false for _ in 1:(unpackData.variable_count)]
+function extract(solution::HamiltonianCycleSolution, instance::SAT3)
+    eval = [false for _ in 1:(instance.variable_count)]
 
-    for v in 1:unpackData.variable_count
-        if solution.cycle[v] == v + unpackData.variable_count
+    for v in 1:instance.variable_count
+        if solution.cycle[v] == v + instance.variable_count
             eval[v] = true
         end
     end
@@ -214,7 +209,7 @@ function extract(solution::HamiltonianCycleSolution, unpackData::sat3_ham)
     return SAT3Solution(eval)
 end
 
-function HamiltonianCycleSolution(solution::SAT3Solution, sat3::SAT3)
+function construct(target::Type{HamiltonianCycleSolution}, solution::SAT3Solution, sat3::SAT3)
     variables = 1:sat3.variable_count
 
     vertices = needed_vertices(sat3)
@@ -298,8 +293,8 @@ function HamiltonianCycleSolution(solution::SAT3Solution, sat3::SAT3)
             var = sat3.clauses[i, j]
 
             #we connect clauses to variables
-            s = Nothing
-            f = Nothing
+            s = 0
+            f = 0
             if var < 0
                 (f, s) = next_slot(-var, negq, posq)
             else
@@ -322,7 +317,7 @@ function HamiltonianCycleSolution(solution::SAT3Solution, sat3::SAT3)
         end
     end
 
-    ends = []
+    ends = Vector{Tuple{UInt,UInt}}()
 
     # we find the ends for variable subgraphs
     for i in variables

@@ -15,7 +15,7 @@ julia> shortest_chain(CNFSAT,Knapsack)
  Knapsack
     ```    
 """
-function shortest_chain(in::DataType,out::DataType)
+function shortest_chain(in::Type{<:NPProblem}, out::Type{<:NPProblem})
     in_num = problems[in]
     out_num = problems[out]
     path = a_star(problemGraph, in_num, out_num)
@@ -43,18 +43,7 @@ julia> transform(SAT3([1 2 3]), VertexCover)
 Instance of problem VertexCover
     ```
 """
-function chain_transform(instance::NPProblem, target_type::Type{T}) where T <: NPProblem
-    chaindata = [instance]
-
-    inst = instance
-    for problem_type in shortest_chain(typeof(instance), target_type)
-        inst = problem_type(inst)
-        push!(chaindata, inst)
-    end
-
-    return chaindata
-end
-
+chain_transform(instance::NPProblem, target_type::Type{<:NPProblem}) = chain_transform(instance, shortest_chain(typeof(instance), target_type))
 
 """
     chain_transform(instance , chain_path) -> chain
@@ -77,7 +66,7 @@ julia> transform(SAT3([1 2 3]), VertexCover)
 Instance of problem VertexCover
     ```
 """
-function chain_transform(instance::NPProblem , chain_path::Array{DataType})
+function chain_transform(instance::NPProblem, chain_path::Vector{DataType})
     chaindata = Vector{NPProblem}([instance])
 
     inst = instance
@@ -112,11 +101,13 @@ julia> transform(SAT3([1 2 3]), VertexCover)
 Instance of problem VertexCover
 ```
 """
-function transform(instance::NPProblem, target_type::Type{T}) where T <: NPProblem
+function transform(instance::NPProblem, chain_path::Vector{DataType})
 
     inst = instance
-    for problem_type in shortest_chain(typeof(instance), target_type)
+    for problem_type in chain_path
         inst = problem_type(inst)
     end
     return inst
 end
+
+transform(instance::NPProblem, target_type::Type{<:NPProblem}) = transform(instance, shortest_chain(typeof(instance), target_type))

@@ -32,12 +32,12 @@ println(solver)
       end
 
       @time begin
-        global vc = VertexCover(sat3)
+        global vc = transform(sat3, VertexCover)
         @test !isnothing(vc)
       end
 
       @time begin
-        global ham = HamiltonianCycle(sat3)
+        global ham = transform(sat3, HamiltonianCycle)
         @test !isnothing(ham)
       end
 
@@ -55,18 +55,18 @@ println(solver)
     end
 
     @testset "Extract" begin
-      vc_sat = extract(vc_sol, vc)
+      vc_sat = extract(vc_sol, sat3)
       @test validate(vc_sat, sat3)
 
-      ham_sat = extract(ham_sol, ham)
+      ham_sat = extract(ham_sol, sat3)
       @test validate(ham_sat, sat3)
     end
 
     @testset "Construct" begin
-      vc_con = VertexCoverSolution(sat3_sol, sat3)
+      vc_con = construct(VertexCoverSolution, sat3_sol, sat3)
       @test validate(vc_con, vc)
 
-      ham_con = HamiltonianCycleSolution(sat3_sol, sat3)
+      ham_con = construct(HamiltonianCycleSolution, sat3_sol, sat3)
       @test validate(ham_con, ham)
 
     end
