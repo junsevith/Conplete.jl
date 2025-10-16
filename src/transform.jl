@@ -78,6 +78,18 @@ function chain_transform(instance::NPProblem, chain_path::Vector{DataType})
     return chaindata
 end
 
+"""
+    transform(instance , chain_path) -> target_instance
+"""
+function transform(instance::NPProblem, chain_path::Vector{DataType})
+
+    inst = instance
+    for problem_type in chain_path
+        inst = problem_type(inst)
+    end
+    return inst
+end
+
 
 # [`add_problem`](@ref) and [`add_transformation`](@ref)
 """
@@ -101,13 +113,5 @@ julia> transform(SAT3([1 2 3]), VertexCover)
 Instance of problem VertexCover
 ```
 """
-function transform(instance::NPProblem, chain_path::Vector{DataType})
-
-    inst = instance
-    for problem_type in chain_path
-        inst = problem_type(inst)
-    end
-    return inst
-end
 
 transform(instance::NPProblem, target_type::Type{<:NPProblem}) = transform(instance, shortest_chain(typeof(instance), target_type))
