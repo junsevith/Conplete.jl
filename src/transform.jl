@@ -113,5 +113,4 @@ julia> transform(SAT3([1 2 3]), VertexCover)
 Instance of problem VertexCover
 ```
 """
-
 transform(instance::NPProblem, target_type::Type{<:NPProblem}) = transform(instance, shortest_chain(typeof(instance), target_type))
