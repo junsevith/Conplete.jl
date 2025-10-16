@@ -114,6 +114,15 @@ println(solver)
       @test typeof(first(chaindata)) == SAT3
       @test typeof(last(chaindata)) == Knapsack
 
+      chaindata = chain_transform(sat3, Knapsack)
+
+      @test typeof(first(chaindata)) == SAT3
+      @test typeof(last(chaindata)) == Knapsack
+
+      target = transform(sat3, chainpath)
+
+      @test typeof(target) == Knapsack
+
       target = transform(sat3, Knapsack)
 
       @test typeof(target) == Knapsack

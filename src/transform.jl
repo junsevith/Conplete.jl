@@ -39,8 +39,12 @@ Check [`add_problem`](@ref) and [`add_transformation`](@ref) for adding transfor
 # Examples
 ```jldoctest
 julia> using Conplete
-julia> transform(SAT3([1 2 3]), VertexCover)
-Instance of problem VertexCover
+julia> chain_transform(SAT3([1 2 3]), Knapsack)
+4-element Vector{NPProblem}:
+ Instance of problem SAT3
+ Instance of problem SubsetSum
+ Instance of problem Partition
+ Instance of problem Knapsack
     ```
 """
 chain_transform(instance::NPProblem, target_type::Type{<:NPProblem}) = chain_transform(instance, shortest_chain(typeof(instance), target_type))
@@ -62,8 +66,12 @@ Check [`add_problem`](@ref) and [`add_transformation`](@ref) for adding transfor
 # Examples
 ```jldoctest
 julia> using Conplete
-julia> transform(SAT3([1 2 3]), [VertexCover,Clique])
-Instance of problem Clique
+julia> chain_transform(SAT3([1 2 3]), [SubsetSum,Partition,Knapsack])
+4-element Vector{NPProblem}:
+ Instance of problem SAT3
+ Instance of problem SubsetSum
+ Instance of problem Partition
+ Instance of problem Knapsack
 ```
 """
 function chain_transform(instance::NPProblem, chain_path::Vector{DataType})
@@ -97,8 +105,8 @@ Check [`add_problem`](@ref) and [`add_transformation`](@ref) for adding transfor
 # Examples
 ```jldoctest
 julia> using Conplete
-julia> transform(SAT3([1 2 3]), [VertexCover,Clique])
-Instance of problem Clique
+julia> transform(SAT3([1 2 3]), [SubsetSum,Partition,Knapsack])
+Instance of problem Knapsack
 """
 function transform(instance::NPProblem, chain_path::Vector{DataType})
 

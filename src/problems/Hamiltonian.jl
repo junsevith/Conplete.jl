@@ -317,7 +317,9 @@ function construct(target::Type{HamiltonianCycleSolution}, solution::SAT3Solutio
         end
     end
 
-    ends = Vector{Tuple{UInt,UInt}}()
+    ends = sizehint!(Vector{Tuple{UInt,UInt}}(), sat3.variable_count)
+
+    repl = Dict{UInt,UInt}()
 
     # we find the ends for variable subgraphs
     for i in variables
@@ -335,8 +337,12 @@ function construct(target::Type{HamiltonianCycleSolution}, solution::SAT3Solutio
 
         else
             # if variable doesnt have any uses we remove its vertices
+            push!(repl, length(sol) => i)
+            push!(repl, length(sol) - 1 => i + sat3.variable_count)
+
             sol[i] = pop!(sol)
             sol[i+sat3.variable_count] = pop!(sol)
+
         end
     end
 
@@ -353,7 +359,7 @@ function construct(target::Type{HamiltonianCycleSolution}, solution::SAT3Solutio
         elseif !solution.evaluation[pb] && solution.evaluation[cb]
             sol[pb] = cb
         elseif solution.evaluation[pb] && !solution.evaluation[cb]
-            sol[pe] = ce 
+            sol[pe] = ce
         else
             sol[pb] = ce
         end
