@@ -48,7 +48,7 @@ end
 Add a custom NP complete problem to the transformation graph.
 This makes it available for using `add_transformation`.
 """
-function add_problem(inst::Type{N}, solution::Type{S}) where {N<:NPProblem,S<:NPSolution}
+function add_problem(inst::Type{<:NPProblem}, solution::Type{<:NPSolution})
     add_vertex!(problemGraph)
     solutions[inst] = solution
     problems[inst] = nv(problemGraph)
@@ -57,12 +57,12 @@ function add_problem(inst::Type{N}, solution::Type{S}) where {N<:NPProblem,S<:NP
 end
 
 """
-    add_transformation(new::Type{N}, parent::Type{P}) where {N<:NPProblem,P<:NPProblem}
+    add_transformation(new, parent)
 
 Add a transformation to the transformation graph, 
 This makes it available for transformation using `transform` and `chain_transform` functions.
 """
-function add_transformation(new::Type{N}, parent::Type{P}) where {N<:NPProblem,P<:NPProblem}
+function add_transformation(new::Type{<:NPProblem}, parent::Type{<:NPProblem})
     met = methods(new, [parent])
 
     if length(met) == 0 || (length(met) == 1 && met[1].sig == Tuple{Type{new},Any})

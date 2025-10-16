@@ -29,13 +29,13 @@ Transform `instance` of an NP complete problem into instance of `target_type` ty
 
 It is only possible if there exists a chain of transformations from `instance` type into `target_type` type which is recorded in the package's transformation graph.
 
-Check  for adding transformations into transformation graph
+Check [`add_problem`](@ref) and [`add_transformation`](@ref) for adding transformations into transformation graph
 
 # Arguments
 
 `instance::NPProblem`: input instance of the problem.
 
-`target_type::Type{T} where T <: NPProblem`: target type of the last transformation
+`target_type::Type{<:NPProblem}`: target type of the last transformation
 # Examples
 ```jldoctest
 julia> using Conplete
@@ -52,7 +52,7 @@ Transform `instance` of an NP complete  according to `chain_path`, while returni
 
 It is only possible if there exists a chain of transformations from `instance` type matching `chain_path` which is recorded in the package's transformation graph.
 
-Check  for adding transformations into transformation graph
+Check [`add_problem`](@ref) and [`add_transformation`](@ref) for adding transformations into transformation graph
 
 # Arguments
 
@@ -62,9 +62,9 @@ Check  for adding transformations into transformation graph
 # Examples
 ```jldoctest
 julia> using Conplete
-julia> transform(SAT3([1 2 3]), VertexCover)
-Instance of problem VertexCover
-    ```
+julia> transform(SAT3([1 2 3]), [VertexCover,Clique])
+Instance of problem Clique
+```
 """
 function chain_transform(instance::NPProblem, chain_path::Vector{DataType})
     chaindata = Vector{NPProblem}([instance])
@@ -80,6 +80,25 @@ end
 
 """
     transform(instance , chain_path) -> target_instance
+
+Transform `instance` of an NP complete  according to `chain_path`, while returning only the last instance.
+
+It is only possible if there exists a chain of transformations from `instance` type matching `chain_path` which is recorded in the package's transformation graph.
+
+When transformation of solutions is needed [`chain_transform`](@ref) should be used instead.
+
+Check [`add_problem`](@ref) and [`add_transformation`](@ref) for adding transformations into transformation graph
+
+# Arguments
+
+`instance::NPProblem`: input instance of the problem.
+
+`chain_path::Array{DataType}`: chain of conversions as an array of problem types.
+# Examples
+```jldoctest
+julia> using Conplete
+julia> transform(SAT3([1 2 3]), [VertexCover,Clique])
+Instance of problem Clique
 """
 function transform(instance::NPProblem, chain_path::Vector{DataType})
 
@@ -99,13 +118,15 @@ Transform `instance` of an NP complete problem into `target_instance` of `target
 
 It is only possible if there exists a chain of transformations from `instance` type into `target_type` type which is recorded in the package's transformation graph.
 
-Check  for adding transformations into transformation graph
+When transformation of solutions is needed [`chain_transform`](@ref) should be used instead.
+
+Check [`add_problem`](@ref) and [`add_transformation`](@ref) for adding transformations into transformation graph
 
 # Arguments
 
 `instance::NPProblem`: input instance of the problem.
 
-`target_type::Type{T} where T <: NPProblem`: target type of the output instance of the problem.
+`target_type::Type{<:NPProblem}`: target type of the output instance of the problem.
 # Examples
 ```jldoctest
 julia> using Conplete

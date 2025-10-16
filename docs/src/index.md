@@ -31,3 +31,11 @@ construct(target::Type{NPSolution}, solution::NPSolution, problem::NPProblem)
 ```@docs
 solve
 ```
+
+```@docs
+add_problem(inst::Type{<:NPProblem}, solution::Type{<:NPSolution})
+```
+
+```@docs
+add_transformation(new::Type{N<:NPProblem}, parent::Type{P<:NPProblem})
+```
