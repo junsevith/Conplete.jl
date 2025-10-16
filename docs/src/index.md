@@ -37,5 +37,5 @@ add_problem(inst::Type{<:NPProblem}, solution::Type{<:NPSolution})
 ```
 
 ```@docs
-add_transformation(new::Type{N<:NPProblem}, parent::Type{P<:NPProblem})
+add_transformation(new::Type{<:NPProblem}, parent::Type{<:NPProblem})
 ```
