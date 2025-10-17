@@ -9,13 +9,15 @@ function Conplete.solve(solver, problem::Clique)
     set_silent(model)
     @variable(model, v[vertices(problem.graph)], Bin)
 
-    for i in vert
-        @constraint(model, v[i] => {sum(v[j] * edges[i, j] for j in vert) == sum(v) - 1})
+    for i in axes(edges, 1), j in axes(edges, 2)
+        if i != j && edges[i,j] == 0
+            @constraint(model, v[i] + v[j] <= 1)
+        end
     end
 
-    @constraint(model, sum(v) == problem.size)
+    @constraint(model, sum(v) >= problem.size)
 
-    @objective(model, Min, 1)
+    @objective(model, Max, sum(v))
 
     # println(model)
 
