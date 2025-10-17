@@ -5,15 +5,19 @@ using Graphs
 
 Base.show(io::IO, x::T) where {T<:Union{UInt,UInt128,UInt64,UInt32,UInt16,UInt8}} = Base.print(io, x)
 
-solver = try
-  using CPLEX
+# solver = try
+#   using CPLEX
 
-  CPLEX.Optimizer
-catch
-  using HiGHS
+#   CPLEX.Optimizer
+# catch
+#   using HiGHS
 
-  HiGHS.Optimizer
-end
+#   HiGHS.Optimizer
+# end
+
+using HiGHS
+
+solver = HiGHS.Optimizer
 
 include("data.jl")
 
@@ -25,33 +29,41 @@ println(solver)
 
   @testset verbose = true "Algorithms" begin
     @testset "Transform" begin
+      println("Transform")
       @time begin
+        # global sat3 = SAT3([1 2 3 ; 1 -2 3; 1 2 -3])
+        # global sat3 = SAT3(matrix2)
         global sat3 = SAT3("../test_data/uf20-91/uf20-02.cnf")
         # global sat3 = SAT3("../test_data/UF250.1065.100/uf250-01.cnf")
         @test !isnothing(sat3)
       end
 
-      @time begin
-        global vc = transform(sat3, VertexCover)
-        @test !isnothing(vc)
-      end
+      @time global vc = transform(sat3, VertexCover)
+      @test !isnothing(vc)
 
-      @time begin
-        global ham = transform(sat3, HamiltonianCycle)
-        @test !isnothing(ham)
-      end
+
+      @time global ham = transform(sat3, HamiltonianCycle)
+      @test !isnothing(ham)
+
+      @time global cli = transform(sat3, Clique)
+      @test !isnothing(cli)
 
     end
 
     @testset "Solve" begin
-      global sat3_sol = solve(solver, sat3)
+      println("Solve")
+
+      @time global sat3_sol = solve(solver, sat3)
       @test validate(sat3_sol, sat3)
 
-      global vc_sol = solve(solver, vc)
+      @time global vc_sol = solve(solver, vc)
       @test validate(vc_sol, vc)
 
-      global ham_sol = solve(solver, ham)
+      @time global ham_sol = solve(solver, ham)
       @test validate(ham_sol, ham)
+
+      @time global cli_sol = solve(solver, cli)
+      @test validate(cli_sol, cli)
     end
 
     @testset "Extract" begin

@@ -158,7 +158,9 @@ function transform(sat3::SAT3, target::Type{HamiltonianCycle})
         end
     end
 
-    ends = Vector{Tuple{UInt,UInt}}()
+    ends = sizehint!(Vector{Tuple{UInt,UInt}}(), sat3.variable_count)
+
+    remv = Vector{UInt}()
 
     # we find the ends for variable subgraphs
     for i in variables
@@ -176,8 +178,7 @@ function transform(sat3::SAT3, target::Type{HamiltonianCycle})
 
         else
             # if variable doesnt have any uses we remove its vertices
-            rem_vertex!(g, i)
-            rem_vertex!(g, i + sat3.variable_count)
+            push!(remv, i, i + sat3.variable_count)
         end
     end
 
@@ -193,6 +194,8 @@ function transform(sat3::SAT3, target::Type{HamiltonianCycle})
         add_edge!(g, pe, cb)
         add_edge!(g, pe, ce)
     end
+
+    foreach(x -> rem_vertex!(G, x), remv)
 
     return HamiltonianCycle(g)
 end
@@ -311,10 +314,6 @@ function construct(target::Type{HamiltonianCycleSolution}, solution::SAT3Solutio
                 clause_done = true
             end
         end
-
-        if !clause_done
-            println("dupa" * string(i))
-        end
     end
 
     ends = sizehint!(Vector{Tuple{UInt,UInt}}(), sat3.variable_count)
@@ -339,10 +338,6 @@ function construct(target::Type{HamiltonianCycleSolution}, solution::SAT3Solutio
             # if variable doesnt have any uses we remove its vertices
             push!(repl, length(sol) => i)
             push!(repl, length(sol) - 1 => i + sat3.variable_count)
-
-            sol[i] = pop!(sol)
-            sol[i+sat3.variable_count] = pop!(sol)
-
         end
     end
 
@@ -364,6 +359,12 @@ function construct(target::Type{HamiltonianCycleSolution}, solution::SAT3Solutio
             sol[pb] = ce
         end
     end
+
+    foreach((k, v) -> sol[v] = sol[k], repl)
+
+    resize!(sol, length(sol) - length(repl))
+
+    replace!(sol, repl...)
 
     return HamiltonianCycleSolution(sol)
 end

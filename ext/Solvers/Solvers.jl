@@ -7,5 +7,6 @@ using Graphs
 include("SAT3.jl")
 include("VertexCover.jl")
 include("Hamiltonian.jl")
+include("Clique.jl")
 
 end

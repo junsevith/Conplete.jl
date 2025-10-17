@@ -62,6 +62,7 @@ export Partition
 export TravellingSalesman
 
 export Clique
+export CliqueSolution
 
 export HittingSet
 

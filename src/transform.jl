@@ -45,7 +45,7 @@ julia> chain_transform(SAT3([1 2 3]), Knapsack)
  Instance of problem SubsetSum
  Instance of problem Partition
  Instance of problem Knapsack
-    ```
+```
 """
 chain_transform(instance::NPProblem, target_type::Type{<:NPProblem}) = chain_transform(instance, shortest_chain(typeof(instance), target_type))
 
@@ -107,6 +107,7 @@ Check [`add_problem`](@ref) and [`add_transformation`](@ref) for adding transfor
 julia> using Conplete
 julia> transform(SAT3([1 2 3]), [SubsetSum,Partition,Knapsack])
 Instance of problem Knapsack
+```
 """
 function transform(instance::NPProblem, chain_path::Vector{DataType})
 
