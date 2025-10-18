@@ -1,6 +1,7 @@
 function Conplete.solve(solver, problem::VertexCover)
     model = Model(solver)
 
+    # set_optimizer_attribute(model, "msg_lev", 3)
     set_silent(model)
     @variable(model, v[vertices(problem.graph)], Bin)
 
@@ -10,15 +11,9 @@ function Conplete.solve(solver, problem::VertexCover)
 
     @constraint(model, sum(v) <= problem.size)
 
-    @objective(model, Min, 1)
-
-    # println(model)
+    @objective(model, Min, sum(v))
 
     optimize!(model)
-
-    # display(value(v))
-
-    # display(sum(value(v)))
 
     if is_solved_and_feasible(model)
       set = Set()
@@ -31,6 +26,6 @@ function Conplete.solve(solver, problem::VertexCover)
 
       return VertexCoverSolution(set)
     else
-      return Nothing
+      return nothing
     end
 end

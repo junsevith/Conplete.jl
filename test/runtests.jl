@@ -5,19 +5,16 @@ using Graphs
 
 Base.show(io::IO, x::T) where {T<:Union{UInt,UInt128,UInt64,UInt32,UInt16,UInt8}} = Base.print(io, x)
 
-# solver = try
-#   using CPLEX
+solver = try
+  # throw(ErrorException("d"))
+  using CPLEX
 
-#   CPLEX.Optimizer
-# catch
-#   using HiGHS
+  CPLEX.Optimizer
+catch
+  using HiGHS
 
-#   HiGHS.Optimizer
-# end
-
-using HiGHS
-
-solver = HiGHS.Optimizer
+  HiGHS.Optimizer
+end
 
 include("data.jl")
 
@@ -40,7 +37,6 @@ println(solver)
 
       @time global vc = transform(sat3, VertexCover)
       @test !isnothing(vc)
-
 
       @time global ham = transform(sat3, HamiltonianCycle)
       @test !isnothing(ham)

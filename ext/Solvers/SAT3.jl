@@ -17,15 +17,11 @@ function Conplete.solve(solver, problem::SAT3)
 
     @objective(model, Min, 1)
 
-    # println(model)
-
     optimize!(model)
-
-    # display(value(x))
 
     if is_solved_and_feasible(model)
       return SAT3Solution(value(x))
     else
-      return Nothing
+      return nothing
     end
 end

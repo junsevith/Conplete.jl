@@ -73,4 +73,17 @@ Solve problem with JuMP using given solver
 """
 function solve end
 
+function validate(::Nothing, ::NPProblem)
+    return false
 end
+
+function extract(::Nothing, ::NPProblem)
+    return nothing
+end
+
+function construct(::DataType, ::Nothing, ::NPProblem)
+    return nothing
+end
+
+end
+
