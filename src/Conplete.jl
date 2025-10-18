@@ -69,7 +69,9 @@ export HittingSet
 export Knapsack
 
 """
+    solve(solver, problem) -> solution
 Solve problem with JuMP using given solver
+JuMP is required to be added for methos to appear
 """
 function solve end
 

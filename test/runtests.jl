@@ -63,20 +63,28 @@ println(solver)
     end
 
     @testset "Extract" begin
-      vc_sat = extract(vc_sol, sat3)
+      println("Extract")
+
+      @time vc_sat = extract(vc_sol, sat3)
       @test validate(vc_sat, sat3)
 
-      ham_sat = extract(ham_sol, sat3)
+      @time ham_sat = extract(ham_sol, sat3)
       @test validate(ham_sat, sat3)
+
+      @time cli_sat = extract(cli_sol, sat3)
+      @test validate(cli_sat, sat3)
     end
 
     @testset "Construct" begin
-      vc_con = construct(VertexCoverSolution, sat3_sol, sat3)
+      println("Construct")
+      @time vc_con = construct(VertexCoverSolution, sat3_sol, sat3)
       @test validate(vc_con, vc)
 
-      ham_con = construct(HamiltonianCycleSolution, sat3_sol, sat3)
+      @time ham_con = construct(HamiltonianCycleSolution, sat3_sol, sat3)
       @test validate(ham_con, ham)
 
+      @time cli_con = construct(CliqueSolution, sat3_sol, sat3)
+      @test validate(cli_con, cli)
     end
 
   end
