@@ -3,6 +3,6 @@ struct SubsetSum <: NPProblem
 end
 
 
-function SubsetSum(inst::SAT3)
+function transform(inst::SAT3, target::Type{SubsetSum})
     return SubsetSum(1)
 end

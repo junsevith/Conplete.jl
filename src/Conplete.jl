@@ -17,6 +17,7 @@ include("problems/Partition.jl")
 include("problems/TravellingSalesman.jl")
 include("problems/VertexCover.jl")
 include("problems/Knapsack.jl")
+include("problems/UndirectedHamiltonian.jl")
 
 include("extract.jl")
 include("reductionGraph.jl")
@@ -52,8 +53,11 @@ export SAT3Solution
 export VertexCover
 export VertexCoverSolution
 
-export HamiltonianCycle
-export HamiltonianCycleSolution
+export DirHamCycle
+export DirHamCycleSolution
+
+export HamCycle
+export HamCycleSolution
 
 export SubsetSum
 

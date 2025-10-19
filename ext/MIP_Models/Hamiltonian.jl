@@ -2,7 +2,7 @@
 # Modified version of https://jump.dev/JuMP.jl/stable/tutorials/algorithms/tsp_lazy_constraints/
 # When solver supports it, model uses Solver-independent Callbacks https://jump.dev/JuMP.jl/stable/manual/callbacks/#callbacks_manual
 
-function Conplete.solve(solver, problem::HamiltonianCycle)
+function Conplete.solve(solver, problem::DirHamCycle)
     model = Model(solver)
     vert = vertices(problem.graph)
     n = nv(problem.graph)
@@ -88,7 +88,7 @@ function Conplete.solve(solver, problem::HamiltonianCycle)
     end
 
     if is_solved_and_feasible(model)
-        return HamiltonianCycleSolution(getcycle(value(e)))
+        return DirHamCycleSolution(getcycle(value(e)))
     else
         return nothing
     end
@@ -126,5 +126,6 @@ function find_subtour(cycle::Vector{Int})
             shortest_subtour = this_cycle
         end
     end
+    # println(shortest_subtour)
     return shortest_subtour
 end

@@ -9,7 +9,7 @@ Depth specifies how deep to extract when problem is a result of multiple transfo
 extract(solution::NPSolution, chain::Array{NPProblem}) = foldl(extract, Iterators.reverse(chain); init=solution)
 
 
-# unpack(solution::HamiltonianCycleSolution, problem::HamiltonianCycle, depth::UInt) = unpack(solution, problem.record, depth)
+# unpack(solution::DirHamCycleSolution, problem::DirHamCycle, depth::UInt) = unpack(solution, problem.record, depth)
 # unpack(solution::VertexCoverSolution, problem::VertexCover, depth::UInt) = unpack(solution, problem.record, depth)
 
 

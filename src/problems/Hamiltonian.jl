@@ -1,6 +1,9 @@
 using DataStructures, IterTools
 
-struct HamiltonianCycle <: NPProblem
+"""
+Instance of a directed Hamiltonian Cycle problem
+"""
+struct DirHamCycle <: NPProblem
     graph::SimpleDiGraph{UInt}
 end
 
@@ -10,21 +13,29 @@ Solution to a Hamiltonian-Cycle problem containing cycle in following format:
 an array of length equal to number of vertices where value cycle[x] = y corresponds to edge (x,y) in cycle
 
 """
-struct HamiltonianCycleSolution <: NPSolution
+struct DirHamCycleSolution <: NPSolution
     cycle::Array{UInt}
 end
 
-function validate(solution::HamiltonianCycleSolution, problem::HamiltonianCycle)
-    if length(solution.cycle) != nv(problem.graph)
+validate(solution::DirHamCycleSolution, problem::DirHamCycle) = validate_ham_cycle(solution.cycle, problem.graph)
+
+function validate_ham_cycle(cycle::Array{UInt}, graph::AbstractGraph)
+    if length(cycle) != nv(graph)
         # return false
         return ErrorException("invalid cycle length")
     end
-    visited = [false for _ in vertices(problem.graph)]
+    visited = [false for _ in vertices(graph)]
     cur = 1
     visited[1] = true
 
-    for _ in vertices(problem.graph)
-        cur = solution.cycle[cur]
+    for _ in vertices(graph)
+        new = cycle[cur]
+
+        if !has_edge(graph, cur, new)
+            return ErrorException("Cycle follows nonexistent edge $((cur,new))")
+        end
+        cur = new
+
 
         if visited[cur]
             if cur == 1
@@ -38,11 +49,9 @@ function validate(solution::HamiltonianCycleSolution, problem::HamiltonianCycle)
         end
     end
 
-
-
     if !all(visited)
         # return false
-        return ErrorException("Cycle is too short")
+        return ErrorException("Cycle does not visit all vertices")
     else
         return true
     end
@@ -70,7 +79,7 @@ function needed_vertices(sat3::SAT3)
     return size(sat3.clauses, 1) + 2 * sat3.variable_count + mapreduce((x, y) -> 3 * max(x, y) + 1, +, positive, negative)
 end
 
-function transform(sat3::SAT3, target::Type{HamiltonianCycle})
+function transform(sat3::SAT3, target::Type{DirHamCycle})
     variables = 1:sat3.variable_count
 
     vertices = needed_vertices(sat3)
@@ -195,12 +204,12 @@ function transform(sat3::SAT3, target::Type{HamiltonianCycle})
         add_edge!(g, pe, ce)
     end
 
-    foreach(x -> rem_vertex!(G, x), remv)
+    rem_vertex!.(Ref(g), remv)
 
-    return HamiltonianCycle(g)
+    return DirHamCycle(g)
 end
 
-function extract(solution::HamiltonianCycleSolution, instance::SAT3)
+function extract(solution::DirHamCycleSolution, instance::SAT3)
     eval = [false for _ in 1:(instance.variable_count)]
 
     for v in 1:instance.variable_count
@@ -212,7 +221,7 @@ function extract(solution::HamiltonianCycleSolution, instance::SAT3)
     return SAT3Solution(eval)
 end
 
-function construct(target::Type{HamiltonianCycleSolution}, solution::SAT3Solution, sat3::SAT3)
+function construct(target::Type{DirHamCycleSolution}, solution::SAT3Solution, sat3::SAT3)
     variables = 1:sat3.variable_count
 
     vertices = needed_vertices(sat3)
@@ -366,5 +375,5 @@ function construct(target::Type{HamiltonianCycleSolution}, solution::SAT3Solutio
 
     replace!(sol, repl...)
 
-    return HamiltonianCycleSolution(sol)
+    return DirHamCycleSolution(sol)
 end

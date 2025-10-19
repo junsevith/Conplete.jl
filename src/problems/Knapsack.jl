@@ -3,6 +3,6 @@ struct Knapsack <: NPProblem
 end
 
 
-function Knapsack(inst::Partition)
+function transform(inst::Partition, target::Type{Knapsack})
     return Knapsack(1)
 end

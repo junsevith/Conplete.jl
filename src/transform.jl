@@ -79,7 +79,7 @@ function chain_transform(instance::NPProblem, chain_path::Vector{DataType})
 
     inst = instance
     for problem_type in chain_path
-        inst = problem_type(inst)
+        inst = transform(inst, problem_type)
         push!(chaindata, inst)
     end
 
@@ -113,7 +113,7 @@ function transform(instance::NPProblem, chain_path::Vector{DataType})
 
     inst = instance
     for problem_type in chain_path
-        inst = problem_type(inst)
+        inst = transform(inst, problem_type)
     end
     return inst
 end

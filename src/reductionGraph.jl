@@ -3,7 +3,7 @@ using Bijections
 global problems = Bijection(
     CNFSAT => 1,
     SAT3 => 2,
-    HamiltonianCycle => 3,
+    DirHamCycle => 3,
     VertexCover => 4,
     SubsetSum => 5,
     Clique => 6,
@@ -12,16 +12,18 @@ global problems = Bijection(
     HittingSet => 9,
     TravellingSalesman => 10,
     Knapsack => 11,
+    HamCycle => 12,
 )
 
 global solutions = Bijection(
     SAT3 => SAT3Solution,
-    HamiltonianCycle => HamiltonianCycleSolution,
-    VertexCover => VertexCoverSolution
+    DirHamCycle => DirHamCycleSolution,
+    VertexCover => VertexCoverSolution,
+    HamCycle => HamCycleSolution
 )
 
 global problemGraph = let
-    local g = SimpleDiGraph(11)
+    local g = SimpleDiGraph(length(problems))
 
     add_edge!(g, 1, 2)
 
@@ -29,7 +31,8 @@ global problemGraph = let
     add_edge!(g, 2, 4)
     add_edge!(g, 2, 5)
 
-    add_edge!(g, 3, 10)
+    # add_edge!(g, 3, 10)
+    add_edge!(g, 3, 12)
 
     add_edge!(g, 4, 9)
 
@@ -39,6 +42,8 @@ global problemGraph = let
 
     add_edge!(g, 7, 8)
     add_edge!(g, 7, 11)
+
+    add_edge!(g, 12, 10)
     g
 end
 
@@ -53,7 +58,7 @@ function add_problem(inst::Type{<:NPProblem}, solution::Type{<:NPSolution})
     solutions[inst] = solution
     problems[inst] = nv(problemGraph)
 
-    return Nothing
+    return nothing
 end
 
 """
@@ -63,13 +68,13 @@ Add a transformation to the transformation graph,
 This makes it available for transformation using `transform` and `chain_transform` functions.
 """
 function add_transformation(new::Type{<:NPProblem}, parent::Type{<:NPProblem})
-    met = methods(new, [parent])
+    met = methods(transform, [parent, Type{new}])
 
-    if length(met) == 0 || (length(met) == 1 && met[1].sig == Tuple{Type{new},Any})
-        throw(MethodError(new, Tuple{parent}))
+    if length(met) == 0 || met[1].sig == Tuple{typeof(transform), NPProblem, Type{<:NPProblem}}
+        throw(MethodError(transform, Tuple{parent, Type{new}}))
     end
 
     add_edge!(problemGraph, problems[parent], problems[new])
 
-    return Nothing
+    return nothing
 end

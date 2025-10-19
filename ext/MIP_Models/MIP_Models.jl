@@ -1,4 +1,4 @@
-module Solvers
+module MIP_Models
 
 using Conplete
 using JuMP
@@ -8,5 +8,6 @@ include("SAT3.jl")
 include("VertexCover.jl")
 include("Hamiltonian.jl")
 include("Clique.jl")
+include("UndirectedHamiltonian.jl")
 
 end

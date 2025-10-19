@@ -48,10 +48,10 @@ function transform(input::SAT3, target::Type{Clique})
             var = input.clauses[row, i]
 
             if var > 0
-                foreach(x -> rem_edge!(g, vert, x), neg[var])
+                rem_edge!.(Ref(g), vert, neg[var])
                 push!(pos[var], vert)
             else
-                foreach(x -> rem_edge!(g, vert, x), pos[-var])
+                rem_edge!.(Ref(g), vert, pos[-var])
                 push!(neg[-var], vert)
             end
 
