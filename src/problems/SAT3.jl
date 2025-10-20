@@ -4,7 +4,7 @@ struct SAT3 <: NPProblem
 end
 
 struct SAT3Solution <: NPSolution
-  evaluation::Array{Bool}
+  evaluation::BitArray
 end
 
 # find the variable count of given clauses
@@ -48,27 +48,9 @@ function SAT3(path::String)
 end
 
 function validate(solution::SAT3Solution, problem::SAT3)
-    if length(solution.evaluation) != problem.variable_count
-      return false
-    end
+  if length(solution.evaluation) != problem.variable_count
+    return false
+  end
 
-    for i in axes(problem.clauses,1)
-      val = false
-      for j in 1:3
-
-        var = problem.clauses[i,j]
-        if var < 0
-          val |= !solution.evaluation[-var]
-        else
-          val |= solution.evaluation[var]
-        end
-      end
-
-      if val == false
-        return false
-      end
-
-    end
-
-    return true
+  return all(y -> any(x -> x < 0 ? !solution.evaluation[-x] : solution.evaluation[x], y), eachrow(problem.clauses))
 end

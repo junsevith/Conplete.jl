@@ -31,7 +31,7 @@ function transform(sat3::SAT3, target::Type{VertexCover})
     # vertex sat3.variable_count + x correspontd to ¬x
     # vertex 2*sat3.variable_count + 3*(i-1) + (j-1) corresponds to element j of clause i
 
-    graph = SimpleGraph(sat3.variable_count * 2 + length(sat3.clauses))
+    graph = SimpleGraph(2 * sat3.variable_count + length(sat3.clauses))
 
     elementsCounter = 2 * sat3.variable_count
     # we add edge between variable and its negation
@@ -77,7 +77,8 @@ function transform(sat3::SAT3, target::Type{VertexCover})
 end
 
 function extract(solution::VertexCoverSolution, instance::SAT3)
-    return SAT3Solution([in(v, solution.cover) for v in 1:(instance.variable_count)])
+    # return SAT3Solution([in(v, solution.cover) for v in 1:(instance.variable_count)])
+    return SAT3Solution(1:Int(instance.variable_count) .∈ Ref(solution.cover))
 end
 
 """
@@ -89,7 +90,7 @@ function construct(target::Type{VertexCoverSolution}, solution::SAT3Solution, sa
     # vertex sat3.variable_count + x correspontd to ¬x
     # vertex 2*sat3.variable_count + 3*(i-1) + (j-1) corresponds to element j of clause i
 
-    elementsCounter = 2 * sat3.variable_count
+    elementsCounter = 2sat3.variable_count
 
     vars = map(((num, eval),) -> if eval
             num

@@ -14,10 +14,10 @@ include("problems/Hamiltonian.jl")
 include("problems/HittingSet.jl")
 include("problems/SubsetSum.jl")
 include("problems/Partition.jl")
-include("problems/TravellingSalesman.jl")
 include("problems/VertexCover.jl")
 include("problems/Knapsack.jl")
 include("problems/UndirectedHamiltonian.jl")
+include("problems/TSP.jl")
 
 include("extract.jl")
 include("reductionGraph.jl")
@@ -63,7 +63,8 @@ export SubsetSum
 
 export Partition
 
-export TravellingSalesman
+export TSP
+export TSPSolution
 
 export Clique
 export CliqueSolution

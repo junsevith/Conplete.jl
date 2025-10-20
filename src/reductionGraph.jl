@@ -10,7 +10,7 @@ global problems = Bijection(
     Partition => 7,
     BinPacking => 8,
     HittingSet => 9,
-    TravellingSalesman => 10,
+    TSP => 10,
     Knapsack => 11,
     HamCycle => 12,
 )

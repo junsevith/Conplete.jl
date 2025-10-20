@@ -20,52 +20,34 @@ end
 validate(solution::DirHamCycleSolution, problem::DirHamCycle) = validate_ham_cycle(solution.cycle, problem.graph)
 
 function validate_ham_cycle(cycle::Array{UInt}, graph::AbstractGraph)
-    if length(cycle) != nv(graph)
-        # return false
-        return ErrorException("invalid cycle length")
-    end
-    visited = [false for _ in vertices(graph)]
-    cur = 1
-    visited[1] = true
+    n = length(cycle)
 
-    for _ in vertices(graph)
-        new = cycle[cur]
-
-        if !has_edge(graph, cur, new)
-            return ErrorException("Cycle follows nonexistent edge $((cur,new))")
-        end
-        cur = new
-
-
-        if visited[cur]
-            if cur == 1
-                break # cycle finished
-            else
-                # return false
-                return ErrorException("vertex" * string(cur) * "twice in cycle")
-            end
-        else
-            visited[cur] = true
-        end
+    if n != nv(graph)
+        return ErrorException("Invalid number of vertices in cycle")
     end
 
-    if !all(visited)
-        # return false
-        return ErrorException("Cycle does not visit all vertices")
-    else
-        return true
+    if !all(x -> 0 < x <= n, cycle)
+        return ErrorException("Invalid vertex in cycle")
     end
+
+    if !allunique(cycle)
+        return ErrorException("Vertex is traversed twice in cycle")
+    end
+
+    if !all(i -> has_edge(graph, i...), enumerate(cycle))
+        return ErrorException("Cycle follows nonexistent edge")
+    end
+
+    return true
 
 end
 
 function needed_vertices(sat3::SAT3)
-    variables = 1:sat3.variable_count
-
     #Count how many vertices do we need to initialize the graph
 
     #Count how many timex a variable has been used
-    positive = [0 for _ in variables]
-    negative = [0 for _ in variables]
+    positive = zeros(UInt, sat3.variable_count)
+    negative = zeros(UInt, sat3.variable_count)
 
     for i in axes(sat3.clauses, 1), j in 1:3
         el = sat3.clauses[i, j]
@@ -209,16 +191,9 @@ function transform(sat3::SAT3, target::Type{DirHamCycle})
     return DirHamCycle(g)
 end
 
-function extract(solution::DirHamCycleSolution, instance::SAT3)
-    eval = [false for _ in 1:(instance.variable_count)]
-
-    for v in 1:instance.variable_count
-        if solution.cycle[v] == v + instance.variable_count
-            eval[v] = true
-        end
-    end
-
-    return SAT3Solution(eval)
+function extract(solution::DirHamCycleSolution, inst::SAT3)
+    sec_rng = (x -> x+1:2x)(inst.variable_count)
+    return SAT3Solution([x in sec_rng for x in Iterators.first(solution.cycle, inst.variable_count)])
 end
 
 function construct(target::Type{DirHamCycleSolution}, solution::SAT3Solution, sat3::SAT3)
@@ -227,7 +202,7 @@ function construct(target::Type{DirHamCycleSolution}, solution::SAT3Solution, sa
     vertices = needed_vertices(sat3)
 
     #initialization
-    sol = [0 for _ in 1:vertices]
+    sol = zeros(UInt, vertices)
 
     # clause_done = [false for _ in axes(sat3.clauses, 1)]
 
