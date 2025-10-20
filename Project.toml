@@ -19,6 +19,7 @@ TSP_Solver = "Concorde"
 
 [compat]
 Bijections = "0.2.2"
+Concorde = "0.2"
 DataStructures = "0.19.1"
 Graphs = "1.13.1"
 IterTools = "1.10.0"
