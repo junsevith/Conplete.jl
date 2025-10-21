@@ -1,6 +1,6 @@
 using Test
 using JuMP
-# using Concorde
+using Concorde
 using Conplete
 using Graphs
 
@@ -64,6 +64,9 @@ println(solver)
       @time global uham = transform(ham, HamCycle)
       @test !isnothing(uham)
 
+      @time global tsp = transform(uham, TSP)
+      @test !isnothing(uham)
+
     end
 
     @testset "Solve" begin
@@ -84,8 +87,8 @@ println(solver)
       @time global uham_sol = solve(solver, uham)
       @test validate(uham_sol, uham)
 
-      # @time global uham_sol2 = solve(uham)
-      # @test validate(uham_sol2, uham)
+      @time global tsp_sol = solve(tsp)
+      @test validate(tsp_sol, tsp)
     end
 
     @testset "Extract" begin
@@ -102,6 +105,9 @@ println(solver)
 
       @time uham_ham = extract(uham_sol, ham)
       @test validate(uham_ham, ham)
+
+      @time tsp_uham = extract(tsp_sol, uham)
+      @test validate(tsp_uham, uham)
     end
 
     @testset "Construct" begin
@@ -117,6 +123,9 @@ println(solver)
 
       @time uham_con = construct(HamCycleSolution, ham_sol, ham)
       @test validate(uham_con, uham)
+
+      @time tsp_con = construct(TSPSolution, uham_sol, uham)
+      @test validate(tsp_con, tsp)
     end
 
   end

@@ -1,5 +1,5 @@
 struct TSP <: NPProblem
-    weights::Matrix{UInt}
+    weights::Matrix{Int}
     length::UInt
 end
 
