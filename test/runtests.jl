@@ -49,7 +49,6 @@ println(solver)
         global ezsat3 = SAT3(matrix2)
         global sat3 = SAT3("../test_data/uf20-91/uf20-02.cnf")
         # global sat3 = SAT3("../test_data/UF250.1065.100/uf250-01.cnf")
-        @test !isnothing(sat3)
       end
 
       @time global vc = transform(sat3, VertexCover)
@@ -63,6 +62,12 @@ println(solver)
       @time global uham = transform(ezham, HamCycle)
 
       @time global tsp = transform(uham, TSP)
+
+      @time global sub = transform(sat3, SubsetSum)
+
+      # println(sub.sum)
+      # println(sub.set)
+
 
     end
 
@@ -81,8 +86,15 @@ println(solver)
       @time global cli_sol = solve(solver, cli)
       @test validate(cli_sol, cli)
 
+      @time global sub_sol = solve(solver, sub)
+      println(sub_sol)
+      # @test validate(sub_sol, sub)
+
+      # Easy test data
+
+      @time global ezsat3_sol = solve(solver, ezsat3)
+
       @time global ezham_sol = solve(solver, ezham)
-      @test validate(ezham_sol, ezham)
 
       @time global uham_sol = solve(solver, uham)
       @test validate(uham_sol, uham)

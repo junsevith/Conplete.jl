@@ -9,5 +9,6 @@ include("VertexCover.jl")
 include("Hamiltonian.jl")
 include("Clique.jl")
 include("UndirectedHamiltonian.jl")
+include("SubsetSum.jl")
 
 end
