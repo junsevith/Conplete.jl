@@ -63,7 +63,7 @@ println(solver)
 
       @time global tsp = transform(uham, TSP)
 
-      @time global sub = transform(sat3, SubsetSum)
+      @time global sub = transform(ezsat3, SubsetSum)
 
       # println(sub.sum)
       # println(sub.set)
@@ -87,7 +87,7 @@ println(solver)
       @test validate(cli_sol, cli)
 
       @time global sub_sol = solve(solver, sub)
-      println(sub_sol)
+      # println(sub_sol)
       # @test validate(sub_sol, sub)
 
       # Easy test data
