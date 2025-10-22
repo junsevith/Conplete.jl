@@ -46,26 +46,23 @@ println(solver)
       println("Transform")
       @time begin
         # global sat3 = SAT3([1 2 3 ; 1 -2 3; 1 2 -3])
-        global sat3 = SAT3(matrix2)
-        # global sat3 = SAT3("../test_data/uf20-91/uf20-02.cnf")
+        global ezsat3 = SAT3(matrix2)
+        global sat3 = SAT3("../test_data/uf20-91/uf20-02.cnf")
         # global sat3 = SAT3("../test_data/UF250.1065.100/uf250-01.cnf")
         @test !isnothing(sat3)
       end
 
       @time global vc = transform(sat3, VertexCover)
-      @test !isnothing(vc)
 
       @time global ham = transform(sat3, DirHamCycle)
-      @test !isnothing(ham)
 
       @time global cli = transform(sat3, Clique)
-      @test !isnothing(cli)
 
-      @time global uham = transform(ham, HamCycle)
-      @test !isnothing(uham)
+      @time global ezham = transform(ezsat3, DirHamCycle)
+
+      @time global uham = transform(ezham, HamCycle)
 
       @time global tsp = transform(uham, TSP)
-      @test !isnothing(uham)
 
     end
 
@@ -83,6 +80,9 @@ println(solver)
 
       @time global cli_sol = solve(solver, cli)
       @test validate(cli_sol, cli)
+
+      @time global ezham_sol = solve(solver, ezham)
+      @test validate(ezham_sol, ezham)
 
       @time global uham_sol = solve(solver, uham)
       @test validate(uham_sol, uham)
@@ -103,8 +103,8 @@ println(solver)
       @time cli_sat = extract(cli_sol, sat3)
       @test validate(cli_sat, sat3)
 
-      @time uham_ham = extract(uham_sol, ham)
-      @test validate(uham_ham, ham)
+      @time uham_ham = extract(uham_sol, ezham)
+      @test validate(uham_ham, ezham)
 
       @time tsp_uham = extract(tsp_sol, uham)
       @test validate(tsp_uham, uham)
@@ -121,7 +121,7 @@ println(solver)
       @time cli_con = construct(CliqueSolution, sat3_sol, sat3)
       @test validate(cli_con, cli)
 
-      @time uham_con = construct(HamCycleSolution, ham_sol, ham)
+      @time uham_con = construct(HamCycleSolution, ezham_sol, ezham)
       @test validate(uham_con, uham)
 
       @time tsp_con = construct(TSPSolution, uham_sol, uham)
