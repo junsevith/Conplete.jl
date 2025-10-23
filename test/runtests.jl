@@ -65,10 +65,6 @@ println(solver)
 
       @time global sub = transform(ezsat3, SubsetSum)
 
-      # println(sub.sum)
-      # println(sub.set)
-
-
     end
 
     @testset "Solve" begin
@@ -86,11 +82,10 @@ println(solver)
       @time global cli_sol = solve(solver, cli)
       @test validate(cli_sol, cli)
 
-      @time global sub_sol = solve(solver, sub)
-      # println(sub_sol)
-      # @test validate(sub_sol, sub)
-
       # Easy test data
+
+      @time global sub_sol = solve(solver, sub) # solver is not accurate enough for large data
+      @test validate(sub_sol, sub)
 
       @time global ezsat3_sol = solve(solver, ezsat3)
 
@@ -120,6 +115,9 @@ println(solver)
 
       @time tsp_uham = extract(tsp_sol, uham)
       @test validate(tsp_uham, uham)
+
+      @time sub_sat = extract(sub_sol, ezsat3)
+      @test validate(sub_sat, ezsat3)
     end
 
     @testset "Construct" begin
@@ -138,6 +136,9 @@ println(solver)
 
       @time tsp_con = construct(TSPSolution, uham_sol, uham)
       @test validate(tsp_con, tsp)
+
+      @time sub_con = construct(SubsetSumSolution, ezsat3_sol, ezsat3)
+      @test validate(sub_con, sub)
     end
 
   end

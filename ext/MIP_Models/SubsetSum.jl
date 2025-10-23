@@ -8,6 +8,6 @@ function Conplete.solve(solver, inst::SubsetSum)
 
     optimize!(model)
 
-    return BitArray(value(x))
+    return SubsetSumSolution(BitArray(value(x)))
 
 end

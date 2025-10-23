@@ -19,7 +19,7 @@ function shortest_chain(in::Type{<:NPProblem}, out::Type{<:NPProblem})
     in_num = problems[in]
     out_num = problems[out]
     path = a_star(problemGraph, in_num, out_num)
-    return [problems(dst(e)) for e in path]
+    return Type{<:NPProblem}[problems(dst(e)) for e in path]
 end
 
 """
@@ -74,7 +74,7 @@ julia> chain_transform(SAT3([1 2 3]), [SubsetSum,Partition,Knapsack])
  Instance of problem Knapsack
 ```
 """
-function chain_transform(instance::NPProblem, chain_path::Vector{DataType})
+function chain_transform(instance::NPProblem, chain_path::Vector{Type{<:NPProblem}})
     chaindata = Vector{NPProblem}([instance])
 
     inst = instance
@@ -109,7 +109,7 @@ julia> transform(SAT3([1 2 3]), [SubsetSum,Partition,Knapsack])
 Instance of problem Knapsack
 ```
 """
-function transform(instance::NPProblem, chain_path::Vector{DataType})
+function transform(instance::NPProblem, chain_path::Vector{Type{<:NPProblem}})
 
     inst = instance
     for problem_type in chain_path

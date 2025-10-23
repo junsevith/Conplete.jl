@@ -1,6 +1,6 @@
 using Bijections
 
-global problems = Bijection(
+global problems = Bijection{Type{<:NPProblem},UInt}(
     CNFSAT => 1,
     SAT3 => 2,
     DirHamCycle => 3,
@@ -15,7 +15,7 @@ global problems = Bijection(
     HamCycle => 12,
 )
 
-global solutions = Bijection(
+global solutions = Bijection{Type{<:NPProblem},Type{<:NPSolution}}(
     SAT3 => SAT3Solution,
     DirHamCycle => DirHamCycleSolution,
     VertexCover => VertexCoverSolution,

@@ -60,6 +60,7 @@ export HamCycle
 export HamCycleSolution
 
 export SubsetSum
+export SubsetSumSolution
 
 export Partition
 

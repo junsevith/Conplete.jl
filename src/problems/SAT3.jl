@@ -49,7 +49,7 @@ end
 
 function validate(solution::SAT3Solution, problem::SAT3)
   if length(solution.evaluation) != problem.variable_count
-    return false
+    return ErrorException("Invalid solution size")
   end
 
   return all(y -> any(x -> x < 0 ? !solution.evaluation[-x] : solution.evaluation[x], y), eachrow(problem.clauses))
