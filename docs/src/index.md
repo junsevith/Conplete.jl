@@ -8,7 +8,7 @@ transform(instance::NPProblem, target_type::Type{<:NPProblem})
 ```
 
 ```@docs
-transform(instance::NPProblem, chain_path::Vector{DataType})
+transform(instance::NPProblem, chain_path::Vector{Type{<:NPProblem}})
 ```
 
 ```@docs
@@ -16,7 +16,7 @@ chain_transform(instance::NPProblem, target_type::Type{<:NPProblem})
 ```
 
 ```@docs
-chain_transform(instance::NPProblem, chain_path::Vector{DataType})
+chain_transform(instance::NPProblem, chain_path::Vector{Type{<:NPProblem}})
 ```
 
 ```@docs
