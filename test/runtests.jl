@@ -50,6 +50,10 @@ println(solver)
         global sat3 = SAT3("../test_data/uf20-91/uf20-02.cnf")
         # global sat3 = SAT3("../test_data/UF250.1065.100/uf250-01.cnf")
       end
+      
+      @time global cnf = CNFSAT(cnfmatrix)
+
+      @time global cnf_sat3 = transform(cnf, SAT3)
 
       @time global vc = transform(sat3, VertexCover)
 
@@ -96,6 +100,12 @@ println(solver)
 
       @time global tsp_sol = solve(tsp)
       @test validate(tsp_sol, tsp)
+
+      @time global cnf_sol = solve(solver, cnf)
+      @test validate(cnf_sol, cnf)
+
+      @time global cnfsat_sol = solve(solver, cnf_sat3)
+      @test validate(cnfsat_sol, cnf_sat3)
     end
 
     @testset "Extract" begin
@@ -118,6 +128,9 @@ println(solver)
 
       @time sub_sat = extract(sub_sol, ezsat3)
       @test validate(sub_sat, ezsat3)
+
+      @time sat3_cnf = extract(cnfsat_sol, cnf)
+      @test validate(sat3_cnf, cnf)
     end
 
     @testset "Construct" begin
@@ -139,6 +152,9 @@ println(solver)
 
       @time sub_con = construct(SubsetSumSolution, ezsat3_sol, ezsat3)
       @test validate(sub_con, sub)
+
+      @time sat3_con = construct(SAT3Solution, cnf_sol, cnf)
+      @test validate(sat3_con, cnf_sat3)
     end
 
   end

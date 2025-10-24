@@ -46,6 +46,7 @@ export construct
 
 # concrete types
 export CNFSAT
+export CNFSATSolution
 
 export SAT3
 export SAT3Solution
