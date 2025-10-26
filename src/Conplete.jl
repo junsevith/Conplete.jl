@@ -34,6 +34,8 @@ export NPSolution
 
 export add_problem
 export add_transformation
+export problems
+export solutions
 
 # function interfaces
 export solve

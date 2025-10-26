@@ -3,8 +3,8 @@ struct Clique <: NPProblem
     size::UInt
 end
 
-struct CliqueSolution
-    clique::Array{UInt}
+struct CliqueSolution <: NPSolution
+    clique::Set{UInt}
 end
 
 function validate(solution::CliqueSolution, problem::Clique)
@@ -90,7 +90,7 @@ end
 
 function construct(target::Type{CliqueSolution}, sol::SAT3Solution, parent::SAT3)
 
-    clique = UInt[]
+    clique = Set{UInt}()
     sizehint!(clique, size(parent.clauses, 1))
 
     for clause in axes(parent.clauses, 1)

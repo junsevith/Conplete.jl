@@ -33,6 +33,21 @@ function Conplete.transform(inst::SAT3, target::Type{Pies})
   return Pies(1)
 end
 
+function test_algo(target::Type{<:NPProblem}, parent::NPProblem, parent_sol::NPSolution)
+  res = transform(parent, target)
+
+  @time sol = solve(solver, res)
+  @test validate(sol, res)
+
+  ext = extract(sol, parent)
+  @test validate(ext, parent)
+
+  con = construct(target, parent_sol, parent)
+  @test validate(con, res)
+
+  return (res, sol)
+end
+
 include("data.jl")
 
 print("Using solver: ")
@@ -42,119 +57,60 @@ println(solver)
 
 
   @testset verbose = true "Algorithms" begin
-    @testset "Transform" begin
-      println("Transform")
-      @time begin
+    @testset "import CNFSAT" begin
+      @time global cnf = CNFSAT(cnfmatrix)
+
+      @time global cnf_sol = solve(solver, cnf)
+      @test validate(cnf_sol, cnf)
+    end
+
+
+    @testset "import 3SAT" begin
+      begin
         # global sat3 = SAT3([1 2 3 ; 1 -2 3; 1 2 -3])
         global ezsat3 = SAT3(matrix2)
         global sat3 = SAT3("../test_data/uf20-91/uf20-02.cnf")
         # global sat3 = SAT3("../test_data/UF250.1065.100/uf250-01.cnf")
       end
-      
-      @time global cnf = CNFSAT(cnfmatrix)
 
-      @time global cnf_sat3 = transform(cnf, SAT3)
-
-      @time global vc = transform(sat3, VertexCover)
-
-      @time global ham = transform(sat3, DirHamCycle)
-
-      @time global cli = transform(sat3, Clique)
-
-      @time global ezham = transform(ezsat3, DirHamCycle)
-
-      @time global uham = transform(ezham, HamCycle)
-
-      @time global tsp = transform(uham, TSP)
-
-      @time global sub = transform(ezsat3, SubsetSum)
-
-    end
-
-    @testset "Solve" begin
-      println("Solve")
-
-      @time global sat3_sol = solve(solver, sat3)
+      global sat3_sol = solve(solver, sat3)
       @test validate(sat3_sol, sat3)
 
-      @time global vc_sol = solve(solver, vc)
-      @test validate(vc_sol, vc)
-
-      @time global ham_sol = solve(solver, ham)
-      @test validate(ham_sol, ham)
-
-      @time global cli_sol = solve(solver, cli)
-      @test validate(cli_sol, cli)
-
-      # Easy test data
-
-      @time global sub_sol = solve(solver, sub) # solver is not accurate enough for large data
-      @test validate(sub_sol, sub)
-
-      @time global ezsat3_sol = solve(solver, ezsat3)
-
-      @time global ezham_sol = solve(solver, ezham)
-
-      @time global uham_sol = solve(solver, uham)
-      @test validate(uham_sol, uham)
-
-      @time global tsp_sol = solve(tsp)
-      @test validate(tsp_sol, tsp)
-
-      @time global cnf_sol = solve(solver, cnf)
-      @test validate(cnf_sol, cnf)
-
-      @time global cnfsat_sol = solve(solver, cnf_sat3)
-      @test validate(cnfsat_sol, cnf_sat3)
+      global ezsat3_sol = solve(solver, ezsat3)
+      @test validate(ezsat3_sol, ezsat3)
     end
 
-    @testset "Extract" begin
-      println("Extract")
-
-      @time vc_sat = extract(vc_sol, sat3)
-      @test validate(vc_sat, sat3)
-
-      @time ham_sat = extract(ham_sol, sat3)
-      @test validate(ham_sat, sat3)
-
-      @time cli_sat = extract(cli_sol, sat3)
-      @test validate(cli_sat, sat3)
-
-      @time uham_ham = extract(uham_sol, ezham)
-      @test validate(uham_ham, ezham)
-
-      @time tsp_uham = extract(tsp_sol, uham)
-      @test validate(tsp_uham, uham)
-
-      @time sub_sat = extract(sub_sol, ezsat3)
-      @test validate(sub_sat, ezsat3)
-
-      @time sat3_cnf = extract(cnfsat_sol, cnf)
-      @test validate(sat3_cnf, cnf)
+    @testset "CNFSAT->3SAT" begin
+      global sat3_cnf = test_algo(SAT3, cnf, cnf_sol)
     end
 
-    @testset "Construct" begin
-      println("Construct")
-      @time vc_con = construct(VertexCoverSolution, sat3_sol, sat3)
-      @test validate(vc_con, vc)
+    @testset "3SAT->VertexCover" begin
+      global vc_sat3 = test_algo(VertexCover, sat3, sat3_sol)
+    end
 
-      @time ham_con = construct(DirHamCycleSolution, sat3_sol, sat3)
-      @test validate(ham_con, ham)
+    @testset "3SAT->DirHamCycle" begin
+      global ham_sat3 = test_algo(DirHamCycle, sat3, sat3_sol)
+    end
 
-      @time cli_con = construct(CliqueSolution, sat3_sol, sat3)
-      @test validate(cli_con, cli)
+    @testset "3SAT->Clique" begin
+      global cli_sat3 = test_algo(Clique, sat3, sat3_sol)
+    end
 
-      @time uham_con = construct(HamCycleSolution, ezham_sol, ezham)
-      @test validate(uham_con, uham)
+    @testset "3SAT->SubsetSum" begin
+      global sub_sat3 = test_algo(SubsetSum, ezsat3, ezsat3_sol)
+    end
 
-      @time tsp_con = construct(TSPSolution, uham_sol, uham)
-      @test validate(tsp_con, tsp)
+    @testset "Clique->VertexCover" begin
+      global cli_vc = test_algo(VertexCover, cli_sat3...)
+    end
 
-      @time sub_con = construct(SubsetSumSolution, ezsat3_sol, ezsat3)
-      @test validate(sub_con, sub)
+    @testset "DirHamCycle->HamCycle" begin
+      global ezham = test_algo(DirHamCycle, ezsat3, ezsat3_sol)
+      global uham_ham = test_algo(HamCycle, ezham...)
+    end
 
-      @time sat3_con = construct(SAT3Solution, cnf_sol, cnf)
-      @test validate(sat3_con, cnf_sat3)
+    @testset "HamCycle->TSP" begin
+      global tsp_uham = test_algo(TSP, uham_ham...)
     end
 
   end

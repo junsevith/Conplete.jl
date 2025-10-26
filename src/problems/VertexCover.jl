@@ -181,3 +181,15 @@ end
 
 #     return VertexCoverSolution(cover)
 # end
+
+function transform(parent::Clique, target::Type{VertexCover})
+    return VertexCover(Graphs.complement(parent.graph), nv(parent.graph) - parent.size)
+end
+
+function extract(solution::VertexCoverSolution, instance::Clique)
+    return CliqueSolution(setdiff(Set(1:nv(instance.graph)), solution.cover))
+end
+
+function construct(target::Type{VertexCoverSolution}, solution::CliqueSolution, parent::Clique)
+    return VertexCoverSolution(setdiff(Set(1:nv(parent.graph)), solution.clique))
+end

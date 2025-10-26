@@ -16,11 +16,15 @@ global problems = Bijection{Type{<:NPProblem},UInt}(
 )
 
 global solutions = Bijection{Type{<:NPProblem},Type{<:NPSolution}}(
+    CNFSAT => CNFSATSolution,
     SAT3 => SAT3Solution,
     DirHamCycle => DirHamCycleSolution,
     VertexCover => VertexCoverSolution,
-    HamCycle => HamCycleSolution
-)
+    SubsetSum => SubsetSumSolution,
+    Clique => CliqueSolution,
+    HamCycle => HamCycleSolution,
+    TSP => TSPSolution
+    )
 
 global problemGraph = let
     local g = SimpleDiGraph(length(problems))
@@ -70,8 +74,8 @@ This makes it available for transformation using `transform` and `chain_transfor
 function add_transformation(new::Type{<:NPProblem}, parent::Type{<:NPProblem})
     met = methods(transform, [parent, Type{new}])
 
-    if length(met) == 0 || met[1].sig == Tuple{typeof(transform), NPProblem, Type{<:NPProblem}}
-        throw(MethodError(transform, Tuple{parent, Type{new}}))
+    if length(met) == 0 || met[1].sig == Tuple{typeof(transform),NPProblem,Type{<:NPProblem}}
+        throw(MethodError(transform, Tuple{parent,Type{new}}))
     end
 
     add_edge!(problemGraph, problems[parent], problems[new])

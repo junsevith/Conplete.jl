@@ -18,5 +18,7 @@ function Conplete.solve(problem::TSP)
 
     return TSPSolution(cycle2)
 end
-    
+
+Conplete.solve(solver, tsp::TSP) = solve(tsp)
+
 end

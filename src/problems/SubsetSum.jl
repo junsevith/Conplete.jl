@@ -3,7 +3,7 @@ struct SubsetSum{T<:Number} <: NPProblem
     sum::BigInt
 end
 
-struct SubsetSumSolution
+struct SubsetSumSolution <: NPSolution
     subset::BitArray
 end
 

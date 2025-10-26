@@ -37,4 +37,4 @@ function construct(target::Type{NPSolution}, solution::NPSolution, problem::NPPr
     end
 end
 
-construct(target::Type{NPProblem}, solution::NPSolution, problem::NPProblem) = construct(solution, problem, solutions[target])
+construct(target::Type{<:NPProblem}, solution::NPSolution, problem::NPProblem) = construct(solutions[target], solution, problem)
