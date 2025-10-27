@@ -1,13 +1,3 @@
-struct SubsetSum{T<:Number} <: NPProblem
-    set::Vector{T}
-    sum::BigInt
-end
-
-struct SubsetSumSolution <: NPSolution
-    subset::BitArray
-end
-
-
 function transform(inst::SAT3, target::Type{SubsetSum})
     n = inst.variable_count
     m = size(inst.clauses, 1)
@@ -39,24 +29,25 @@ function transform(inst::SAT3, target::Type{SubsetSum})
 end
 
 function validate(sol::SubsetSumSolution, problem::SubsetSum)
-    return problem.sum == sum(problem.set .* sol.subset)
+    return problem.sum == sum(problem.set[i] for i in sol.subset)
 end
 
 function extract(sol::SubsetSumSolution, sat::SAT3)
-    return SAT3Solution([sol.subset[i] for i in 1:2:(2*sat.variable_count)])
+    return SAT3Solution([i ∈ sol.subset for i in 1:2:(2*sat.variable_count)])
 end
 
 function construct(target::Type{SubsetSumSolution}, sol::SAT3Solution, parent::SAT3)
     n = parent.variable_count
     m = size(parent.clauses, 1)
 
-    subset = falses( 2n + 2m)
+    subset = BitSet()
+    sizehint!(subset, 2n + 2m)
 
     for (i, v) in enumerate(sol.evaluation)
         if v
-            subset[2i-1] = true
+            push!(subset, 2i - 1)
         else
-            subset[2i] = true
+            push!(subset, 2i)
         end
     end
 
@@ -66,11 +57,11 @@ function construct(target::Type{SubsetSumSolution}, sol::SAT3Solution, parent::S
         cnt = sum(eval.(parent.clauses[c, :]))
 
         if cnt < 3
-            subset[2n+2c-1] = true
+            push!(subset, 2n+2c-1)
         end
 
         if cnt < 2
-            subset[2n+2c] = true
+            push!(subset, 2n+2c)
         end
     end
 

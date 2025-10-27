@@ -23,7 +23,8 @@ global solutions = Bijection{Type{<:NPProblem},Type{<:NPSolution}}(
     SubsetSum => SubsetSumSolution,
     Clique => CliqueSolution,
     HamCycle => HamCycleSolution,
-    TSP => TSPSolution
+    TSP => TSPSolution,
+    HittingSet => HittingSetSolution
     )
 
 global problemGraph = let

@@ -1,18 +1,3 @@
-struct TSP <: NPProblem
-    weights::Matrix{Int}
-    length::UInt
-end
-
-"""
-Solution to a TravellingSalesman problem containing cycle in following format:
-
-an array of length equal to number of vertices where value cycle[x] = y corresponds to edge (x,y) in cycle
-
-"""
-struct TSPSolution <: NPSolution
-    cycle::Array{UInt}
-end
-
 function transform(parent::HamCycle, target::Type{TSP})
     return TSP(map(x -> x == 1 ? 0 : 1, adjacency_matrix(parent.graph)), 0)
 end

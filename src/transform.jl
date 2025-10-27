@@ -1,9 +1,9 @@
 """
     shortest_chain(in,out)
 
-Find the shortest chain of conversions between problem of type `in` and problem of type `out` and return it as an array of corresponding types.
+Find the shortest chain of conversions between problem of type `in` and problem of type `out` and return it as an Vector of corresponding types.
 
-Output array can be then used in `chain_transform` function.
+Output Vector can be then used in `chain_transform` function.
 
 # Examples
 ```jldoctest
@@ -62,7 +62,7 @@ Check [`add_problem`](@ref) and [`add_transformation`](@ref) for adding transfor
 
 `instance::NPProblem`: input instance of the problem.
 
-`chain_path::Array{DataType}`: chain of conversions as an array of problem types.
+`chain_path::Vector{DataType}`: chain of conversions as an Vector of problem types.
 # Examples
 ```jldoctest
 julia> using Conplete
@@ -101,7 +101,7 @@ Check [`add_problem`](@ref) and [`add_transformation`](@ref) for adding transfor
 
 `instance::NPProblem`: input instance of the problem.
 
-`chain_path::Array{DataType}`: chain of conversions as an array of problem types.
+`chain_path::Vector{DataType}`: chain of conversions as an Vector of problem types.
 # Examples
 ```jldoctest
 julia> using Conplete

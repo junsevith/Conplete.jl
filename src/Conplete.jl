@@ -1,10 +1,13 @@
 module Conplete
 
 using Graphs
+using DataStructures, IterTools
 
 abstract type NPProblem end
 
 abstract type NPSolution end
+
+include("structures.jl")
 
 include("problems/CnfSAT.jl")
 include("problems/SAT3.jl")
@@ -74,6 +77,7 @@ export Clique
 export CliqueSolution
 
 export HittingSet
+export HittingSetSolution
 
 export Knapsack
 

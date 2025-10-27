@@ -1,12 +1,3 @@
-struct SAT3 <: NPProblem
-  variable_count::UInt
-  clauses::Matrix{Int}
-end
-
-struct SAT3Solution <: NPSolution
-  evaluation::BitArray
-end
-
 # find the variable count of given clauses
 function SAT3(clauses::Matrix{Int})
   maxi = 0
@@ -117,7 +108,7 @@ end
 
 function construct(target::Type{SAT3Solution}, sol::CNFSATSolution, parent::CNFSAT)
   cnt = parent.variable_count
-  vars = BitArray[]
+  vars = BitVector[]
   sizehint!(vars, parent.variable_count)
 
   push!(vars, sol.evaluation)

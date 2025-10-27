@@ -1,12 +1,3 @@
-struct Clique <: NPProblem
-    graph::SimpleGraph
-    size::UInt
-end
-
-struct CliqueSolution <: NPSolution
-    clique::Set{UInt}
-end
-
 function validate(solution::CliqueSolution, problem::Clique)
     # display(solution.clique)
     # display(problem.size)

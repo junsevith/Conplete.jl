@@ -1,25 +1,6 @@
-using DataStructures, IterTools
-
-"""
-Instance of a directed Hamiltonian Cycle problem
-"""
-struct DirHamCycle <: NPProblem
-    graph::SimpleDiGraph{UInt}
-end
-
-"""
-Solution to a Hamiltonian-Cycle problem containing cycle in following format:
-
-an array of length equal to number of vertices where value cycle[x] = y corresponds to edge (x,y) in cycle
-
-"""
-struct DirHamCycleSolution <: NPSolution
-    cycle::Array{UInt}
-end
-
 validate(solution::DirHamCycleSolution, problem::DirHamCycle) = validate_ham_cycle(solution.cycle, problem.graph)
 
-function validate_ham_cycle(cycle::Array{UInt}, graph::AbstractGraph)
+function validate_ham_cycle(cycle::Vector{UInt}, graph::AbstractGraph)
     n = length(cycle)
 
     if n != nv(graph)

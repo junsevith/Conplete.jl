@@ -11,5 +11,6 @@ include("Clique.jl")
 include("UndirectedHamiltonian.jl")
 include("SubsetSum.jl")
 include("CNFSAT.jl")
+include("HittingSet.jl")
 
 end

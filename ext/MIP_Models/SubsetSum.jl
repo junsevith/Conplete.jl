@@ -8,6 +8,10 @@ function Conplete.solve(solver, inst::SubsetSum)
 
     optimize!(model)
 
-    return SubsetSumSolution(BitArray(value(x) .> 0.5))
+    return if is_solved_and_feasible(model)
+        SubsetSumSolution(BitSet(findall(value(x) .> 0.5)))
+    else
+        nothing
+    end
 
 end

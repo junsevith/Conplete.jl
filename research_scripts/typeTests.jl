@@ -27,7 +27,7 @@ end
 
 
 struct cont 
-    araj::Array{UnpackData}
+    araj::Vector{UnpackData}
 end
 
 x = cont([data1(3),data2(5),data3(7)])

@@ -7,7 +7,7 @@ Using `solution` of the base problem, construct the `target_solution` for proble
 
 `chain` includes base problem, target problem and all inbetween problem instances computed during transformation, all of them are needed for this operation.
 """
-function construct(solution::NPSolution, chain::Array{NPProblem})
+function construct(solution::NPSolution, chain::Vector{NPProblem})
 
     current = solution
     for (parent, child) in partition(chain, 2, 1)
@@ -25,7 +25,7 @@ Using `solution` of the base `problem`, construct the `target_solution` for prob
 
 If type of `solution` and `target_type` are separated in transformation graph by more than one transformation, the instance `problem` needs to be transformed which will be slower
 
-Therefore it is advised to use the method `construct(solution::NPSolution, chain::Array{NPProblem})` in this situation.
+Therefore it is advised to use the method `construct(solution::NPSolution, chain::Vector{NPProblem})` in this situation.
 
 See also: [`chain_transform`](@ref)
 """

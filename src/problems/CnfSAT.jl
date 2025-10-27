@@ -1,12 +1,3 @@
-struct CNFSAT <: NPProblem
-        variable_count::UInt
-    clauses::Array{Array{Int}}
-end
-
-struct CNFSATSolution <: NPSolution
-  evaluation::BitArray
-end
-
 function CNFSAT(clauses::Vector{Vector{Int}})
   maxi = 0
 

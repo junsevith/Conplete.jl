@@ -1,20 +1,3 @@
-"""
-Instance of a directed Hamiltonian Cycle problem
-"""
-struct HamCycle <: NPProblem
-    graph::SimpleGraph{UInt}
-end
-
-"""
-Solution to a Hamiltonian-Cycle problem containing cycle in following format:
-
-an array of length equal to number of vertices where value cycle[x] = y corresponds to edge (x,y) in cycle
-
-"""
-struct HamCycleSolution <: NPSolution
-    cycle::Array{UInt}
-end
-
 validate(sol::HamCycleSolution, problem::HamCycle) = validate_ham_cycle(sol.cycle, problem.graph)
 
 function transform(parent::DirHamCycle, target::Type{HamCycle})

@@ -1,12 +1,3 @@
-struct VertexCover <: NPProblem
-    graph::SimpleGraph
-    size::UInt
-end
-
-struct VertexCoverSolution <: NPSolution
-    cover::Set{UInt}
-end
-
 function validate(solution::VertexCoverSolution, problem::VertexCover)
     if length(solution.cover) > problem.size
         return ErrorException("solution too large")

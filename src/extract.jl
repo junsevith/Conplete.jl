@@ -6,7 +6,7 @@ From `solution` of the child problem extract the solution of the parent problem 
 
 Depth specifies how deep to extract when problem is a result of multiple transformations.
 """
-extract(solution::NPSolution, chain::Array{NPProblem}) = foldl(extract, Iterators.reverse(chain); init=solution)
+extract(solution::NPSolution, chain::Vector{NPProblem}) = foldl(extract, Iterators.reverse(chain); init=solution)
 
 
 # unpack(solution::DirHamCycleSolution, problem::DirHamCycle, depth::UInt) = unpack(solution, problem.record, depth)

@@ -20,11 +20,11 @@ chain_transform(instance::NPProblem, chain_path::Vector{Type{<:NPProblem}})
 ```
 
 ```@docs
-extract(solution::NPSolution, chain::Array{NPProblem})
+extract(solution::NPSolution, chain::Vector{NPProblem})
 ```
 
 ```@docs
-construct(solution::NPSolution, chain::Array{NPProblem})
+construct(solution::NPSolution, chain::Vector{NPProblem})
 ```
 
 ```@docs

@@ -113,6 +113,10 @@ println(solver)
       global tsp_uham = test_algo(TSP, uham_ham...)
     end
 
+    @testset "VertexCover->HittingSet" begin
+      global hit_vc = test_algo(HittingSet, vc_sat3...)
+    end
+
   end
 
   @testset verbose = true "Interfaces" begin
