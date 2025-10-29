@@ -14,7 +14,7 @@ function Conplete.solve(solver, inst::HittingSet)
 
     return if is_solved_and_feasible(model)
         val = value.(x)
-        HittingSetSolution(BitSet(findall([val[i] > 0.5 for i in eachindex(val)])))
+        HittingSetSolution(Set([i[1] for i in eachindex(val) if val[i] > 0.5]))
     else 
         nothing
     end

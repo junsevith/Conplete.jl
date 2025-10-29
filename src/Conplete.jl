@@ -69,6 +69,7 @@ export SubsetSum
 export SubsetSumSolution
 
 export Partition
+export PartitionSolution
 
 export TSP
 export TSPSolution
@@ -102,3 +103,5 @@ end
 
 end
 
+# TODO 
+# subsetsum has integers partition has positive

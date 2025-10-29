@@ -99,3 +99,11 @@ end
 struct HittingSetSolution{T,S<:AbstractSet{T}} <: NPSolution
     hitting_set::S
 end
+
+struct Partition{T<:Integer} <: NPProblem
+    set::Vector{T}
+end
+
+struct PartitionSolution{S<:AbstractSet{Int}} <: NPSolution
+    subset::S
+end

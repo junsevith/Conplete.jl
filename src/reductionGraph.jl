@@ -24,7 +24,8 @@ global solutions = Bijection{Type{<:NPProblem},Type{<:NPSolution}}(
     Clique => CliqueSolution,
     HamCycle => HamCycleSolution,
     TSP => TSPSolution,
-    HittingSet => HittingSetSolution
+    HittingSet => HittingSetSolution,
+    Partition => PartitionSolution
     )
 
 global problemGraph = let

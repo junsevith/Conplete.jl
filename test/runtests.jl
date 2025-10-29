@@ -117,6 +117,10 @@ println(solver)
       global hit_vc = test_algo(HittingSet, vc_sat3...)
     end
 
+    @testset "SubsetSum->Partition" begin
+      global par_sub = test_algo(Partition, sub_sat3...)
+    end
+
   end
 
   @testset verbose = true "Interfaces" begin
