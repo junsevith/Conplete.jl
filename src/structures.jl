@@ -1,5 +1,5 @@
 struct CNFSAT <: NPProblem
-    variable_count::UInt
+    variable_count::Int
     clauses::Vector{Vector{Int}}
 end
 
@@ -8,7 +8,7 @@ struct CNFSATSolution <: NPSolution
 end
 
 struct SAT3 <: NPProblem
-    variable_count::UInt
+    variable_count::Int
     clauses::Matrix{Int}
 end
 
@@ -18,24 +18,24 @@ end
 
 struct Clique <: NPProblem
     graph::SimpleGraph
-    size::UInt
+    size::Int
 end
 
-struct CliqueSolution <: NPSolution
-    clique::Set{UInt}
+struct CliqueSolution{S<:AbstractSet{Int}} <: NPSolution
+    clique::S
 end
 
 struct VertexCover <: NPProblem
     graph::SimpleGraph
-    size::UInt
+    size::Int
 end
 
-struct VertexCoverSolution <: NPSolution
-    cover::Set{UInt}
+struct VertexCoverSolution{S<:AbstractSet{Int}} <: NPSolution
+    cover::S
 end
 
 struct DirHamCycle <: NPProblem
-    graph::SimpleDiGraph{UInt}
+    graph::SimpleDiGraph
 end
 
 """
@@ -45,11 +45,11 @@ an Vector of length equal to number of vertices where value cycle[x] = y corresp
 
 """
 struct DirHamCycleSolution <: NPSolution
-    cycle::Vector{UInt}
+    cycle::Vector{Int}
 end
 
 struct HamCycle <: NPProblem
-    graph::SimpleGraph{UInt}
+    graph::SimpleGraph
 end
 
 """
@@ -59,12 +59,12 @@ an Vector of length equal to number of vertices where value cycle[x] = y corresp
 
 """
 struct HamCycleSolution <: NPSolution
-    cycle::Vector{UInt}
+    cycle::Vector{Int}
 end
 
 struct TSP <: NPProblem
     weights::Matrix{Int}
-    length::UInt
+    length::Int
 end
 
 """
@@ -74,11 +74,11 @@ an Vector of length equal to number of vertices where value cycle[x] = y corresp
 
 """
 struct TSPSolution <: NPSolution
-    cycle::Vector{UInt}
+    cycle::Vector{Int}
 end
 
 struct SubsetSum{T<:Integer} <: NPProblem
-    set::Vector{T}
+    elements::Vector{T}
     sum::BigInt
 end
 
@@ -90,20 +90,30 @@ struct SubsetSumSolution{S<:AbstractSet{Int}} <: NPSolution
     subset::S
 end
 
-struct HittingSet{T,U<:AbstractSet{T},S<:AbstractSet{T}} <: NPProblem
-    universe::U
+struct HittingSet{S<:AbstractSet{Int}} <: NPProblem
+    universe_size::Int
     sets::Vector{S}
-    size::UInt
+    size::Int
 end
 
-struct HittingSetSolution{T,S<:AbstractSet{T}} <: NPSolution
+struct HittingSetSolution{S<:AbstractSet{Int}} <: NPSolution
     hitting_set::S
 end
 
 struct Partition{T<:Integer} <: NPProblem
-    set::Vector{T}
+    elements::Vector{T}
 end
 
 struct PartitionSolution{S<:AbstractSet{Int}} <: NPSolution
     subset::S
+end
+
+struct BinPacking{T<:Integer} <: NPProblem
+    elements::Vector{T}
+    bins::Int
+    bin_size::T
+end
+
+struct BinPackingSolution <: NPSolution
+    assignment::Vector{Int}
 end

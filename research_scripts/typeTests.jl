@@ -5,15 +5,15 @@ struct data1 <: UnpackData
 end
 
 struct data2 <: UnpackData 
-    e::UInt
+    e::Int
 end
 
 struct data3 <: UnpackData 
-    e::UInt
+    e::Int
 end
 
 struct data4 <: UnpackData 
-    e::UInt
+    e::Int
 end
 
 function data2(a::data3)

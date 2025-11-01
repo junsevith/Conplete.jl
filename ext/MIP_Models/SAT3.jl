@@ -5,7 +5,7 @@ function Conplete.solve(solver, problem::SAT3)
     @variable(model, x[1:problem.variable_count], Bin)
     rows = size(problem.clauses, 1)
 
-    function translate(var)
+    function translate(var::Int)
       if var < 0
         return (1 - x[abs(var)])
       else
@@ -13,7 +13,7 @@ function Conplete.solve(solver, problem::SAT3)
       end
     end
 
-    @constraint(model, [r = 1:rows], translate(problem.clauses[r, 1]) + translate(problem.clauses[r, 2]) + translate(problem.clauses[r, 3]) >= 1)
+    @constraint(model, [r = 1:rows], sum(translate, problem.clauses[r, 1:3]) >= 1)
 
     @objective(model, Min, 1)
 

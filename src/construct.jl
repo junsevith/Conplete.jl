@@ -29,12 +29,7 @@ Therefore it is advised to use the method `construct(solution::NPSolution, chain
 
 See also: [`chain_transform`](@ref)
 """
-function construct(target::Type{NPSolution}, solution::NPSolution, problem::NPProblem)
-    return try
-        target(solution, problem)
-    catch
-        construct(solution, chain_transform(problem, solutions(target)))
-    end
-end
+construct(target::Type{NPSolution}, solution::NPSolution, problem::NPProblem) = construct(solution, chain_transform(problem, solutions(target)))
+
 
 construct(target::Type{<:NPProblem}, solution::NPSolution, problem::NPProblem) = construct(solutions[target], solution, problem)

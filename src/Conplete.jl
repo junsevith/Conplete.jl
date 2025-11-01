@@ -80,6 +80,9 @@ export CliqueSolution
 export HittingSet
 export HittingSetSolution
 
+export BinPacking
+export BinPackingSolution
+
 export Knapsack
 
 """
@@ -89,17 +92,17 @@ JuMP is required to be added for methos to appear
 """
 function solve end
 
-function validate(::Nothing, ::NPProblem)
-    return false
-end
+# function validate(::Nothing, ::NPProblem)
+#     return false
+# end
 
-function extract(::Nothing, ::NPProblem)
-    return nothing
-end
+# function extract(::Nothing, ::NPProblem)
+#     return nothing
+# end
 
-function construct(::DataType, ::Nothing, ::NPProblem)
-    return nothing
-end
+# function construct(::DataType, ::Nothing, ::NPProblem)
+#     return nothing
+# end
 
 end
 

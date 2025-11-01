@@ -2,7 +2,7 @@ function Conplete.solve(solver, inst::HittingSet)
     model = Model(solver)
 
     set_silent(model)
-    @variable(model, x[inst.universe], Bin)
+    @variable(model, x[1:inst.universe_size], Bin)
 
     for s in inst.sets
         @constraint(model, sum(i -> x[i], s) >= 1)

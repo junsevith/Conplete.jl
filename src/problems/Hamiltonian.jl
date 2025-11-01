@@ -1,6 +1,6 @@
 validate(solution::DirHamCycleSolution, problem::DirHamCycle) = validate_ham_cycle(solution.cycle, problem.graph)
 
-function validate_ham_cycle(cycle::Vector{UInt}, graph::AbstractGraph)
+function validate_ham_cycle(cycle::Vector{Int}, graph::AbstractGraph)
     n = length(cycle)
 
     if n != nv(graph)
@@ -27,8 +27,8 @@ function needed_vertices(sat3::SAT3)
     #Count how many vertices do we need to initialize the graph
 
     #Count how many timex a variable has been used
-    positive = zeros(UInt, sat3.variable_count)
-    negative = zeros(UInt, sat3.variable_count)
+    positive = zeros(Int, sat3.variable_count)
+    negative = zeros(Int, sat3.variable_count)
 
     for i in axes(sat3.clauses, 1), j in 1:3
         el = sat3.clauses[i, j]
@@ -48,10 +48,10 @@ function transform(sat3::SAT3, target::Type{DirHamCycle})
     vertices = needed_vertices(sat3)
 
     #initialization
-    g = SimpleDiGraph{UInt}(vertices)
+    g = SimpleDiGraph{Int}(vertices)
 
-    posq = [Queue{UInt}() for _ in variables]
-    negq = [Queue{UInt}() for _ in variables]
+    posq = [Queue{Int}() for _ in variables]
+    negq = [Queue{Int}() for _ in variables]
 
     vertex_counter = 2 * sat3.variable_count
 
@@ -130,9 +130,9 @@ function transform(sat3::SAT3, target::Type{DirHamCycle})
         end
     end
 
-    ends = sizehint!(Vector{Tuple{UInt,UInt}}(), sat3.variable_count)
+    ends = sizehint!(Vector{Tuple{Int,Int}}(), sat3.variable_count)
 
-    remv = Vector{UInt}()
+    remv = Vector{Int}()
 
     # we find the ends for variable subgraphs
     for i in variables
@@ -183,12 +183,12 @@ function construct(target::Type{DirHamCycleSolution}, solution::SAT3Solution, sa
     vertices = needed_vertices(sat3)
 
     #initialization
-    sol = zeros(UInt, vertices)
+    sol = zeros(Int, vertices)
 
     # clause_done = [false for _ in axes(sat3.clauses, 1)]
 
-    posq = [Queue{UInt}() for _ in variables]
-    negq = [Queue{UInt}() for _ in variables]
+    posq = [Queue{Int}() for _ in variables]
+    negq = [Queue{Int}() for _ in variables]
 
     vertex_counter = 2 * sat3.variable_count
 
@@ -281,9 +281,9 @@ function construct(target::Type{DirHamCycleSolution}, solution::SAT3Solution, sa
         end
     end
 
-    ends = sizehint!(Vector{Tuple{UInt,UInt}}(), sat3.variable_count)
+    ends = sizehint!(Vector{Tuple{Int,Int}}(), sat3.variable_count)
 
-    repl = Dict{UInt,UInt}()
+    repl = Dict{Int,Int}()
 
     # we find the ends for variable subgraphs
     for i in variables

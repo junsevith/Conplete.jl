@@ -1,3 +1,4 @@
 /Manifest*.toml
 test/Project.toml
 docs/build/
+test/Manifest.toml

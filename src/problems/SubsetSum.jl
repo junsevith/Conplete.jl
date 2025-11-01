@@ -29,7 +29,7 @@ function transform(inst::SAT3, target::Type{SubsetSum})
 end
 
 function validate(sol::SubsetSumSolution, problem::SubsetSum)
-    return problem.sum == sum(problem.set[i] for i in sol.subset)
+    return problem.sum == sum(problem.elements[i] for i in sol.subset)
 end
 
 function extract(sol::SubsetSumSolution, sat::SAT3)

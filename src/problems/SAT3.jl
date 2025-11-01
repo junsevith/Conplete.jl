@@ -14,7 +14,7 @@ function SAT3(path::String)
   file = open(path, "r")
 
   m = Matrix{Int}
-  vars = UInt
+  vars = Int
   currow = 1
 
   for line in readlines(file)
@@ -22,8 +22,8 @@ function SAT3(path::String)
       #nothing
     elseif line[1] == 'p'
       args = split(strip(line))
-      vars = parse(UInt, args[3])
-      matlen = parse(UInt, args[4])
+      vars = parse(Int, args[3])
+      matlen = parse(Int, args[4])
       m = [0 for i in 1:matlen, j in 1:3]
     elseif line[1] == '%'
       break

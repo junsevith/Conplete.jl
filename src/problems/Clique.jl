@@ -21,7 +21,7 @@ function transform(input::SAT3, target::Type{Clique})
     # each vertex correspons to element of clause
     g = complete_graph(size(input.clauses, 1) * 3)
 
-    pos = [UInt[] for _ in 1:input.variable_count]
+    pos = [Int[] for _ in 1:input.variable_count]
     neg = deepcopy(pos)
 
     vertices = 0
@@ -54,7 +54,7 @@ end
 
 function extract(solution::CliqueSolution, parent::SAT3)
     valuation = falses(parent.variable_count)
-    done = Set{UInt}()
+    done = Set{Int}()
 
     for v in solution.clique
         (r, c) = divrem(v - 1, 3)
@@ -81,7 +81,7 @@ end
 
 function construct(target::Type{CliqueSolution}, sol::SAT3Solution, parent::SAT3)
 
-    clique = Set{UInt}()
+    clique = Set{Int}()
     sizehint!(clique, size(parent.clauses, 1))
 
     for clause in axes(parent.clauses, 1)

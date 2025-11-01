@@ -1,6 +1,6 @@
 using Bijections
 
-global problems = Bijection{Type{<:NPProblem},UInt}(
+global problems = Bijection{Type{<:NPProblem},Int}(
     CNFSAT => 1,
     SAT3 => 2,
     DirHamCycle => 3,
@@ -25,7 +25,8 @@ global solutions = Bijection{Type{<:NPProblem},Type{<:NPSolution}}(
     HamCycle => HamCycleSolution,
     TSP => TSPSolution,
     HittingSet => HittingSetSolution,
-    Partition => PartitionSolution
+    Partition => PartitionSolution,
+    BinPacking => BinPackingSolution
     )
 
 global problemGraph = let

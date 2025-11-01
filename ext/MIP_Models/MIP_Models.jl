@@ -13,5 +13,6 @@ include("SubsetSum.jl")
 include("CNFSAT.jl")
 include("HittingSet.jl")
 include("Partition.jl")
+include("BinPacking.jl")
 
 end

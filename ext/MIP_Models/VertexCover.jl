@@ -16,15 +16,7 @@ function Conplete.solve(solver, problem::VertexCover)
     optimize!(model)
 
     if is_solved_and_feasible(model)
-      set = Set()
-
-      for (i,val) in enumerate(value(v))
-        if val > 0.5
-          push!(set, i)
-        end
-      end
-
-      return VertexCoverSolution(set)
+      return VertexCoverSolution(Set(findall(x -> x > 0.5, value(v))))
     else
       return nothing
     end

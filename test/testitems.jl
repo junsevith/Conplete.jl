@@ -5,7 +5,7 @@ using Conplete
 using Graphs
 using TestItems
 
-Base.show(io::IO, x::T) where {T<:Union{UInt,UInt128,UInt64,UInt32,UInt16,UInt8}} = Base.print(io, x)
+Base.show(io::IO, x::T) where {T<:Union{Int,Int128,Int64,Int32,Int16,Int8}} = Base.print(io, x)
 
 solver = try
   # throw(ErrorException("d"))
@@ -19,15 +19,15 @@ catch
 end
 
 struct Pies <: NPProblem
-  dums::UInt64
+  dums::Int64
 end
 
 struct Ogon <: NPSolution
-  dums::UInt64
+  dums::Int64
 end
 
 struct Kot
-  smart::UInt64
+  smart::Int64
 end
 
 function Conplete.transform(inst::SAT3, target::Type{Pies})
@@ -124,9 +124,9 @@ end
 
   @test add_problem(Pies, Ogon) == nothing
 
-  @test_throws MethodError add_problem(Pies, UInt)
+  @test_throws MethodError add_problem(Pies, Int)
 
-  @test_throws MethodError add_problem(Kot, UInt)
+  @test_throws MethodError add_problem(Kot, Int)
 
   @test add_transformation(Pies, SAT3) == nothing
 

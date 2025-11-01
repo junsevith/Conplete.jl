@@ -1,11 +1,11 @@
 using Conplete
 
 struct Pies <: Problem
-    dums::UInt64
+    dums::Int64
 end
 
 struct Kot
-    smart::UInt64
+    smart::Int64
 end
 
 function Pies(inst::SAT3)

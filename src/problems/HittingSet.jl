@@ -7,7 +7,7 @@ function validate(sol::HittingSetSolution, inst::HittingSet)
 end
 
 function transform(parent::VertexCover, target::Type{HittingSet})
-    return HittingSet(BitSet(1:nv(parent.graph)), [Set{Int}([src(e), dst(e)]) for e in edges(parent.graph)], parent.size)
+    return HittingSet(nv(parent.graph), [Set{Int}([src(e), dst(e)]) for e in edges(parent.graph)], parent.size)
 end
 
 function extract(sol::HittingSetSolution, parent::VertexCover)

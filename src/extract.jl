@@ -9,8 +9,8 @@ Depth specifies how deep to extract when problem is a result of multiple transfo
 extract(solution::NPSolution, chain::Vector{NPProblem}) = foldl(extract, Iterators.reverse(chain); init=solution)
 
 
-# unpack(solution::DirHamCycleSolution, problem::DirHamCycle, depth::UInt) = unpack(solution, problem.record, depth)
-# unpack(solution::VertexCoverSolution, problem::VertexCover, depth::UInt) = unpack(solution, problem.record, depth)
+# unpack(solution::DirHamCycleSolution, problem::DirHamCycle, depth::Int) = unpack(solution, problem.record, depth)
+# unpack(solution::VertexCoverSolution, problem::VertexCover, depth::Int) = unpack(solution, problem.record, depth)
 
 
 # """
@@ -19,7 +19,7 @@ extract(solution::NPSolution, chain::Vector{NPProblem}) = foldl(extract, Iterato
 
 # Depth specifies how deep to extract when `problem` is a result of multiple transformations.
 # """
-# extract(solution::NPSolution, problem::NPProblem, depth::UInt=typemax(UInt)) = extract(solution, getfield(problem, :record), depth)
+# extract(solution::NPSolution, problem::NPProblem, depth::Int=typemax(Int)) = extract(solution, getfield(problem, :record), depth)
 
 
 

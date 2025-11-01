@@ -19,8 +19,7 @@ function Conplete.solve(solver, problem::Clique)
     optimize!(model)
 
     if is_solved_and_feasible(model)
-        set = Set([i for (i, val) in enumerate(value(v)) if val > 0.5])
-        return CliqueSolution(set)
+        return CliqueSolution(Set(findall(x -> x > 0.5, value(v))))
     else
         return nothing
     end

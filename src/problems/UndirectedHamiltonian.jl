@@ -2,7 +2,7 @@ validate(sol::HamCycleSolution, problem::HamCycle) = validate_ham_cycle(sol.cycl
 
 function transform(parent::DirHamCycle, target::Type{HamCycle})
     n = nv(parent.graph)
-    g = SimpleGraph{UInt}(n * 3)
+    g = SimpleGraph{Int}(n * 3)
 
     # 1 - n   : input vertices
     # n - 2n  : middle vertices
@@ -29,7 +29,7 @@ function extract(sol::HamCycleSolution, parent::DirHamCycle)
         DirHamCycleSolution([sol.cycle[x+2*n] for x in vertices(parent.graph)])
     else
         # Cycle goes in the oposite direction
-        cycle = zeros(UInt, n)
+        cycle = zeros(Int, n)
 
         for x in vertices(parent.graph)
             out = sol.cycle[x] - 2 * n
