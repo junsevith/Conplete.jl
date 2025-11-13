@@ -1,0 +1,17 @@
+{
+  "mentor": "Opiekun pracy",
+  "mentor_plural": "Promotorzy",
+  "jury": "Jury",
+  "author": "Autor",
+  "author_plural": "Autorzy",
+  "academic_year": "Rok akademicki",
+
+  "figures_table": "Spis rysunków",
+  "tables_table": "Spis tabel",
+  "algo_table": "Spis algorytmów",
+
+  "chapter": "Rozdział",
+  "abstract":"Streszczenie",
+  "keywords":"Słowa kluczowe",
+  "course":"Kierunek"
+}
