@@ -29,6 +29,11 @@
 #let pro = frame(kind: "problem", "Problem", red)
 // This is necessary. Don't forget this!
 #show: frame-style(styles.hint)
+
+#let problem-stype(title,tags,body,supplement,number,arg) = {
+  
+}
+
 #show: frame-style(kind: "problem", styles.hint)
 
 
@@ -91,6 +96,9 @@ Celem pracy jest stworzenie biblioteki redukcji problemów klasy NP w języku pr
 
 
 = Podstawy teoretyczne <theory>
+
+W tym rozdziale przedstawimy podstawy teoretyczne niezbędne aby zrozumieć istotę przedstawianych w tej pracy zagadnień. Rozpoczniemy od pojęcia np-zupełności które to jest punktem wyjścia dla rozważań zawartych w tej pracy
+
 == Klasa złożoności NP
 Na początku określmy kilka pojęć z których będziemy korzystać:
 
@@ -100,13 +108,13 @@ Na początku określmy kilka pojęć z których będziemy korzystać:
 - Algorytm zwracający rozwiązanie instancji problemu $cal(A)_X (I_X) in {S_X union emptyset } $
 - Algorytm weryfikujący dane rozwiązanie oznaczamy $cal(V)_X (I_X,S_X) in {0, 1}$
 
-Pojęcie problemu decyzyjnego odpowiada w naszym przypadku pojęciu słowa $I_X$ które należy do języka $X$ jeśli istnieje rozwiązanie $S_X$. Pojęcia tłumaczą się bezpośrednio z tych w @cormen @sudkamp @tardos, będziemy jednak używać w tym przypadku nazewnictwa bardziej programistycznego. Mając zdefiniowane te pojęcia możemy zacząć definiować omawiane zagadnienia.
+Pojęcie problemu decyzyjnego odpowiada w naszym przypadku pojęciu słowa $I_X$ które należy do języka $X$ jeśli istnieje rozwiązanie $S_X$. Pojęcia tłumaczą się bezpośrednio z tych w @rivest_wprowadzenie_2024 @sudkamp_languages_2006 @kleinberg_algorithm_2006, będziemy jednak używać w tym przypadku nazewnictwa bardziej programistycznego. Mając zdefiniowane te pojęcia możemy zacząć definiować omawiane zagadnienia.
 
 #def[Klasa złożoności $cal(P)$][
   Klasa $cal(P)$ to klasa wszystkich problemów dla których istnieje algorytm $cal(A)'$ rozwiązujący instancję problemu, działający w czasie wielomianowym $cal(A)' in O(n^k)$ 
 ]
 
-// #def[Klasa złożoności $np$][Klasa $np$ to klasa wszystkich problemów $X$ dla których istnieje algorytm $cal(V)_X$ weryfikujący rozwiązanie instancji problemu , który działa w czasie wielomianowym. tzn. $cal(V)_X in O(n^k), k in NN$ @tardos
+// #def[Klasa złożoności $np$][Klasa $np$ to klasa wszystkich problemów $X$ dla których istnieje algorytm $cal(V)_X$ weryfikujący rozwiązanie instancji problemu , który działa w czasie wielomianowym. tzn. $cal(V)_X in O(n^k), k in NN$ @kleinberg_algorithm_2006
 // ]
 
 #def[Klasa złożoności $np$][Klasa $np$ to klasa wszystkich problemów $X$ dla których istnieje działający w czasie wielomianowym algorytm certyfikujący $cal(C)_X in O(n^k)$, gdzie $C_X$ jest certyfikatem rozwiązywalności problemu, taki że: \
@@ -117,7 +125,7 @@ Pojęcie problemu decyzyjnego odpowiada w naszym przypadku pojęciu słowa $I_X$
 
 
 
-Istnieje kilka równoznacznych definicji tego pojęcia, nazwa $np$ oznacza _Nondeterministic Polynomial_ i wywodzi się z definicji opartej na niedeterministycznych maszynach Turinga, więcej informacji na ten temat prezentuje książka @sudkamp. Z reguły certyfikatem będzie rozwiązanie problemu $S_X$, a algorytmem $cal(C)_X$ algorytm weryfikujący rozwiązanie $cal(V)_X$, spełniają one powyższe wymagania, nie są jednak jedynymi.
+Istnieje kilka równoznacznych definicji tego pojęcia, nazwa $np$ oznacza _Nondeterministic Polynomial_ i wywodzi się z definicji opartej na niedeterministycznych maszynach Turinga, więcej informacji na ten temat prezentuje książka @sudkamp_languages_2006. Z reguły certyfikatem będzie rozwiązanie problemu $S_X$, a algorytmem $cal(C)_X$ algorytm weryfikujący rozwiązanie $cal(V)_X$, spełniają one powyższe wymagania, nie są jednak jedynymi.
 
 Można od razu zauważyć że klasa #np zawiera problemy rozwiązywalne w czasie wielomianowym, możemy bowiem ustalić $cal(C)_X (I_X, c) = cal(A)_X (I_X)$ co spełnia wszystkie wymagania. Zatem widzimy że $cal(P) subset.eq np$, równość tych klas jednak do tej pory pozostaje nierozstrzygnięta. Wiemy jednak że do klasy $np$ należą również problemy dla których nie znamy wielomianowego algorytmu, to znaczy najlepszy algorytm jaki znamy działa w czasie eksponencjalnym.
 
@@ -125,7 +133,7 @@ Można od razu zauważyć że klasa #np zawiera problemy rozwiązywalne w czasie
 
 Jeśli rozmawiamy o trudności problemów w danej klasie, warto rozpatrzyć je pod względem jakiegoś porządku, oznaczając czy dane problemy są trudniejsze od innych. Sposób w jaki możemy to określić to transformacje instancji jednego problemu do instancji drugiego to znaczy *redukcję*. Oznaczmy algorytm transformacji instancji problemu $X -> Y$ jako $cal(T)_(X Y)(I_X) = I_Y$
 
-#def[Redukcja wielomianowa][Jeśli dla dowolniej instacji $I_X$ problemu $X$ istnieje algorytm wielomianowy $cal(T)_(X Y)$ taki że $cal(T)_(X Y)(I_X) = I_Y$ ma rozwiązanie wtedy i tylko wtedy gdy $I_X$  ma rozwiązanie, wtedy problem $X$ jest wielomianowo redukowalny do $Y$, co oznaczamy $X <=_P Y $ @sudkamp
+#def[Redukcja wielomianowa][Jeśli dla dowolniej instacji $I_X$ problemu $X$ istnieje algorytm wielomianowy $cal(T)_(X Y)$ taki że $cal(T)_(X Y)(I_X) = I_Y$ ma rozwiązanie wtedy i tylko wtedy gdy $I_X$  ma rozwiązanie, wtedy problem $X$ jest wielomianowo redukowalny do $Y$, co oznaczamy $X <=_P Y $ @sudkamp_languages_2006
 // #align(center)[
 //   $X <=_P Y$ \
 //   $equiv$ \
@@ -135,7 +143,7 @@ Jeśli rozmawiamy o trudności problemów w danej klasie, warto rozpatrzyć je p
 
 W naszym przypadku redukcja musi być wielomianowa ponieważ zachowuje ona wtedy przynależność do klasy, o czym mówi twierdzenie:
 
-#twi[Hierarchia redukcji][Jeśli $X$ jest redukowalny do $Y$ w czasie wielomianowym: $X <=_P Y$, oraz $Y in cal(P)$ wtedy $X in cal(P)$, równoważnie gdy $X in.not cal(P)$ wtedy $Y in.not cal(P)$ @sudkamp]
+#twi[Hierarchia redukcji][Jeśli $X$ jest redukowalny do $Y$ w czasie wielomianowym: $X <=_P Y$, oraz $Y in cal(P)$ wtedy $X in cal(P)$, równoważnie gdy $X in.not cal(P)$ wtedy $Y in.not cal(P)$ @sudkamp_languages_2006]
 
 Co łatwo dowieść ponieważ gdy $cal(A)'_Y in O(n^k)$ oraz $cal(T)_(X Y) in O(n^k)$ wtedy $cal(A)'_Y compose cal(T)_(X Y) in O(n^k)$ rozwiązuje problem $X$ w czasie wielomianowym (interesuje nas w tym przypadku to czy rozwiązanie istnieje a nie jego wartość).
 
@@ -173,59 +181,171 @@ caption:[Zdefiniowane algorytmy]
 
 == Klasyczne problemy NP-zupełne
 
-Mając już zdefiniowane wszystkie pojęcia, możemy podać kilka przykładów problemów NP-zupełnych. Zaczniemy od problemu *spełnialności formuł logicznych* w skrócie #rsat, jest to najbardziej podstawowy problem NP-zupełny a zarazem pierwszy dla którego udowodniono NP-zupełność o czym mówi *Twierdzenie Cook'a* @sudkamp. 
+Mając już zdefiniowane wszystkie pojęcia, możemy podać kilka przykładów problemów NP-zupełnych. Zaczniemy od problemu *spełnialności formuł logicznych* w skrócie #rsat, jest to najbardziej podstawowy problem NP-zupełny a zarazem pierwszy dla którego udowodniono NP-zupełność o czym mówi *Twierdzenie Cook'a* @sudkamp_languages_2006. 
 
-#pro[#rsat ][
-  
-  *Dane* : #box(baseline: 70%)[$V$ zbiór zmiennych boolowskich,\ $phi$ jest dobrze zbudowaną formułą logiczną nad $V$,] 
+#pro[#rsat - Spełnialność formuł logicznych][
+  #pad(left:1em)[
+  *Dane wejściowe* : #box(baseline: 100% - 7pt)[
+    $V$ - zbiór zmiennych logicznych, $|V| = n$\
+    $phi$ - formuła logiczna złożona z:
+    #enum(indent: 1em,
+    [$n$ zmiennych logicznych $x_1,x_2,dots,x_n in V$ ],
+    [$m$ spójników logicznych np. $and, or, not, ->,<->$],
+    [nawiasów (nie występują nadmiarowe nawiasy)]
+    )
+  ] 
 
-  *Pytanie* : Czy istnieje  wartościowanie $pi : V -> {tru, fal}$ takie że $v a l(pi, phi) = tru$ ?
-  
-]
+  *Pytanie* : Czy istnieje  wartościowanie $pi : V -> {tru, fal}$ dla którego formuła jest spełniona?
+]]
 
 Pominiemy formalną definicję dobrze zbudowanej formuły, ponieważ to jak wygląda formuła logiczna jest oczywiste, warto jedynie zaznaczyć że formuła $phi$ musi być skończona. Następujące problemy są podproblemami problemu #rsat.
 
-#def[#sat ][Weźmy $V$ zbiór zmiennych boolowskich, $u$ jest formułą w postaci koniunkcyjnej normalnej nad $V$ postaci $u = w_1 or dots or w_n $ gdzie $w$ to klauzula będąca alternatywą zmienncyh lub ich negacji, decydujemy czy istnieje  wartościowanie $pi : V -> {tru, fal}$ takie że $v a l(pi, phi) = tru$ @tardos] <cnfsat>
+#pro[#sat - Spełnialność formuł w postaci koniunkcyjnej normalnej][
+  #pad(left:1em)[
+  *Dane wejściowe* : #box(baseline: 100% - 7pt)[
+    $V$ - zbiór zmiennych logicznych, $|V| = n$\
+    $phi$ - formuła logiczna zapisana jako koniunkcja $m$ *klauzul* gdzie:
+    #list(indent: 1em,
+    [*Klauzula* to alternatywa literałów],
+    [*Literał* to wystąpienie zmiennej $x in V$, lub jej negacji $not x$]
+    )
+  ] 
 
-Znanym jest fakt że dowolna formuła może zostać zapisana w postaci CNF, przy czym są to również transformacje wielomianowe. Ten typ redukcji realizuje na przykład transformacja Tseytin @tsi. Z tego powodu, oraz z racji łatwości w zapisie to #sat jest używany jako bazowy format problemu spełnialności i to on jest bazowym problemem w tej pracy.
+  *Pytanie* : Czy istnieje  wartościowanie $pi : V -> {tru, fal}$ dla którego formuła jest spełniona?
+]] <cnfsat>
 
-#def[#sat3 ][Podproblem problemu #sat gdzie każda klauzula w formule zawiera dokładnie 3 literały $forall w in u : |w| = 3$]<sat3>
+Znanym jest fakt że dowolna formuła może zostać zapisana w postaci CNF, przy czym są to również transformacje wielomianowe. Ten typ redukcji realizuje na przykład transformacja Tseytin @tseitin_complexity_1983. Z tego powodu, oraz z racji łatwości w zapisie to #sat jest używany jako bazowy format problemu spełnialności i to on jest bazowym problemem w tej pracy.
+
+#pro[#sat3 - Spełnialność formuł 3-CNF][
+  #pad(left:1em)[
+  *Dane wejściowe* : #box(baseline: 100% - 7pt)[
+    $V$ - zbiór zmiennych logicznych, $|V| = n$\
+    $phi$ - formuła logiczna w postaci koniunkcyjnej normalnej,\ gdzie każda klauzula zawiera dokładnie 3 różne literały
+  ] 
+
+  *Pytanie* : Czy istnieje  wartościowanie $pi : V -> {tru, fal}$ dla którego formuła jest spełniona?
+]] <sat3>
 
 Jest to ostatni problem z rodziny problemów spełnialności formuł i stanowi on często punkt wyjścia dla redukcji do dalszych problemów.
 
-#pagebreak()
 
 Pozostałe problemy to popularne problemy pochodne, możemy podzielić je na 3 grupy gdzie pierwsza grupa to problemy pokrycia:
 
-#def[#vc ][Weźmy graf nieskierowany $G=(V,E)$ oraz stałą $n in NN$, decydujemy czy istnieje podzbiór $C subset V$ taki że $|C| <= n and forall (u,v) in E : u in C or v in C$]<vc>
+#pro[#vc - Problem pokrycia wierzchołkowego][
+  #pad(left:1em)[
+  *Dane wejściowe* : #box(baseline: 100% - 7pt)[
+    $G =(V,E)$ - Graf nieskierowany \
+    $k$ - liczba naturalna
+  ] 
 
-#def[#cli ][Weźmy graf nieskierowany $G=(V,E)$ oraz stałą $n in NN$, decydujemy czy istnieje podzbiór $C subset V$ taki że $|C| <= n and forall c,d in C : (c,d) in E$]<cli>
+  *Pytanie* : Czy istnieje podzbiór wierzchołków $V' subset.eq V$ rozmiaru co najwyżej $k$, taki że:\
+  $
+  forall (v,u) in E : u in V' or v in V'
+  $
+]] <vc>
 
-Problem ten innymi słowem mówi: czy w grafie $G$ istnieje klika o wielkości $n$.
+#pro[#cli - Problem kliki][
+  #pad(left:1em)[
+  *Dane wejściowe* : #box(baseline: 100% - 7pt)[
+    $G =(V,E)$ - Graf nieskierowany \
+    $k$ - liczba naturalna
+  ] 
 
-#def[#hit ][Weźmy zbiór S, skończoną rodzinę podzbiorów $C subset.eq P(S)$ oraz stałą $n in NN$, decydujemy czy istnieje podzbiór $H subset.eq S$ taki że $forall c in C : c inter H != emptyset$]<hit>
+  *Pytanie* : Czy istnieje podzbiór wierzchołków $V' subset.eq V$ rozmiaru co najmniej $k$, w którym każda para wierzchołków jest połączona krawędzią należącą do $E$?
+]] <cli>
+
+#pro[#hit - Problem zbioru przecianjącego][
+  #pad(left:1em)[
+  *Dane wejściowe* : #box(baseline: 100% - 7pt)[
+    $S$ - Skończony zbiór \
+    $cal(C)$ - skończona rodzina podzbiorów $S$ \
+    $k$ - liczba naturalna
+  ] 
+
+    *Pytanie* : Czy istnieje podzbiór $S' subset.eq S$ rozmiaru co najwyżej $k$, taki że dla dowolnego podzbioru $C in cal(C)$ przekrój $S' inter C$ jest niepusty?
+]] <hit>
 
 Następna grupa to problemy dotyczące cykli w grafie:
 
-#def[#uham ][Weźmy graf $G=(V,E)$, decydujemy czy w grafie istnieje cykl odwiedzający wszystkie wierzchołki dokładnie raz]<ham>
+#pro[#uham - Problem cyklu Hamiltona][
+  #pad(left:1em)[
+  *Dane wejściowe* : #box(baseline: 100% - 7pt)[
+    $G =(V,E)$ - Graf nieskierowany \
+  ] 
 
-Będziemy osobno rozpatrywali problem #uham dla grafów skierowanych i nieskierowanych formulacja problemu jest jednak taka sama.
+  *Pytanie* : Czy w grafie istnieje cykl odwiedzający każdy wierzchołek dokładnie raz?
 
-#def[#tsp ][Weźmy pełny graf  nieskierowany $G=(V,E)$, funkcję wag $w : E -> RR$, oraz stałą $n in NN$, decydujemy czy w grafie istnieje cykl odwiedzający wszystkie wierzchołki dokładnie raz taki że suma wag wszystkich krawędzi w cyklu jest mniejsza lub równa $n$ ]<tsp>
+]] <uham>
+
+#pro[#ham - \ #h(5.1em) Problem cyklu Hamiltona w grafie skierowanym][
+  #pad(left:1em)[
+  *Dane wejściowe* : #box(baseline: 100% - 7pt)[
+    $G =(V,E)$ - Graf skierowany \
+  ] 
+
+  *Pytanie* : Czy w grafie istnieje skierowany cykl odwiedzający każdy wierzchołek dokładnie raz?
+
+]] <ham>
+
+#pro[#tsp - Problem komiwojażera][
+  #pad(left:1em)[
+  *Dane wejściowe* : #box(baseline: 100% - 7pt)[
+    $G =(V,E)$ - nieskierowany graf pełny \
+    $c : V times V -> NN$  - funkcja odległości\
+    $k$ - liczba naturalna
+  ] 
+
+  *Pytanie* : Czy w grafie istnieje cykl Hamiltona o długości co najwyżej $k$?
+
+]] <tsp>
+
 
 Ostatnia grupa to problemy sum podzbiorów:
 
-#def[#subs][Weźmy zbiór liczb całkowitych $S$ oraz stałą $n in ZZ$, decydujemy czy istnieje podzbiór $C subset.eq S$ taki że suma jego elementów wynosi $n$]<subs>
+#pro[#subs - Problem sumy podzbioru][
+  #pad(left:1em)[
+  *Dane wejściowe* : #box(baseline: 100% - 7pt)[
+    $S$ - skończony zbiór liczb naturalnych\
+    $t$ - liczba naturalna
+  ] 
 
-#def[#part][Weźmy zbiór liczb naturalnych $S$, decydujemy czy istnieje partycja zbioru na dwa podzbiory o równej sumie elementów] <part>
+  *Pytanie* : Czy istnieje podzbiór $S' subset.eq S$ taki, że suma jego elementów jest równa $t$?
 
-#def[#bin][Weźmy zbiór liczb naturalnych $S$ oraz stałe $n,k in NN$, decydujemy czy istnieje $H$ partycja $ union.big H = S$  taka że $|H| = n and forall h in H : |h| <= k $]<bin>
+]]<subs>
 
-#def[#knap][Weźmy zbiór $S$, funkcje wagi $w : S -> NN$ oraz wartości $v : S -> NN$ oraz stałe $n,k in NN$, decydujemy czy istnieje podzbiór $B subset.eq S$ taki że 
-#align(center)[
-  $sum_(b in B) w(b) <=n quad and quad sum_(b in B) v(b) >= k$
-]
-]<knap>
+#pro[#part - Problem podziału][
+  #pad(left:1em)[
+  *Dane wejściowe* : #box(baseline: 100% - 7pt)[
+    $S$ - skończony zbiór liczb naturalnych
+  ] 
+
+  *Pytanie* : Czy istnieje podział zbioru $S$ na dwa rozłączne podzbiory o równej sumie elementów?
+
+]]<part>
+
+#pro[#bin - Problem pakowania][
+  #pad(left:1em)[
+  *Dane wejściowe* : #box(baseline: 100% - 7pt)[
+    $S$ - skończony zbiór liczb naturalnych\
+    $k, m$ - liczby naturalne
+  ] 
+
+  *Pytanie* : Czy istnieje podział zbioru $S$ na $k$ rozłącznych podzbiorów $A_1,A_2,dots,A_k$ takich że suma elementów każdego z nich jest równa co najwyżej $m$?
+
+]]<bin>
+
+#pro[#knap - Problem plecakowy][
+  #pad(left:1em)[
+  *Dane wejściowe* : #box(baseline: 100% - 7pt)[
+    $S$ - skończony zbiór\
+    $s : S -> NN$  - funkcja wagi\
+    $v : S -> NN$  - funkcja wartości\
+    $b, m$ - liczby naturalne
+  ] 
+
+  *Pytanie* : Czy istnieje podzbiór $S' subset.eq S$ taki że: $s(S') <=b$ oraz $ v(S') >= m$?
+
+]]<knap>
 
 = Analiza i opis wybranych redukcji
 
@@ -1143,7 +1263,7 @@ Otrzymaliśmy więc prawidłowy graf emulujący za pomocą `HAMILTIONIAN-CIRCUIT
 
 === Optymalizacja
 
-W trakcie przygotowania do tego rozdziału natrafiłem na 2 metody redukcji #sat3 do #ham metodę _Sudkampa_ @sudkamp, oraz metodę _Kleinberg-Tardos_ @tardos, postanowiłem więc zbadać metody i dowiedzieć się która metoda jest najlepsza. Moim celem było możliwe zmniejszenie liczby wykorzystanych wierzchołków i krawędzi w redukcji. Podczas gdy najbardziej popularna jest metoda K-T, metoda Sudkampa jest bardziej przejrzysta, pomimo że jest zdecydowanie mniej optymalna. Sudkamp w książce @sudkamp proponuje sprytny podgraf klauzuli który dobrze emuluje tą logikę, podczas gdy K-T w książce @tardos jako podgraf klauzuli używają jednego wierzchołka, uproszczenie które wymaga jednak znaczących zmian w podgrafie zmiennej. Jako podgraf zmiennej Sudkamp używa zaś bardziej skomplikowanego grafu który ciężej będzie dynamicznie konstruować w algorytmie.
+W trakcie przygotowania do tego rozdziału natrafiłem na 2 metody redukcji #sat3 do #ham metodę _Sudkampa_ @sudkamp_languages_2006, oraz metodę _Kleinberg-Tardos_ @kleinberg_algorithm_2006, postanowiłem więc zbadać metody i dowiedzieć się która metoda jest najlepsza. Moim celem było możliwe zmniejszenie liczby wykorzystanych wierzchołków i krawędzi w redukcji. Podczas gdy najbardziej popularna jest metoda K-T, metoda Sudkampa jest bardziej przejrzysta, pomimo że jest zdecydowanie mniej optymalna. Sudkamp w książce @sudkamp_languages_2006 proponuje sprytny podgraf klauzuli który dobrze emuluje tą logikę, podczas gdy K-T w książce @kleinberg_algorithm_2006 jako podgraf klauzuli używają jednego wierzchołka, uproszczenie które wymaga jednak znaczących zmian w podgrafie zmiennej. Jako podgraf zmiennej Sudkamp używa zaś bardziej skomplikowanego grafu który ciężej będzie dynamicznie konstruować w algorytmie.
 
 Wzory na ilość wierzchołków i krawędzi w grafie $G=(V,E)$ wyglądają następująco dla $m$-ilość klauzul, $n$-ilość zmiennych, a $U(i)$ to maksimum z liczby wystąpień $x_i$ i wystąpień $not x_i$
 #v(5pt)
@@ -1456,7 +1576,7 @@ Ważną funkcjonalnością systemu jest rozszeczenie grafu transformacji przez u
 
 = Podsumowanie i wnioski
 
-= Appendix
+= Dodatek
 
 // Daje nam to więc dwie opcje
 
