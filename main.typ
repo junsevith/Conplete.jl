@@ -37,7 +37,7 @@
 #show: frame-style(kind: "problem", styles.hint)
 
 
-#let rsat = smallcaps[Sat]
+#let rsat = link(<sat>, smallcaps[Sat]) 
 #let sat = link(<cnfsat>, smallcaps[CNF-Sat]) 
 #let sat3 = link(<sat3>, smallcaps[3-Sat]) 
 #let ham = link(<ham>,smallcaps[Directed-Hamiltonian-Cycle])
@@ -50,11 +50,17 @@
 #let tsp = link(<tsp>,smallcaps[Travelling-Salesman])
 #let knap = link(<knap>,smallcaps[Knapsack])
 #let hit = link(<hit>,smallcaps[Hitting-Set])
+#let mip = link(<mip>,smallcaps[Integer-Programming])
+#let ind = link(<ind>,smallcaps[Independent-Set])
 
 #let np = $cal(N P)$
+#let p = $cal(P)$
 
 #let tru = $bb(1)$
 #let fal = $bb(0)$
+
+#let tak = smallcaps[tak]
+#let nie = smallcaps[nie]
 
 #let num = `num`
 
@@ -97,87 +103,152 @@ Celem pracy jest stworzenie biblioteki redukcji problemów klasy NP w języku pr
 
 = Podstawy teoretyczne <theory>
 
-W tym rozdziale przedstawimy podstawy teoretyczne niezbędne aby zrozumieć istotę przedstawianych w tej pracy zagadnień. Rozpoczniemy od pojęcia np-zupełności które to jest punktem wyjścia dla rozważań zawartych w tej pracy
+W tym rozdziale przedstawimy podstawy teoretyczne niezbędne aby zrozumieć istotę przedstawianych zagadnień. Rozpoczniemy definiując wszystkie niezbędne pojęcia potrzebne do zdefiniowania #np -zupełności, która to będzie punktem wyjścia dla zagadnień opisanych w tej pracy.
 
 == Klasa złożoności NP
-Na początku określmy kilka pojęć z których będziemy korzystać:
 
-- Instancję problemu decyzyjnego $X$ oznaczamy $I_X$
-- Rozwiązanie instancji problemu $X$ oznaczamy $S_X$
-- Algorytm rozwiązujący instancję oznaczamy $cal(A)'_X (I_X) in {0,1} $
-- Algorytm zwracający rozwiązanie instancji problemu $cal(A)_X (I_X) in {S_X union emptyset } $
-- Algorytm weryfikujący dane rozwiązanie oznaczamy $cal(V)_X (I_X,S_X) in {0, 1}$
+Definicje w tym podrozdziale zostały zaczerpnięte z książki @ausiello_complexity_1999[Rozdz. 1], będziemy więc operować pojęciami problemów decyzyjnych i algorytmów, definicje tłumaczą się jednak bezpośrednio z bardziej powszechnego podejścia opartego na językach formalnych. Wybrane podejście omija nieistotne dla naszych rozważań szczegóły i jest bliższe programistycznemu podejściu, jakie będzie towarzyszyło nam podczas konstrukcji biblioteki.
 
-Pojęcie problemu decyzyjnego odpowiada w naszym przypadku pojęciu słowa $I_X$ które należy do języka $X$ jeśli istnieje rozwiązanie $S_X$. Pojęcia tłumaczą się bezpośrednio z tych w @rivest_wprowadzenie_2024 @sudkamp_languages_2006 @kleinberg_algorithm_2006, będziemy jednak używać w tym przypadku nazewnictwa bardziej programistycznego. Mając zdefiniowane te pojęcia możemy zacząć definiować omawiane zagadnienia.
+Podstawowym pojęciem dla tego tematu jest pojęcie *problemu*, w ogólności problemem nazywamy relację $P subset.eq I times S$ gdzie $I$ jest zbiorem wszystkich poprawnych egzemplarzy problemu (inaczej instancji lub danych wejściowych), a $S$ jest zbiorem wszystkich poprawnych rozwiązań. Jako alternatywę możemy rozważyć predykat $p(x,y)$ który jest prawdziwy wtedy i tylko wtedy gdy $(x,y) in P$. Dla dowolnego egzemplarza problemu $x in P$ będziemy oznaczać jako $x$ zarówno obiekt jak i jego naturalny zapis np. nad alfabetem ${0,1}$.
 
-#def[Klasa złożoności $cal(P)$][
-  Klasa $cal(P)$ to klasa wszystkich problemów dla których istnieje algorytm $cal(A)'$ rozwiązujący instancję problemu, działający w czasie wielomianowym $cal(A)' in O(n^k)$ 
+W podejściu opartym na językach formalnych, stwierdzenie te jest równoważne przynależności do języka $L_P$ tzn. $x in L_P equiv x in Y_P$ warto jednak zaznaczyć że wtedy bierzemy pod uwagę jedynie wszystkie poprawne zapisy tego problemu (zbiór wszystkich poprawnych egzemplarzy jest uniwersum).
+
+Problem $P$ nazywamy *problemem decyzyjnym* jeśli zbiór wszystkich egzemplarzy problemu $I_P$ dzieli się na zbiór $Y_P$ *egzemplarzy pozytywnych* oraz zbiór $N_P$ *egzemplarzy negatywnych*, oraz pytaniem problemu jest: czy dla dowolnego egzemplarza $x in I_P$, $x$ jest egzemplarzem pozytywnym  $x in Y_P$? Pojęcie to jest szczególnie istotne ponieważ pojęcia klas problemów które przedstawimy dotyczą właśnie problemów decyzyjnych, dlatego będziemy w tej pracy operować wyłącznie na nich.
+
+Następnym krokiem jest zdefiniowanie rozwiązywania problemu, zrobimy to za pomocą *algorytmu* który może zwrócić wartość #tak lub #nie, algorytm taki może być wykonywany np. na maszynie Turinga lub dowolnej innej maszynie liczącej.
+
+#def[Algorytm rozwiązujący][
+  Problem decyzyjny $P$ jest rozwiązywany przez algorytm $cal(A)$, gdy algorytm zatrzymuje się dla dowolnego egzemplarza $x in I_P$ , oraz zwraca #tak wtedy i tylko wtedy gdy $x in Y_P$. Dodatkowo mówimy że $P$ jest rozwiązywalny w czasie $t(n)$ jeśli złożoność czasowa $A$ wynosi $t(n)$
 ]
 
-// #def[Klasa złożoności $np$][Klasa $np$ to klasa wszystkich problemów $X$ dla których istnieje algorytm $cal(V)_X$ weryfikujący rozwiązanie instancji problemu , który działa w czasie wielomianowym. tzn. $cal(V)_X in O(n^k), k in NN$ @kleinberg_algorithm_2006
-// ]
+Ponieważ jednak klasa #np opiera się na pojęciu *niedeterminizmu* musimy zdefiniować również algorytm niedeterministyczny. Algorytm taki to różni się od zwykłego tym że potrafi wykonywać operację *guess* $y in {0,1}$. Oznacza to że $y$ może przyjąć wartość 0 lub 1, algorytm taki w gruncie rzeczy potrafi "odgadnąć" jakąś wymaganą wartość. Konstrukcja ta jest bardzo podobna do niedeterministycznej maszyny Turinga. Podczas gdy deterministyczne obliczenia mają przebieg liniowy, obliczenia niedeterministyczne mają strukturę drzewa.
 
-#def[Klasa złożoności $np$][Klasa $np$ to klasa wszystkich problemów $X$ dla których istnieje działający w czasie wielomianowym algorytm certyfikujący $cal(C)_X in O(n^k)$, gdzie $C_X$ jest certyfikatem rozwiązywalności problemu, taki że: \
-#align(center)[
-  $forall I_X : cal(A)'_X (I_X) = 1 <=> exists C_X  |C_X| = O(|I_X|^c) : cal(C)_X (I_X,C_X) = 1$
-]
+#def[Rozwiązanie niedeterministyczne][
+  Problem decyzyjny $P$ jest rozwiązywany przez niedeterministyczny algorytm $cal(A)$, gdy dla dowolnego egzemplarza $x in I_p$, $cal(A)$ zatrzymuje się dla dowolnego ciągu odgadnięć oraz  $x in Y_P$ wtedy i tylko wtedy gdy istnieje co najmniej jeden ciąg odgadnięć dla którego algorytm zwróci #tak
 ]
 
+Istnienie takiego algorytmu jest równoważne stwierdzeniu że istnieje algorytm weryfikujący problem $P$. Algorytm taki może zweryfikować czy istnieje rozwiązanie egzemplarza problemu jeśli otrzyma jakieś "świadectwo" istnienia rozwiązania.  Połączenie pomiędzy tymi dwoma sposobami możemy zobaczyć na podstawie specyfiki algorytmów niedeterministycznych. Bez straty ogólności możemy założyć że algorytm deterministyczny zgaduje na początku działania jakiś ciąg $C subset {0,1}^*$, a następnie przeprowadza na nim jakieś operacje. Przekłada się to bezpośrednio na wspomniany weryfikator, zamiast jednak zgadywać wartość świadectwa dostaje on je z góry. Definicja oparta na weryfikatorach prowadzi do odrębnej drogi definiowania klasy #np, którą możemy zobaczyć w @rivest_wprowadzenie_2024[Rozdz. 34].
 
+#def[Złożoność algorytmu niedeterministycznego][
+  Niedeterministyczny algorytm $cal(A)$ rozwiązuje problem decyzyjny $P$ w złożoności czasowej $t(n)$, gdy dla dowolnego egzemplarza $x in I_p$, $cal(A)$ zatrzymuje się dla dowolnego ciągu odgadnięć oraz  $x in Y_P$ wtedy i tylko wtedy gdy istnieje co najmniej jeden ciąg odgadnięć dla którego algorytm zwróci #tak w czasie co najwyżej $t(n)$
+]
 
-Istnieje kilka równoznacznych definicji tego pojęcia, nazwa $np$ oznacza _Nondeterministic Polynomial_ i wywodzi się z definicji opartej na niedeterministycznych maszynach Turinga, więcej informacji na ten temat prezentuje książka @sudkamp_languages_2006. Z reguły certyfikatem będzie rozwiązanie problemu $S_X$, a algorytmem $cal(C)_X$ algorytm weryfikujący rozwiązanie $cal(V)_X$, spełniają one powyższe wymagania, nie są jednak jedynymi.
+Definicja ta z kolei jest równoważna stwierdzeniu że istnieje, weryfikator działający w czasie $t(n)$. Mając te definicje możemy w końcu określić interesujące nas klasy problemów.
 
-Można od razu zauważyć że klasa #np zawiera problemy rozwiązywalne w czasie wielomianowym, możemy bowiem ustalić $cal(C)_X (I_X, c) = cal(A)_X (I_X)$ co spełnia wszystkie wymagania. Zatem widzimy że $cal(P) subset.eq np$, równość tych klas jednak do tej pory pozostaje nierozstrzygnięta. Wiemy jednak że do klasy $np$ należą również problemy dla których nie znamy wielomianowego algorytmu, to znaczy najlepszy algorytm jaki znamy działa w czasie eksponencjalnym.
+#def[Klasa #p][
+   jest klasą wszystkich problemów rozwiązywanych przez algorytm działający w czasie wielomianowym
+]
+
+#def[Klasa #np][
+   jest klasą wszystkich problemów rozwiązywanych przez niedeterministyczny algorytm działający w czasie wielomianowym
+]
+
+Nazwa #np pochodzi od angielskiego określenia _Nondeterministic-Polynoimial_. Możemy łatwo zauważyć że $#p subset.eq np$, jest to spowodowane faktem że algorytm deterministyczny jest szczególnym przypadkiem algorytmu niedeterministycznego. Równość tych klas jest jednak wciąż nierozstrzygnięta i pozostaje jednym z najważniejszych problemów informatyki.
+
 
 == Pojęcie redukcji
 
-Jeśli rozmawiamy o trudności problemów w danej klasie, warto rozpatrzyć je pod względem jakiegoś porządku, oznaczając czy dane problemy są trudniejsze od innych. Sposób w jaki możemy to określić to transformacje instancji jednego problemu do instancji drugiego to znaczy *redukcję*. Oznaczmy algorytm transformacji instancji problemu $X -> Y$ jako $cal(T)_(X Y)(I_X) = I_Y$
+Jeśli rozmawiamy o trudności problemów w danej klasie, warto rozpatrzyć je pod względem jakiegoś porządku, oznaczając czy dane problemy są trudniejsze od innych. Sposób w jaki możemy to określić to transformacje egzemplarza jednego problemu do egzemplarza drugiego to znaczy *redukcję*. W gruncie rzeczy redukcja problemu $P_1$ do problemu $P_2$ dostarcza metodę rozwiązywania problemu $P_1$ za pomocą algorytmu dla problemu $P_2$. 
 
-#def[Redukcja wielomianowa][Jeśli dla dowolniej instacji $I_X$ problemu $X$ istnieje algorytm wielomianowy $cal(T)_(X Y)$ taki że $cal(T)_(X Y)(I_X) = I_Y$ ma rozwiązanie wtedy i tylko wtedy gdy $I_X$  ma rozwiązanie, wtedy problem $X$ jest wielomianowo redukowalny do $Y$, co oznaczamy $X <=_P Y $ @sudkamp_languages_2006
-// #align(center)[
-//   $X <=_P Y$ \
-//   $equiv$ \
-//   $exists cal(T)_(X Y) in O(n^k) : forall I_X : cal(T)_(X Y)(I_X) = I_Y -> cal(A)_Y (I_Y) != emptyset  <=> cal(A)_X (I_X) != emptyset$
-// ]
+#let karp = $scripts(<=)_m$
+
+#def[Redukowalność w sensie Karpa][
+  
+  Mówimy że problem decyzyjny $P_1$ jest redukowalny w sensie Karpa do problemu decyzyjnego $P_2$ jeśli istnieje algorytm $cal(R)$ który dla dowolnego egzemplarza $x in I_P_1$ problemu $P_1$, transformuje go w egzemplarz $y in I_P_2$ problemu $P_2$ w taki sposób że $x in Y_P_1$ wtedy i tylko wtedy gdy $y in Y_P_2$. W takim przypadku mówimy że $cal(R)$ jest redukcją Karpa z $P_1$ do $P_2$ i zapisujemy $P_1 karp P_2$. 
+  
+  Jeśli zachodzi $P_1 karp P_2$ oraz $P_2 karp P_1$ mówimy że są one równoważne w sensie Karpa tj. $P_1 scripts(equiv)_m P_2$
 ]
 
-W naszym przypadku redukcja musi być wielomianowa ponieważ zachowuje ona wtedy przynależność do klasy, o czym mówi twierdzenie:
+Istnienie takiej redukcji mówi nam że problem $P_2$ jest co najmniej tak trudny jak problem $P_1$. Co tworzy nam tak jak wspomnieliśmy, hierarchię pomiędzy problemami, którą to możemy wykorzystać aby określić klasy pochodne będące w zależności z #np. Jeśli algorytm redukcji $cal(R)$ działa w czasie wielomianowym mówimy wtedy że problem jest *wielomianowo redukowalny* co zapisujemy $P_1 karp^p P_2$
 
-#twi[Hierarchia redukcji][Jeśli $X$ jest redukowalny do $Y$ w czasie wielomianowym: $X <=_P Y$, oraz $Y in cal(P)$ wtedy $X in cal(P)$, równoważnie gdy $X in.not cal(P)$ wtedy $Y in.not cal(P)$ @sudkamp_languages_2006]
+#def[#np - trudność][
 
-Co łatwo dowieść ponieważ gdy $cal(A)'_Y in O(n^k)$ oraz $cal(T)_(X Y) in O(n^k)$ wtedy $cal(A)'_Y compose cal(T)_(X Y) in O(n^k)$ rozwiązuje problem $X$ w czasie wielomianowym (interesuje nas w tym przypadku to czy rozwiązanie istnieje a nie jego wartość).
-
-Powyższe twierdzenie mówi więc w gruncie rzeczy że problem $X$ jest *co najmniej* tak trudny jak problem $Y$. Możemy więc za pomocą tego kryterium podzielić problemy w klasie #np.
-
-#def[NP-hard][Weźmy problem $X$, jeśli dla każdego $Y in np$ zachodzi $Y <=_P X$ mówimy że problem $X$ jest *NP-trudny*]
-
-Co oznacza że te problemy są co najmniej tak trudne jak cała klasa #np, mogą one jednak nie należeć do #np dlatego wprowadzamy ostatnią definicję.
-
-#def[NP-complete][
-  Jeśli problem $X$ jest NP-trudny oraz $X in np$ to mówimy że problem $X$ jest *NP-zupełny*
+  Mówimy że problem decyzyjny $P$ jest #np - trudny jeśli dla dowolnego problemu decyzyjnego $P_1 in np$ zachodzi $P_1 karp^p P$, i zapisujemy $P in np H$
 ]
 
-Są to więc najtrudniejsze problemy z klasy #np, rozwiązanie jednego z nich pozwala na rozwiązanie wszystkich problemów z klasy, a stworzenie wielomianowego algorytmu do jednego z nich pozwala udowodnić że $cal(P) = np$ oraz vice versa: udowodnienie że któryś z nich nie należy do $cal(P)$ pozwala udowodnić $cal(P) != np$. W zasadzie więc mamy do czynienia z najciekawszymi problemami z tej klasy, i to nimi będziemy się zajmować w tej pracy.
+Jest to więc klasa problemów co najmniej tak trudnych jak dowolny problem z klasy #np. Redukowalność wielomianowa jest ważna w tym przypadku dlatego że zachowuje ona przynależność do klasy, tzn. redukcja wielomianowa $P_1 karp^p P_2$ pozwala rozwiązać problem $P_1$ w czasie wielomianowym o ile posiadamy algorytm rozwiązujący problem $P_2$ w czasie wielomianowym, taka sama zależność zachodzi dla niedeterministycznych algorytmów rozwiązujących. Wiąże się z tym jedna ciekawa właściwość, a mianowicie: jeśli znaleźli byśmy wielomianowy algorytm rozwiązujący dowolny problem w $np H$ od razu wynikałoby z tego że $#p = np$.
 
-W pracy omawiane będą również transformacje rozwiązań. Użyteczne są dwa typy takich transformacji, tzn. dla określonej transformacji $cal(T)_(X Y)$ : algorytm $cal(K)_(X Y)$ działający w tym samym kierunku co transformacja który będziemy nazywać "konstrukcją" rozwiązania dla problemu będącego wynikiem transformacji, oraz algorytm $cal(E)_(Y X)$ działający w kierunku przeciwnym który będziemy nazywać "ekstrakcją" rozwiązania dla źródłowego problemu. Algorytm $cal(K)$ będzie zawsze istniał ponieważ bezpośredio odpowiada on algorytmowi transformacji, algorytm $cal(E)$ nie musi istnieć jednak pokażemy że stosując odpowiednie techniki często da się go skonstruować.
+#def[#np - zupełność][
 
-Zdefiniowaliśmy więc wszytkie potrzebne nam algorytmy, a ich wzajemna relacja w uproszczeniu prezentuje się następująco:
+  Mówimy że problem decyzyjny $P$ jest #np - zupełny jeśli $P$ jest #np - trudny oraz $P in np$, zapisujemy wtedy $P in np C$
+]
+
+Relację pomiędzy tymi klasami ilustruje równanie $np inter np H = np C$.
+Z powyższej definicji wynika że jest to klasa problemów z #np które są wzajemnie równoważne w sensie Karpa. Ta równoważność jest kluczowym pojęciem w tej pracy i to właśnie na problemach #np - zupełnych będziemy operować, co wyjaśnimy w późniejszej części pracy.
+
+
+== Problemy funkcyjne
+Z praktycznego jednak względu problemy decyzyjne, choć są lepsze w rozważaniach formalnych, oferują limitowaną funkcjonalność. Dużo bardziej przydatne jest poznanie dokładnej wartości rozwiązania. Wchodzimy wtedy na terytorium *problemów funkcyjnych*, szersze omówienie takich problemów możemy znaleźć w @papadimitriou_zlozonosc_2007[Rozdz. 10.3], w tej pracy omówimy je jedynie pokrótce.
+
+#def[Problem funkcyjny][
+
+  Weźmy abstrakcyjny problem zdefiniowany jako relacja $P subset.eq I_P times S_P$. \Problem funkcyjny definiujemy następująco:
+
+  Dla danego $X in I_P$ znajdź rozwiązanie $y in S_P$, takie że $(x,y) in P$, o ile takie rozwiązanie istnieje; jeżeli takie słowo nie istnieje wówczas zwróć #nie
+]
+
+Widzimy że istnieje bezpośrednia relacja pomiędzy problemami funkcyjnymi a problemami decyzyjnymi, tzn. każdemu problemowi funkcyjnemu odpowiada problem decyzyjny gdzie zwracamy #tak jeśli istnieje odpowiednie rozwiązanie i #nie jeśli takie nie istnieje. 
+
+W rzeczywistości istnieje swojego rodzaju równoważność pomiędzy problemami decyzyjnymi i funkcyjnymi tzn. jeśli możemy rozwiązać wersję decyzyjną problemu możemy też rozwiązać wersję funkcyjną w podobnym czasie. Jest to oparte na podstawie pojęcia *samoredukowalności* które to zachodzi dla większości problemów $P in np$, omówienie tego pojęcia wykracza jednak poza zakres tej pracy.
+
+Dla problemów funkcyjnych istnieje nieco inne, bardziej ogólniejsze pojęcie redukcji które jest bliższe operacjom zaimplementowanym w bibliotece
+
+#def[Wyrocznia][
+  Dla danego problemu $P$ obliczenia funkcji $f : I_P -> S_P$, wyrocznią nazywamy abstrakcyjne urządzenie które, dla każdego egzemplarza $x in I_P$, zwraca wartość $f(x) in S_P$. Zakładamy że wyrocznia zwraca tę wartość w jednym kroku obliczeń i oznaczymy ją $cal(O)_P$
+]
+
+Wyrocznia jest więc w gruncie rzeczy hipotetycznym algorytmem rozwiązującym problem w jednym kroku obliczeń. W rzeczywistym zastosowaniu zastępujemy ją odpowiednim algorytmem rozwiązującym dany problem (niekoniecznie działającym w jednym kroku obliczeń).
+
+#def[Redukowalność w sensie Turinga][
+  Dla denego problemu $P_1$ obliczenia funkcji $f : I_P_1 -> S_P_2$. Mówimy że $P_1$ jest redukowalny w sensie Turinga do problemu $P_2$ jeśli istnieje algorytm $cal(R)$ dla problemu $P_1$ korzystający z wyroczni dla problemu $P_2$. Mówimy wtedy że $cal(R)$ jest redukcją w sensie Turinga z $P_1$ do $P_2$ i zapisujemy $P_1 scripts(<=)_T P_2$
+]
+
+Widzimy że redukcja Karpa jest w rzeczywistości szczególnm przypadkeim redukcji Turinga, gdy mamy do czynienia z problemem decyzyjnym. 
+Tak samo jak dla redukcji Karpa definiujemy redukcje wielomianowe oznaczane są $P_1 scripts(<=)_T^p P_2$ i to właśnie takie redukcje będą implementowane w tej pracy, podzielimy jedynie algorytm $cal(R)$ na osobne części realizujące poszczególne operacje, tak aby można było je łatwo wykorzystać.  Strukturę redukcji Turinga oraz naszą interpretację zilustrowano na @turing_red[Rysunku]
+
 
 #figure(sdiagram(
-  node($I_X$),
-  edge("->",$cal(A)_X$),
-  node((1,0),$S_X$),
-  node((0,1),$I_Y$),
-  edge("->",$cal(A)_Y$),
-  node((1,1),$S_Y$),
-  edge((0,0),(0,1),"->",$cal(T)_(X Y)$),
-  edge((1,0),(1,1),"->",$cal(C)_(X Y)$, shift:5pt, label-side:left),
-  edge((1,0),(1,1),"<-",$cal(E)_(Y X)$, shift:-5pt),
+    edge((-0.7,0),(0,0),"->", stroke:path),
+  node((0,0),$I_P_1$),
+  // edge("->",$cal(S)_P_1$),
+  node((1,0),$S_P_1$),
+  node((0,1),$I_P_2$),
+  edge("->",$cal(S)_P_2$, stroke:path),
+  node((1,1),$S_P_2$),
+  edge((0,0),(0,1),"->",$cal(T)$, stroke:path),
+  edge((1,0),(1,1),"->",$cal(C)$, shift:5pt, label-side:left),
+  edge((1,0),(1,1),"<-",$cal(E)$, shift:-5pt, stroke:path),
+  edge((1,0),(1.7,0),"->", stroke:path),
+  
+  edge((-4.7,0),(-4,0),"->"),
+  node((-4,0),$I_P_1$),
+  node((-3,0),$S_P_1$),
+  node((-4,1),$I_P_2$),
+  edge("->",$cal(O)_P_2$),
+  node((-3,1),$S_P_2$),
+  edge((-4,0),(-4,1),"->"),
+  edge((-3,1),(-3,0),"->"),
+  edge((-3,0),(-2.3,0),"->"),
+    node(
+  align(top)[$cal(R)$],
+  enclose: ((-4,0), (-3,1)),
+  snap: -1,
+  stroke: (paint: gray, thickness: 0.8pt, dash: "dashed"),
+  shape: rect,
 ),
-caption:[Zdefiniowane algorytmy]
-)
 
+),
+caption:[Struktura redukcji Turinga w porównaniu z algorytmami omawianymi w pracy]
+) <turing_red>
 
+Jak widzimy redukcja Turinga jest bezpośrednio realizowana za pomocą kilku algorytmów które możemy opisać w następujący sposób. Dodatkowo definiujemy algorytm $cal(C)$ który jest dopełnieniem funkcjonalności w bibliotece.
+
+- $cal(T)$ - transformacja (redukcja) egzemplarza $x in P_1$ do $x' in P_2$
+- $cal(S)$ - rozwiązanie egzemplarza $x' in P_2$, odpowiednik wyroczni
+- $cal(E)$ - ekstrakcja rozwiązania $y in S_P_1$ z rozwiązania $y' in S_P_2$ 
+- $cal(C)$ - konstrukcja rozwiązania $y' in S_P_2$ przy pomocy rozwiązania $y in S_P_1$
+
+W rzeczywistości transformacja rozwiązań bardzo często wymaga dodatkowych informacji o redukcji które w redukcji Turinga mogą być zachowane w algorytmie. W bibliotece jednak powoduje to potrzebę przekazania do algorytmów $cal(E)$ i $cal(C)$ zarówno egzemplarza problemu jak i jego rozwiązania.
 
 == Klasyczne problemy NP-zupełne
 
@@ -193,12 +264,10 @@ Mając już zdefiniowane wszystkie pojęcia, możemy podać kilka przykładów p
     [$m$ spójników logicznych np. $and, or, not, ->,<->$],
     [nawiasów (nie występują nadmiarowe nawiasy)]
     )
-  ] 
+  ] <sat>
 
   *Pytanie* : Czy istnieje  wartościowanie $pi : V -> {tru, fal}$ dla którego formuła jest spełniona?
 ]]
-
-Pominiemy formalną definicję dobrze zbudowanej formuły, ponieważ to jak wygląda formuła logiczna jest oczywiste, warto jedynie zaznaczyć że formuła $phi$ musi być skończona. Następujące problemy są podproblemami problemu #rsat.
 
 #pro[#sat - Spełnialność formuł w postaci koniunkcyjnej normalnej][
   #pad(left:1em)[
@@ -254,6 +323,16 @@ Pozostałe problemy to popularne problemy pochodne, możemy podzielić je na 3 g
   *Pytanie* : Czy istnieje podzbiór wierzchołków $V' subset.eq V$ rozmiaru co najmniej $k$, w którym każda para wierzchołków jest połączona krawędzią należącą do $E$?
 ]] <cli>
 
+#pro[#ind - Problem zbioru niezależnego][
+  #pad(left:1em)[
+  *Dane wejściowe* : #box(baseline: 100% - 7pt)[
+    $G =(V,E)$ - Graf nieskierowany \
+    $k$ - liczba naturalna
+  ] 
+
+  *Pytanie* : Czy istnieje podzbiór wierzchołków $V' subset.eq V$ rozmiaru co najmniej $k$, w którym każda para wierzchołków jest połączona krawędzią należącą do $E$?
+]]<ind>
+
 #pro[#hit - Problem zbioru przecianjącego][
   #pad(left:1em)[
   *Dane wejściowe* : #box(baseline: 100% - 7pt)[
@@ -277,7 +356,7 @@ Następna grupa to problemy dotyczące cykli w grafie:
 
 ]] <uham>
 
-#pro[#ham - \ #h(5.1em) Problem cyklu Hamiltona w grafie skierowanym][
+#pro[#ham  \ #h(5.1em) Problem cyklu Hamiltona w grafie skierowanym][
   #pad(left:1em)[
   *Dane wejściowe* : #box(baseline: 100% - 7pt)[
     $G =(V,E)$ - Graf skierowany \
@@ -347,7 +426,38 @@ Ostatnia grupa to problemy sum podzbiorów:
 
 ]]<knap>
 
+
+
+== Problemy optymalizacyjne
+
+W rzeczywistości kilka z wcześniej wymienionych problemów to tak naprawdę problemy optymalizacyjne. *Problem optymalizacyjny* to problem gdzie z każdym dopuszczalnym rozwiązaniem związana jest pewna wartość i chcemy znaleźć rozwiązanie dopuszczalne z najlepszą wartością.
+
+Złożoność obliczeniowa problemów gdzie szukamy minimalnego lub maksymalnego rozwiązania znacząco się różni od problemów z klasy #np. Istnieje jednak przydatna zależność między problemami optymalizacyjnymi a decyzyjnymi. Możemy zazwyczaj przejść od problemu optymalizacyjnego do pokrewnego problemu decyzyjnego, wprowadzając dodatkowy parametr - ograniczenie optymalizowanej wartości, czego przykład możemy zobaczyć np. w @knap[Problemie #knap], gdzie stała $m$ jest ograniczeniem funkcji celu.
+Zależność ta została poza tym wykorzystana w kilku innych problemach wymienionych wyżej.
+
+#pro[#mip - Programowanie całkowitoliczbowe][
+  
+    *Dane wejściowe* : #box(baseline: 100% - 7pt)[
+    Układ równań liniowych (ograniczeń) postaci: \
+    $A = (a_(i j))$ - macierz liczb całkowitych wymiaru $n times m$\
+    $b = (b_i)$ - wektor liczb całkowitych wymiaru $m$, wektor prawych stron \
+    oraz\
+    $c = (c_j)$ - wektor liczb całkowitych wymiaru $n$, wektor funkcji celu \
+    $B$ - liczba całkowita, ograniczenie funkcji celu
+  ] 
+
+  *Pytanie* : Czy istnieje wektor liczb całkowitych $x = (x_j)$ wymiaru $n$ taki że:
+
+  $
+  c^T x <= d \
+  A x <= b \
+  x >= 0
+  $
+] <mip>
+
 = Analiza i opis wybranych redukcji
+
+== Redukcje trywialne
 
 == Redukcja #sat3 do #vc
 
@@ -538,106 +648,18 @@ $
 (bb(1) or bb(1) or bb(1)) and (bb(0) or bb(1) or bb(1)) = bb(1)
 $
 
-// === Algorytm
-
-Algorytm jest dosyć elementarny i sam nasuwa się na myśl jeżeli zrozumieliśmy zasadę działania konwersji, wystarczy jedynie ustalić odpowiednie numerowanie wierzchołków aby ułatwić ich łączenie, wierzchołki numerujemy kolejnymi liczbami naturalnymi z przedziału $angle.l 1 , 2n+3m angle.r$ gdzie $n$ to ilość zmiennych a $m$ ilość klauzul.
-
-$
-num(x_i) &= i \
-num(not x_i) &= n + i \
-num(u_(i,j)) &= 2n + 3i + j  \
-$
-
-Numerowanie w tym wypadku oznacza unilalne przyporządkowanie wierzchołkom liczb narutalnych, co jest bardzo naturalne jeśli rozważamy struktury komputerowe, jest to więc funckja róznowartościowa przyporządkowująca elementom liczby naturalne, przy czym implementacja komputerowa algorytmów wymaga aby była to funkcja "na" przedział liczb naturalnych rozboczynający się od liczby 1.
-
-// $
-// num: V ->^(1-1) bb(N) \
-// num[V] = angle.l 1,|V| angle.r inter bb(N) \
-// // num(v) = j" - numer wierzchołka" v\
-// v_i equiv num^(-1)(i) equiv v in V : num(v) = i\
-// num(v_i) = i
-// $
-
-// Numerowanie jest to więc funckja róznowartościowa przyporządkowująca elementom liczby naturalne, przy czym implementacja komputerowa algorytmów wymaga aby była to funkcja "na" przedział liczb naturalnych rozboczynający się od liczby 1.
-
-#figure(
-  kind: "algorithm",
-  supplement: [Algorytm],
-  pseudocode-list(booktabs: true, numbered-title: [Redukcja #sat3 do #vc])[
-  + *function* 3SAT-VertexCover$(W,n)$
-    + $|V| = 2 dot n + 3dot|W|$ #comm[ustalamy zbiór wierzchołków]
-    + $G=(V,E)$
-    + *for* $i in 1 dots n$ #comm[dla każdej zmiennej]
-        + $d<-n+i$
-        + $E arrow.l (i,d)$ #comm[łączymy wierzchołek zmiennej z jej negacją]
-    + *end*    
-    + *for* $w in W$ #comm[dla każdej klauzuli]
-      + $c arrow.l$ następny wolny wierzchołek z $V$
-      + *for* $u in w$ #comm[dla zmiennych w klauzuli]
-        + *if* u < 0 #comm[wybieramy odpowiednie miejsce w podgrafie zmiennych]
-          + $d<-n+(-u)$  
-        + *else*
-          + $d<-u$   
-        + *end*
-        + $E arrow.l (c,d)$
-    + *end*
-    + $s <- n + 2dot|W|$
-    + *return* ($G$,s)
-  + *end*
-]
-)
-
-Algorytm tworzy najpierw podgrafy zmiennych, a następnie podgrafy klauzul od razu łącząc je z odpowiednimi zmiennymi według przedstawionych wytycznych. Pozostaje nam jedynie zbadać jego złożoność obliczeniową, zawiera on następujące operacje.
-
-
-  + $O(n)$ - pętla *for* tworząca podgrafy zmiennych
-  + $O(m)$ - pętla *for* tworząca podgrafy klauzul
-
-Co daje nam w sumie złożoność $O(n+m)$ a więc złożoność liniową. Jest więc to istotnie wielomianowa konwersja i może posłużyć jako dowód NP złożoności problemu #vc.
-
 #pagebreak()
-
-=== Odzyskanie rozwiązania
-
-Odpakowanie rozwiązania oryginalnego problemu #sat3 jest bardzo łatwe, dzięki odpowiedniemu numerowaniu wierzchołków którego użyliśmy. Wystarczy jedynie sprawdzić dla wierzchołków $1dots n$  czy znajdują się one w zbiorze #vc.
-
-#figure(
-  kind: "algorithm",
-  supplement: [Algorytm],
-  pseudocode-list(booktabs: true, numbered-title: [Odzyskanie rozwiązania #sat3 z #vc])[
-  + *function* Unpack-Hamiltonian *begin*
-    - *input:* $C,n$ #comm[zbiór #vc $C subset.eq V$, liczba zmiennych #sat3]
-
-    - *output:* $A$ #comm[$A in {bb(0),bb(1)}^n$ ewaluacja zmienych dla #sat3]
-    + $A = (fal, fal, dots, fal)$ #comm[tablica o długości $n$]
-    + *for* $i in 1 dots n$
-      + *if* $v_i in C$ 
-        + $A[i] = tru$
-      + *end*
-    + *end* 
-   + *return* $A$
-  + *end*
-]
-)
-
-Obecność w zbiorze #vc wierzchołka $v_i$ gdzie $i in chevron 1,n chevron.r$ oznacza ewaluację zmiennej $x_i$ na `true`, w p.p. jeśli nie ma tam tego wierzchołka, w zbiorze musi znajdować się wierzchołek $v_(n+i)$ a więc zmienna ewaluowana jest na `false`.
-
-
 == Redukcja #sat3 do #ham
 
 Ustalmy problem #sat3 jako: $W = w_1 and w_2 and dots and w_m$ formuła w postaci koniunkcyjnej normalnej gdzie $w_j = u_(j,1) or u_(j,2) or u_(j,3)$ oraz $X = {x_1, x_2, dots, x_n}$ zbiór zmiennych używanych w formułach.
 
-Problem #ham polega na znalezieniu w grafie cyklu Hamiltona tzn. cyklu który przechodzi przez każdy wierzchołek w grafie dokładnie raz. Formalnie taki cykl $C$ można opisać w ten sposób, dla grafu $G = (V,E subset.eq V times V)$
-
-$
-  exists C subset.eq E : forall v in V space ( exists_(=1) (v,y) in C and exists_(=1) (x,v) in C )
-$
+Problem #ham polega na znalezieniu w grafie cyklu Hamiltona tzn. cyklu który przechodzi przez każdy wierzchołek w grafie dokładnie raz. 
 
 Naszym celem jest skonstruowanie na podstawie zadanego problemu #sat3 grafu dla którego znalezienie cyklu Hamiltona będzie równoznaczne z rozwiązaniem problemu #sat3. Dokonamy tego w dwóch krokach: najpierw stworzymy podgraf emulujący zachowaniem zmienną a następnie podgraf emulujący zachowaniem klauzulę.
 
 === Podgraf zmiennej
 
-Podgraf odpowiadający zmiennej musi spełniać następującą właściwość: Cykl Hamiltona może przebiegać przez podgraf na dokładnie dwa sposoby. Podgraf taki można stworzyć na wiele sposobów, ja wybrałem jednak ten (co uzasadnię w dalszej części rozdziału). Długość środkowego łańcucha w podgrafie musi być większa od 2 wierzchołków i może być zwiększona w miarę potrzeb.
+Podgraf odpowiadający zmiennej musi spełniać następującą właściwość: Cykl Hamiltona może przebiegać przez podgraf na dokładnie dwa sposoby. Podgraf taki można stworzyć na wiele sposobów, wybrana została jednak wersja przedstawiona na @zmien[Rysunku] Długość środkowego łańcucha w podgrafie musi być większa od 2 wierzchołków i może być zwiększona w miarę potrzeb.
 
 #figure(
   sdiagram(
@@ -670,7 +692,7 @@ Podgraf odpowiadający zmiennej musi spełniać następującą właściwość: C
     edge((5, 0), (4, 1), "-|>", dash: "dashed"),
   ),
   caption: [$X_i$ - Podgraf zmiennej $x_i$],
-)
+) <zmien>
 
 #let grid_size = 85%
 #figure(
@@ -934,7 +956,7 @@ $
 $
 === Podgraf Klauzuli
 
-Mając już strukturę emulującą zachowanie zmiennych, musimy zająć się następnie klauzulami. Szukamy podgrafu który w zachowaniu względem cyklu Hamiltona będzie do napisu $x and y and z$ tzn. szukamy podgrafu który stanie się częścią poprawnego cyklu wtedy i tylko wtedy gdy jedna z odpowiadających mu zmiennych w grafie ewaluacji otrzyma odpowiednią wartość. Podgraf taki można skonstruować w następujący sposób:
+Mając już strukturę emulującą zachowanie zmiennych, musimy zająć się następnie klauzulami. Szukamy podgrafu który w zachowaniu względem cyklu Hamiltona będzie równoważny do napisu $x and y and z$ tzn. szukamy podgrafu który stanie się częścią poprawnego cyklu wtedy i tylko wtedy gdy jedna z odpowiadających mu zmiennych w grafie ewaluacji otrzyma odpowiednią wartość. Podgraf taki można skonstruować w następujący sposób:
 
 #figure(
   sdiagram(
@@ -976,7 +998,7 @@ Mając już strukturę emulującą zachowanie zmiennych, musimy zająć się nas
   caption: [Podgraf zmiennej z podłączonym podgrafem klauzuli],
 )<klauzula>
 
-Jako podgraf klauzuli może posłużyć jeden z wierzchołków, podłączamy go "równolegle" do odpowiedniej krawędzi w podgrafie. Widzimy że może on zostać podłączony na kilka sposobów: w lewą stronę lub w prawą stronę, co definiuje jaka ewaluacja zmiennej powinna zaspokoić daną klauzulę. Na powyższym @klauzula[rysunku] ewaluacja zmiennej na `true` zaspokaja klauzulę $V_1$ zaś ewaluacja zmiennej na `false` zaspokaja klauzulę $V_2$. 
+Jako podgraf klauzuli może posłużyć jeden z wierzchołków, podłączamy go "równolegle" do odpowiedniej krawędzi w podgrafie. Widzimy że może on zostać podłączony na kilka sposobów: w lewą stronę lub w prawą stronę, co definiuje jaka ewaluacja zmiennej powinna zaspokoić daną klauzulę. Na powyższym @klauzula[Rysunku] ewaluacja zmiennej na `true` zaspokaja klauzulę $V_1$ zaś ewaluacja zmiennej na `false` zaspokaja klauzulę $V_2$. 
 
 Równolegle do jednej krawędzi mogą więc zostać podłączone co najwyżej 2 wierzchołki: jeden w prawo a drugi w lewo, w przeciwnym wypadku klauzule podłączone w tym samym kierunku mogły by się wzajemnie wykluczać. Podłączenie w prawo i w lewo z definicji się wyklucza więc może zostać wykonane na tej samej krawędzi
 
@@ -1258,219 +1280,8 @@ caption:[Część kompletnego grafu emulacji #sat3 z zaznaczonym cyklem Hamilton
 
 Jak widzimy Cykl Hamiltona jeśli tylko może "ucieka" do podgrafu klauzuli tzn. odpowiednia ewaluacja zmiennej $x_j$ zaspokaja klauzulę $w_i$. Warto zauważyć również że cykl może uciec jedynie do podgrafu klauzuli który jest podłączony do podgrafu zmiennej w odpowiednim kierunku w przeciwnym wypadku cykl musiałby wrócić z podgrafu zmiennej do wierzchołka będącego już częścią cyklu.
 
-Otrzymaliśmy więc prawidłowy graf emulujący za pomocą `HAMILTIONIAN-CIRCUIT` problem #sat3, przykładową ewaluację #sat3 możemy zobaczyć na @3sat-ham[Rysunku]. 
+Otrzymaliśmy więc prawidłowy graf emulujący za pomocą #ham problem #sat3, przykładową ewaluację #sat3 możemy zobaczyć na @3sat-ham[Rysunku]. 
 
-
-=== Optymalizacja
-
-W trakcie przygotowania do tego rozdziału natrafiłem na 2 metody redukcji #sat3 do #ham metodę _Sudkampa_ @sudkamp_languages_2006, oraz metodę _Kleinberg-Tardos_ @kleinberg_algorithm_2006, postanowiłem więc zbadać metody i dowiedzieć się która metoda jest najlepsza. Moim celem było możliwe zmniejszenie liczby wykorzystanych wierzchołków i krawędzi w redukcji. Podczas gdy najbardziej popularna jest metoda K-T, metoda Sudkampa jest bardziej przejrzysta, pomimo że jest zdecydowanie mniej optymalna. Sudkamp w książce @sudkamp_languages_2006 proponuje sprytny podgraf klauzuli który dobrze emuluje tą logikę, podczas gdy K-T w książce @kleinberg_algorithm_2006 jako podgraf klauzuli używają jednego wierzchołka, uproszczenie które wymaga jednak znaczących zmian w podgrafie zmiennej. Jako podgraf zmiennej Sudkamp używa zaś bardziej skomplikowanego grafu który ciężej będzie dynamicznie konstruować w algorytmie.
-
-Wzory na ilość wierzchołków i krawędzi w grafie $G=(V,E)$ wyglądają następująco dla $m$-ilość klauzul, $n$-ilość zmiennych, a $U(i)$ to maksimum z liczby wystąpień $x_i$ i wystąpień $not x_i$
-#v(5pt)
-$
-U(i) = max(|{w in u : x_i in w }|,|{w in u : not x_i in w}|) \
-$
-#v(5pt)
-#figure(
-  table(
-  columns: (auto,auto,auto),
-  inset: 10pt,
-  align: center,
-  [Metoda],[Liczba wierzchołków $|V|$],[Liczba krawędzi $|E|$],
-  [Sudkamp],$6m+sum_(i=1)^(n) U(i) + 1$,$6m+9m +sum_(i=1)^(n) 4 + 2(U(i) + 1)$,
-  [K-T],$m+sum_(i=1)^(n) 3 dot U(i) + 3$,$6m+sum_(i=1)^(n)4+2(3 dot U(i) + 3)$,
-),
-caption: [Wzory na liczbę wierzchołków i krawędzi w grafach]
-)
-
-Sprawdziłem wykresy ilości zmiennych dla worst i best case  które pokazują odpowiednio największe i najmniejsze ilości, oraz dla avg case który został obliczony według benchmarkowych problemów #sat3 dostępnych w internecie. W tym przypadku worst-best case zależy od ilości unikalncyh zmiennych w problemie gdzie best case to $|V_"best"| = 3$ (jedynie 3 różne zmienne w klauzulach) a worst case to $|V_"worst"| = 3x$ (każda zmienna w klauzuli jest inna). 
-
-\
-#figure(
-  table(
-  columns: (auto,auto,auto),
-  inset: 10pt,
-  align: center,
-  [Case],[Liczba zmiennych $n$],[Liczba użyć zmiennej $x_i - U(i)$],
-  [Best],$3$,$ceil(m/2)$,
-  [Avg],$1/4m$,$~7.5$,
-  [Worst],$3m$,$1$,
-),
-caption: [Wzory na liczbę wierzchołków i krawędzi w grafach]
-)
-\
-
-#let x = lq.linspace(10, 10000)
-
-#let vars = 4
-
-#let avg = 7.5
-
-
-Metoda Sudkampa w większym stopniu zależy od ilości klauzul a metoda K-T zależy bardziej od wielkości $U(i)$ sprawdzą się one więc w innych wypadkach. Zbadałem więc jak wygląda typowy problem #sat3 i według udostępnionych w internecie przykładów występuje średnio 4 razy więcej klauzul niż zmiennych i średnia wartość $U(i) approx 7.5$ czego wpływ na wielkości grafu możemy zobaczyć na poniższych wykresach.
-\
-\
-
-#show figure: set figure.caption(position: top)
-
-#figure(
-  lq.diagram(
-  // title: [Ilość wierzchołków w grafie],
-  xlabel: "Liczba klauzul", 
-  ylabel: "Liczba wierzchołków",
-  legend: (position: top + left),
-  width:12cm,
-  height:6cm,
-  lq.plot(x, x.map(x => x + 3*x*(3+3)), mark:none, label:[K-T worst], color:rgb("#bbbbff")),
-  lq.plot(x, x.map(x => 6*x + 3*x*(1+1)), mark:none, label:[Sud worst], color:rgb("#ffbbbb")),
-  lq.plot(x, x.map(x => x + (x/vars)*(3*avg+3)), mark:none, label:[K-T avg], color:rgb("#6666ff")),
-  lq.plot(x, x.map(x => 6*x + (x/vars)*(avg+1)), mark:none, label:[Sud avg], color:rgb("#ff6666") ),
-  lq.plot(x, x.map(x => x + 3*(3*(x/2)+3)), mark:none, label:[K-T best], color:rgb("#0000ff") ),
-  lq.plot(x, x.map(x => 6*x + 3*((x/2)+1)), mark:none, label:[Sud best], color:rgb("#ff0000")  ),
-),
-  caption:[Porównanie liczby wierzchołków dla metod redukcji],
-  // kind: "chart",
-  // supplement: [Wykres]
-)
-\
-
-#figure(
-  lq.diagram(
-  // title: [Ilość krawędzi w grafie],
-  xlabel: "Liczba klauzul", 
-  ylabel: "Liczba krawędzi",
-  legend: (position: top + left),
-  width:12cm,
-  height:6cm,
-  lq.plot(x, x.map(x => 6*x + 0*x + 3*x*(4+2*(3+1))), mark:none, label:[K-T worst], color:rgb("#bbbbff")),
-  lq.plot(x, x.map(x => 6*x + 9*x + 3*x*(4+2*(1+1))), mark:none, label:[Sud worst], color:rgb("#ffbbbb")),
-  lq.plot(x, x.map(x => 6*x + 0*x + (x/vars)*(4+2*(3*avg+3))), mark:none, label:[K-T avg], color:rgb("#6666ff")),
-  lq.plot(x, x.map(x => 6*x + 9*x + (x/vars)*(4+2*(avg+1))), mark:none, label:[Sud avg], color:rgb("#ff6666") ),
-  lq.plot(x, x.map(x => 6*x + 0*x + 3*(4+2*(3*(x/2)+1))), mark:none, label:[K-T best], color:rgb("#0000ff") ),
-  lq.plot(x, x.map(x => 6*x + 9*x + 3*(4+2*((x/2)+1))), mark:none, label:[Sud best], color:rgb("#ff0000") ),
-
-),
-  caption:[Porównanie liczby krawędzi dla metod redukcji],
-  // kind: "chart",
-  // supplement: [Wykres]
-)
-
-#show figure: set figure.caption(position: bottom)
-
-Jak widzimy metoda S-T okazuje się być wyraźnie lepsza dla ilości wierzchołków i nieznacznie lepsza co do ilości krawędzi, wybrałem więc ostatecznie tą metodę i to ona jest przedstawiona w powyższym rozdziale.
-
-#pagebreak()
-// === Algorytm
-
-Pozostało nam tylko skonstruować algorytm, co nie jest szczególnie skomplikowane. Przechodzimy w nim po klauzulach i stopniowo podłączamy je do odpowiednich zmiennych, dodając tam wierzchołki jeśli jest to wymagane, a na koniec łączymy ze sobą podgrafy zmiennych. Algorytm wykorzystuje funkcję `next_slot` która wybiera odpowiednie, wolne miejsce w podgrafie zmiennej do podłączenia klauzuli według opisanych wcześniej instrukcji. 
-
-#figure(
-  kind: "algorithm",
-  supplement: [Algorytm],
-  pseudocode-list(booktabs: true, numbered-title: [Redukcja #sat3 do #ham])[
-  + *function* 3SAT-HamiltonianCircuit *begin*
-    - *input:* $W, n$ #comm[klauzule i liczba zmiennych problemu #sat3]
-    - *output:* $G$ #comm[graf dla którego będziemy szukać cyklu Hamiltona]
-    + $V = [1 dots |W|+sum_(i=1)^(n) 3 dot U(i) + 3]$ #comm[ustalamy zbiór wierzchołków]
-    + $G=(V,E)$ #comm[!! Rezerwujemy wierzchołki $1dots 2n$ na wierzchołki startowe $b$]
-    + $P[1..n] = "Queue"{}$ #comm[kolejki wierzchołków w podgrafach zmienncyh]
-    + $N[1..n] = "Queue"{}$ #comm[jak wyżej, tylko że dla negatywnego użycia zmiennej]
-    + *for* $w in W$ #comm[dla każdej klauzuli]
-      + $c arrow.l$ następny wolny wierzchołek z $V$
-      + *for* $u in w$ #comm[dla zmiennych w klauzuli]
-        + *if* u < 0 #comm[wybieramy odpowiednie miejsce w podgrafie zmiennych]
-          + $(f,s) arrow.l "next_slot"(-u,N,P,S,G)$
-        + *else*
-          + $(s,f) arrow.l "next_slot"(u,P,N,S,G)$    
-        + *end*
-        + $E arrow.l (s arrow c), (c arrow f)$ #comm[podpinamy wierzchołek klauzuli do podgrafu zmiennej]
-    + *end*
-    + $b_l,e_l <-$ pierwszy i ostatni w. z ostatniego niepustego podgrafu zmiennej
-    + *for* i = 1..n #comm[łączymy ze sobą podgrafy zmiennych]
-      + $b <- V_i$
-      + *if* length$(P[i])$ > 0
-        + $e <- "last"(P[i])$    
-        + $b_l,e_l <-$ pierwszy i ostatni w. z poprzedniego niepustego podgrafu zmiennej
-        + $E <- (b_l->b),(b_l->e),(e_l->b),(e_l->e),$
-      + *else*: usuń wierzchołki $V_i, V_(n+i)$ #comm[Zmienna nie jest użyta w żadnej klauzuli]
-      + *end*
-    + *end*
-    + *return* $G$
-  + *end*
-]
-)
-#pagebreak()
-
-#pseudocode-list[
-  + *function* next_slot *begin*
-    - *input:*
-      - $i,n$ #comm[Numer zmiennej, ilość wszystkich zmiennych]
-      - $Q_1,Q_2,G$ #comm[Wybrana kolejka, pozostała kolejka, konstruowany graf]       
-    - *output:* $(a,b)$ #comm[miejsce gdzie można podpiąć wierzchołek klauzuli]
-    + $l <- "len"(Q_1)$
-    + *if* $l = 0$ #comm[podgraf jest pusty]
-      + $a <- i$ 
-      + $b<-i+n$
-      + $c <-$ następny wolny wierzchołek z $V$
-      + $Q_1[i],Q_2[i] <- c$
-      + $E <- (a<->b),(b<->c)$
-    + *end*
-  
-    + *if* $l <= 3$ #comm[podgraf ma za mało wierzchołków]
-      + $a,b,c <-$ trzy następne wolne wierzchołki z $V$
-      + $Q_1[i] <- c$ #comm[w. $a$ zostanie od razu wykorzystany więc go nie dodajemy]
-      + $Q_2[i] <- a,c$ #comm[wierzchołek $a$ i $c$ dodajemy do 2 kolejki]
-      + $s <- Q_1[i]$
-      + $E <- (s<->a),(a<->b),(b<->c)$
-      + *return* $(s,a)$
-    + *else* #comm[mamy wystarczającą ilość wierzchołków w kolejce]
-      + $s, f <- Q_1[i]$    
-      + *return* $(s,f)$      
-    + *end*
-  + *end*
-]
-
-Jak widać funkcja `next_slot` wybiera krawędź do której należy równolegle podłączyć wierzchołek klauzuli. Funkcja zachowuje odstępy pomiędzy klauzulami wstawiając odpowiednie wierzchołki pomocnicze i  wybierając co 3 wierzchołek.
-
-Wolne miejsca w podgrafach zmiennych są przechowywane w kolejkach zawartych w tablicach $P$ i $N$ odpowiednio dla zwyczajnych i zanegowanych zmiennych. Użycie dwóch kolejek może się wydawać marnowaniem pamięci, jednak w rzeczywistości zawsze co najmniej jedna z nich będzie miała długość równą 1.
-
-Jeśli zmienna nie została użyta w żadnej klauzuli odpowiadające jej kolejki są puste, usuwamy wtedy wierzchołek $b_i : num(b_i) = i $ z grafu za pomocą metody `rem_vertex!()`, aby nie interferował w znajdowaniu cyklu. Zamienia ona wierzchołek $b$ z ostatnim wierzchołkiem w grafie a następnie go usuwa, mając przy tym złożoność $O(max(deg(b),deg(|V|))^2)$ co w naszym grafie gdzie $forall v in V deg(v) <= 6$ oznacza w gruncie rzeczy złożoność $O(1)$. Nie przesuwa ona więc numerowania wierzchołków a na miejscu wierzchołka `b` znajdzie się losowy wierzchołek o numerowaniu: $num(v) >n$.
-
-Pozostaje nam jedynie zbadać złożoność obliczeniową algorytmu, zawiera on operacje:
-
-  + $O(m)$ - inicjalizacja zbioru wierzchołków z wykorzystaniem funkcji $U(i)$
-  + $O(m)$ - pętla *for* łącząca podgrafy klauzul z podgrafami zmiennych
-    + $O(1)$ - funkcja *next_slot* znajdująca odpowiednie miejsce do podłączenia
-  + $O(n)$ - pętla *for* łącząca podgrafy zmiennych
-
-Ponieważ pozostałe operacje są $O(1)$, daje nam to w sumie złożoność $O(n+m)$ a więc złożoność liniową. Jest więc to istotnie wielomianowa konwersja i może posłużyć jako dowód NP złożoności problemu #ham.
-
-=== Odzyskanie rozwiązania
-Kolejnym ważnym krokiem jest odzyskanie rozwiązania tzn. odczytanie rozwiązania oryginalnego problemu #sat3 na podstawie rozwiązania utworzonej instancji #ham oraz danych pomocniczych dotyczących redukcji zawartych w instancji problemu.
-
-Aby to zrobić musimy sprawdzić kierunek przejścia cyklu po podgrafach zmiennych co ułatwia nam fakt że ustaliliśmy numerowanie dla dwóch pierwszych wierzchołków w podgrafie zmiennej $x_i$ jako $num(p_i) = i and num(d_i) = n+i$, możemy dzięki temu sprawdzić czy w cyklu znajduje się krawędź $p_i->d_i$ a jeśli tak, cykl idzie w prawo a zmienna jest ewaluowana jako `true`, zaś w p.p. musi istnieć krawędź $d_i -> p_i$, cykl idzie w lewo a zmienna ewaluuje się jako `false`
-
-#figure(
-  kind: "algorithm",
-  supplement: [Algorytm],
-  pseudocode-list(booktabs: true, numbered-title: [Odzyskanie rozwiązania #sat3 z #ham])[
-  + *function* Unpack-Hamiltonian *begin*
-    - *input:* $C,n$ #comm[cykl Hamiltona $C subset.eq E$, liczba zmiennych #sat3]
-
-    - *output:* $A$ #comm[$A in {bb(0),bb(1)}^n$ ewaluacja zmienych dla #sat3]
-    + $A = [fal, fal, dots, fal]$ #comm[tablica o długości $n$]
-    + *for* $(v,u) in C$
-      + $i <- num(v)$ #comm[numer wierzchołka $v$]
-      + *if* $i <= n$ *and* $i + n = num(u)$ #comm[jest to wierzchołek $p_i$ i cykl biegnie w prawo]
-        + $A[i] = tru$ #comm[zmienna $x_i$ ewaluowana jest na `true`]
-      + *end*
-   + *end* 
-   + *return* $A$
-  + *end*
-]
-)
-
-Jeśli któraś ze zmiennych $x_i$ nie była nigdy użyta w klauzuli, jej wierzchołki $p_i, d_i$ zostają usunięte a w ich miejsce umieszczamy inne wierzchołki nie będące wierzchołkami początkowymi. Sprawia to że ewaluacja tej zmiennej zostanie odczytana jako losowa, co nie ma jednak żadnego wpływu na poprawność rozwiązania ponieważ ewaluacja zmiennej $x_i$ nie ma znaczenia dla spełnienia klauzul.
 
 = Projekt systemu odwzorowującego graf redukcji
 
@@ -1489,20 +1300,20 @@ Celem projektu jest stworzenie biblioteki programistycznej implementującej redu
 
 W celu zachowania spójności w bibliotece zastosowano interfejsy funkcyjne. Odpowiadają one bezpośrednio algorytmom zdefiniowanym w @theory[Rozdziale].
 
-- #smallcaps[Transform]$(I_X, Y) = I_Y$ - transformacja (redukcja) instancji problemu $X$ na instancję problemu $Y$ odpowiednik algorytmu $cal(T)_(X Y)$
+- #smallcaps[Transform]$(I_P_1,P_2) -> I_P_2$ - transformacja (redukcja) egzemplarza problemu $P_1$ do egzemplarza problemu $P_2$, odpowiednik algorytmu $cal(T)_(P_1->P_2)$
 
-- #smallcaps[Solve]$(I_X) in {S_X, emptyset}$ - rozwiązanie zadanej instancji problemu, odpowiednik  $cal(A)_X$
+- #smallcaps[Solve]$(I_P) -> {S_P,$ #nie$}$ - rozwiązanie zadanej instancji problemu, odpowiednik  $cal(S)_P$
 
-- #smallcaps[Extract]$(S_Y,I_X) = S_X$ - odpakowanie rozwiązania instancji $I_Y$ będącej wynikiem transformacji, do rozwiązania źródłowej instancji $I_X$, odpowiednik algorytmu $cal(E)_(Y X)$
+- #smallcaps[Extract]$(S_P_2,I_P_1) -> S_P_1$ - odpakowanie rozwiązania egzemplarza $I_P_2$ będącego wynikiem transformacji, do rozwiązania źródłowego egzemplarza $I_P_1$, odpowiednik algorytmu $cal(E)_(P_1->P_2)$
 
-- #smallcaps[Construct]$(Y,S_X,I_X) = S_Y$ - skonstruowanie rozwiązania dla instancji $I_Y$ będącej wynikiem transformacji, wykorzystując rozwiązanie źródłowej instancji $S_X$, odpowiednik algorytmu $cal(C)_(X Y)$
+- #smallcaps[Construct]$(P_2,S_P_1,I_P_1) -> S_P_2$ - skonstruowanie rozwiązania dla egzemplarza $I_P_2$ będącego wynikiem transformacji, wykorzystując rozwiązanie źródłowego egzemplarza $I_P_1$, odpowiednik algorytmu $cal(C)_(P_1->P_2)$
 
-- #smallcaps[Validate]$(S_X, I_X) in {tru, fal}$ - sprawdzenie poprawności zadanego rozwiązania instancji problemu $X$, odpowiednik algorytmu $cal(V)_X$
+- #smallcaps[Validate]$(S_X, I_X) -> {tru, fal}$ - sprawdzenie poprawności zadanego rozwiązania instancji problemu $X$, odpowiednik algorytmu $cal(V)_X$
 
 Przedstawione interfejsy prezentują całość funkcjonalności biblioteki
 
 == Implementacja grafu redukcji
-Poniższy graf prezentuje problemy dla których zaimplementowano funkcjonalności, gdzie krawędź $X -> Y$ oznacza implementację wszystkich interfejsów dla danej pary problemów $X,Y$.
+Poniższy graf prezentuje problemy dla których zaimplementowano funkcjonalności, gdzie krawędź $P_1 -> P_2$ oznacza implementację wszystkich interfejsów dla danej pary problemów $P_1, P_2$.
 
 #let node = fletcher.node
 
@@ -1548,18 +1359,323 @@ Warto zauważyć że dla niektórych problemów krawędzie biegną w obie strony
 
 Dla problemów bezpośrednio połączonych wykorzystywane są  zaimplementowane algorytmy, w systemie możliwa jest jednak transformacja wielokrotna o ile istnieje ścieżka pomiędzy zadanymi problemami. Wybór operacji jest określany na podstawie najkrótszej ścieżki pomiędzy problemami względem liczby krawędzi. W tym wypadku zalecane jest wykorzystanie interfejsów dla transformacji łańcuchowych:
 
-- #smallcaps[Transform]$(I_X_1, X_n) = C_(1..n) = (I_X_1,I_X_2,dots,I_X_n)$ - transformacja (redukcja) instancji problemu $X$ na instancję problemu $Y$ zwracająca ciąg wszystkich pośrednich instancji.
+- #smallcaps[Transform]$(I_P_1, P_n) = C_(1..n) = (I_P_1,I_P_2,dots,I_P_n)$ - transformacja (redukcja) egzemplarza problemu $P_1$ do egzemplarza problemu $P_2$ zwracająca ciąg egzemplarzy wszystkich pośrednich problemów.
 
-- #smallcaps[Extract]$(S_X_n,C_(1..n)) = S_X$ - odpakowanie rozwiązania instancji $I_X_n$ będącej wynikiem transformacji, do rozwiązania źródłowej instancji $I_X_1$
+- #smallcaps[Extract]$(S_P_n,C_(1..n)) = S_P_1$ - odpakowanie rozwiązania egzemplarza $I_P_n$ będącego wynikiem transformacji, do rozwiązania źródłowego egzemplarza $I_P_1$
 
-- #smallcaps[Construct]$(S_X,C_(1..n)) = S_Y$ - skonstruowanie rozwiązania dla instancji $I_X_n$ będącej wynikiem transformacji, wykorzystując rozwiązanie źródłowej instancji $S_X_1$, odpowiednik algorytmu $cal(C)_(X Y)$
+- #smallcaps[Construct]$(S_P_1,C_(1..n)) = S_P_n$ - skonstruowanie rozwiązania dla egzemplarza $I_P_n$ będącego wynikiem transformacji, wykorzystując rozwiązanie źródłowego egzemplarza $I_P_1$,
 
 Wykorzystanie łańcucha instancji $C_(1..n)$ jest wymagane dla interfejsów #smallcaps[Extract] i #smallcaps[Construct] ze względów implementacyjnych, co jest oczywiste jeśli spojrzymy na ich domyślne definicje.
 
 == Możliwość rozbudowy o kolejne problemy
 
 Ważną funkcjonalnością systemu jest rozszeczenie grafu transformacji przez użytkownika. Dostępne jest dodanie dowolnych problemów jako wierzchołków w grafie, oraz dowolnych transformacji jako krawędzi w grafie. Rozszerzenie takie będzie współgrać całkowicie z systemem, pod warunkiem przestrzegania przez uzytkownika definicji interfejsów, o których było mowa powyżej.
-== Zastosowania
+
+= Wybrane algorytmy redukcji
+
+
+== Redukcja #sat3 do #ham
+
+Istnieje kilka równoważnych metod redukcji #sat3 do #ham, w pracy rozważone zostały metody _Sudkampa_ @sudkamp_languages_2006, oraz metoda _Kleinberg-Tardos_ @kleinberg_algorithm_2006, zbadaliśmy więc optymalność redukcji pod względem rozmiaru wynikowego egzemplarza problemu.  Podczas gdy najbardziej popularna jest metoda K-T, metoda Sudkampa jest bardziej przejrzysta, pomimo że jest zdecydowanie mniej optymalna. Sudkamp w książce @sudkamp_languages_2006 proponuje sprytny podgraf klauzuli który dobrze emuluje tą logikę, podczas gdy w książce @kleinberg_algorithm_2006 jako podgraf klauzuli wykorzystany jest jeden wierzchołek, uproszczenie to wymaga jednak znaczących zmian w podgrafie zmiennej. Jako podgraf zmiennej Sudkamp używa zaś bardziej skomplikowanego grafu który ciężej będzie dynamicznie konstruować w algorytmie.
+
+Wzory na ilość wierzchołków i krawędzi w grafie $G=(V,E)$ wyglądają następująco dla $m$-ilość klauzul, $n$-ilość zmiennych, a $U(i)$ to maksimum z liczby wystąpień $x_i$ i wystąpień $not x_i$
+#v(5pt)
+$
+U(i) = max(|{w in u : x_i in w }|,|{w in u : not x_i in w}|) \
+$
+#v(5pt)
+#figure(
+  table(
+  columns: (auto,auto,auto),
+  inset: 10pt,
+  align: center,
+  [Metoda],[Liczba wierzchołków $|V|$],[Liczba krawędzi $|E|$],
+  [Sudkamp],$6m+sum_(i=1)^(n) U(i) + 1$,$6m+9m +sum_(i=1)^(n) 4 + 2(U(i) + 1)$,
+  [K-T],$m+sum_(i=1)^(n) 3 dot U(i) + 3$,$6m+sum_(i=1)^(n)4+2(3 dot U(i) + 3)$,
+),
+caption: [Wzory na liczbę wierzchołków i krawędzi w grafach]
+)
+
+Przeprowadziliśmy analizę wykresów ilości zmiennych dla worst i best case  które pokazują odpowiednio największe i najmniejsze ilości, oraz dla avg case który został obliczony według benchmarkowych problemów #sat3 dostępnych w internecie. W tym przypadku worst-best case zależy od ilości unikalncyh zmiennych w problemie gdzie best case to $|V_"best"| = 3$ (jedynie 3 różne zmienne w klauzulach) a worst case to $|V_"worst"| = 3x$ (każda zmienna w klauzuli jest inna). 
+
+\
+#figure(
+  table(
+  columns: (auto,auto,auto),
+  inset: 10pt,
+  align: center,
+  [Case],[Liczba zmiennych $n$],[Liczba użyć zmiennej $x_i - U(i)$],
+  [Best],$3$,$ceil(m/2)$,
+  [Avg],$1/4m$,$~7.5$,
+  [Worst],$3m$,$1$,
+),
+caption: [Wzory na liczbę wierzchołków i krawędzi w grafach]
+)
+\
+
+#let x = lq.linspace(10, 10000)
+
+#let vars = 4
+
+#let avg = 7.5
+
+
+Metoda Sudkampa w większym stopniu zależy od ilości klauzul a metoda K-T zależy bardziej od wielkości $U(i)$ sprawdzą się one więc w innych wypadkach. Zbadaliśmy więc jak wygląda typowy problem #sat3 i według udostępnionych w internecie przykładów występuje średnio 4 razy więcej klauzul niż zmiennych i średnia wartość $U(i) approx 7.5$ czego wpływ na wielkości grafu możemy zobaczyć na poniższych wykresach.
+\
+
+
+#show figure: set figure.caption(position: top)
+
+#figure(
+  lq.diagram(
+  // title: [Ilość wierzchołków w grafie],
+  xlabel: "Liczba klauzul", 
+  ylabel: "Liczba wierzchołków",
+  legend: (position: top + left),
+  width:12cm,
+  height:5cm,
+  lq.plot(x, x.map(x => x + 3*x*(3+3)), mark:none, label:[K-T worst], color:rgb("#bbbbff")),
+  lq.plot(x, x.map(x => 6*x + 3*x*(1+1)), mark:none, label:[Sud worst], color:rgb("#ffbbbb")),
+  lq.plot(x, x.map(x => x + (x/vars)*(3*avg+3)), mark:none, label:[K-T avg], color:rgb("#6666ff")),
+  lq.plot(x, x.map(x => 6*x + (x/vars)*(avg+1)), mark:none, label:[Sud avg], color:rgb("#ff6666") ),
+  lq.plot(x, x.map(x => x + 3*(3*(x/2)+3)), mark:none, label:[K-T best], color:rgb("#0000ff") ),
+  lq.plot(x, x.map(x => 6*x + 3*((x/2)+1)), mark:none, label:[Sud best], color:rgb("#ff0000")  ),
+),
+  caption:[Porównanie liczby wierzchołków dla metod redukcji],
+  // kind: "chart",
+  // supplement: [Wykres]
+)
+\
+
+#figure(
+  lq.diagram(
+  // title: [Ilość krawędzi w grafie],
+  xlabel: "Liczba klauzul", 
+  ylabel: "Liczba krawędzi",
+  legend: (position: top + left),
+  width:12cm,
+  height:5cm,
+  lq.plot(x, x.map(x => 6*x + 0*x + 3*x*(4+2*(3+1))), mark:none, label:[K-T worst], color:rgb("#bbbbff")),
+  lq.plot(x, x.map(x => 6*x + 9*x + 3*x*(4+2*(1+1))), mark:none, label:[Sud worst], color:rgb("#ffbbbb")),
+  lq.plot(x, x.map(x => 6*x + 0*x + (x/vars)*(4+2*(3*avg+3))), mark:none, label:[K-T avg], color:rgb("#6666ff")),
+  lq.plot(x, x.map(x => 6*x + 9*x + (x/vars)*(4+2*(avg+1))), mark:none, label:[Sud avg], color:rgb("#ff6666") ),
+  lq.plot(x, x.map(x => 6*x + 0*x + 3*(4+2*(3*(x/2)+1))), mark:none, label:[K-T best], color:rgb("#0000ff") ),
+  lq.plot(x, x.map(x => 6*x + 9*x + 3*(4+2*((x/2)+1))), mark:none, label:[Sud best], color:rgb("#ff0000") ),
+
+),
+  caption:[Porównanie liczby krawędzi dla metod redukcji],
+  // kind: "chart",
+  // supplement: [Wykres]
+)
+
+#show figure: set figure.caption(position: bottom)
+
+Jak widzimy metoda S-T okazuje się być wyraźnie lepsza dla ilości wierzchołków i nieznacznie lepsza co do ilości krawędzi, wybrałem więc ostatecznie tą metodę i to ona jest przedstawiona w powyższym rozdziale.
+
+
+ === Algorytm
+
+Pozostało nam tylko skonstruować algorytm, co nie jest szczególnie skomplikowane. Przechodzimy w nim po klauzulach i stopniowo podłączamy je do odpowiednich zmiennych, dodając tam wierzchołki jeśli jest to wymagane, a na koniec łączymy ze sobą podgrafy zmiennych. Algorytm wykorzystuje funkcję `next_slot` która wybiera odpowiednie, wolne miejsce w podgrafie zmiennej do podłączenia klauzuli według opisanych wcześniej instrukcji. 
+
+#pseudocode-list[
+  + *function* next_slot *begin*
+    - *input:*
+      - $i,n$ #comm[Numer zmiennej, ilość wszystkich zmiennych]
+      - $Q_1,Q_2,G$ #comm[Wybrana kolejka, pozostała kolejka, konstruowany graf]       
+    - *output:* $(a,b)$ #comm[miejsce gdzie można podpiąć wierzchołek klauzuli]
+    + $l <- "len"(Q_1)$
+    + *if* $l = 0$ #comm[podgraf jest pusty]
+      + $a <- i$ 
+      + $b<-i+n$
+      + $c <-$ następny wolny wierzchołek z $V$
+      + $Q_1[i],Q_2[i] <- c$
+      + $E <- (a<->b),(b<->c)$
+    + *end*
+  
+    + *if* $l <= 3$ #comm[podgraf ma za mało wierzchołków]
+      + $a,b,c <-$ trzy następne wolne wierzchołki z $V$
+      + $Q_1[i] <- c$ #comm[w. $a$ zostanie od razu wykorzystany więc go nie dodajemy]
+      + $Q_2[i] <- a,c$ #comm[wierzchołek $a$ i $c$ dodajemy do 2 kolejki]
+      + $s <- Q_1[i]$
+      + $E <- (s<->a),(a<->b),(b<->c)$
+      + *return* $(s,a)$
+    + *else* #comm[mamy wystarczającą ilość wierzchołków w kolejce]
+      + $s, f <- Q_1[i]$    
+      + *return* $(s,f)$      
+    + *end*
+  + *end*
+]
+
+#figure(
+  kind: "algorithm",
+  supplement: [Algorytm],
+  pseudocode-list(booktabs: true, numbered-title: [Redukcja #sat3 do #ham])[
+  + *function* 3SAT-HamiltonianCircuit *begin*
+    - *input:* $W, n$ #comm[klauzule i liczba zmiennych problemu #sat3]
+    - *output:* $G$ #comm[graf dla którego będziemy szukać cyklu Hamiltona]
+    + $V = [1 dots |W|+sum_(i=1)^(n) 3 dot U(i) + 3]$ #comm[ustalamy zbiór wierzchołków]
+    + $G=(V,E)$ #comm[!! Rezerwujemy wierzchołki $1dots 2n$ na wierzchołki startowe $b$]
+    + $P[1..n] = "Queue"{}$ #comm[kolejki wierzchołków w podgrafach zmienncyh]
+    + $N[1..n] = "Queue"{}$ #comm[jak wyżej, tylko że dla negatywnego użycia zmiennej]
+    + *for* $w in W$ #comm[dla każdej klauzuli]
+      + $c arrow.l$ następny wolny wierzchołek z $V$
+      + *for* $u in w$ #comm[dla zmiennych w klauzuli]
+        + *if* u < 0 #comm[wybieramy odpowiednie miejsce w podgrafie zmiennych]
+          + $(f,s) arrow.l "next_slot"(-u,N,P,S,G)$
+        + *else*
+          + $(s,f) arrow.l "next_slot"(u,P,N,S,G)$    
+        + *end*
+        + $E arrow.l (s arrow c), (c arrow f)$ #comm[podpinamy wierzchołek klauzuli do podgrafu zmiennej]
+    + *end*
+    + $b_l,e_l <-$ pierwszy i ostatni w. z ostatniego niepustego podgrafu zmiennej
+    + *for* i = 1..n #comm[łączymy ze sobą podgrafy zmiennych]
+      + $b <- V_i$
+      + *if* length$(P[i])$ > 0
+        + $e <- "last"(P[i])$    
+        + $b_l,e_l <-$ pierwszy i ostatni w. z poprzedniego niepustego podgrafu zmiennej
+        + $E <- (b_l->b),(b_l->e),(e_l->b),(e_l->e),$
+      + *else*: usuń wierzchołki $V_i, V_(n+i)$ #comm[Zmienna nie jest użyta w żadnej klauzuli]
+      + *end*
+    + *end*
+    + *return* $G$
+  + *end*
+]
+)
+
+
+
+
+Jak widać funkcja `next_slot` wybiera krawędź do której należy równolegle podłączyć wierzchołek klauzuli. Funkcja zachowuje odstępy pomiędzy klauzulami wstawiając odpowiednie wierzchołki pomocnicze i  wybierając co 3 wierzchołek.
+
+Wolne miejsca w podgrafach zmiennych są przechowywane w kolejkach zawartych w tablicach $P$ i $N$ odpowiednio dla zwyczajnych i zanegowanych zmiennych. Użycie dwóch kolejek może się wydawać marnowaniem pamięci, jednak w rzeczywistości zawsze co najmniej jedna z nich będzie miała długość równą 1.
+
+Jeśli zmienna nie została użyta w żadnej klauzuli odpowiadające jej kolejki są puste, usuwamy wtedy wierzchołek $b_i : num(b_i) = i $ z grafu za pomocą metody `rem_vertex!()`, aby nie interferował w znajdowaniu cyklu. Zamienia ona wierzchołek $b$ z ostatnim wierzchołkiem w grafie a następnie go usuwa, mając przy tym złożoność $O(max(deg(b),deg(|V|))^2)$ co w naszym grafie gdzie $forall v in V deg(v) <= 6$ oznacza w gruncie rzeczy złożoność $O(1)$. Nie przesuwa ona więc numerowania wierzchołków a na miejscu wierzchołka `b` znajdzie się losowy wierzchołek o numerowaniu: $num(v) >n$.
+
+Pozostaje nam jedynie zbadać złożoność obliczeniową algorytmu, zawiera on operacje:
+
+  + $O(m)$ - inicjalizacja zbioru wierzchołków z wykorzystaniem funkcji $U(i)$
+  + $O(m)$ - pętla *for* łącząca podgrafy klauzul z podgrafami zmiennych
+    + $O(1)$ - funkcja *next_slot* znajdująca odpowiednie miejsce do podłączenia
+  + $O(n)$ - pętla *for* łącząca podgrafy zmiennych
+
+Ponieważ pozostałe operacje są $O(1)$, daje nam to w sumie złożoność $O(n+m)$ a więc złożoność liniową. Jest więc to istotnie wielomianowa konwersja i może posłużyć jako dowód NP złożoności problemu #ham.
+
+=== Odzyskanie rozwiązania
+Kolejnym ważnym krokiem jest odzyskanie rozwiązania tzn. odczytanie rozwiązania oryginalnego problemu #sat3 na podstawie rozwiązania utworzonej instancji #ham.
+
+Aby to zrobić musimy sprawdzić kierunek przejścia cyklu po podgrafach zmiennych co ułatwia nam fakt że ustaliliśmy numerowanie dla dwóch pierwszych wierzchołków w podgrafie zmiennej $x_i$ jako $num(p_i) = i and num(d_i) = n+i$, możemy dzięki temu sprawdzić czy w cyklu znajduje się krawędź $p_i->d_i$ a jeśli tak, cykl idzie w prawo a zmienna jest ewaluowana jako `true`, zaś w p.p. musi istnieć krawędź $d_i -> p_i$, cykl idzie w lewo a zmienna ewaluuje się jako `false`
+
+#figure(
+  kind: "algorithm",
+  supplement: [Algorytm],
+  pseudocode-list(booktabs: true, numbered-title: [Odzyskanie rozwiązania #sat3 z #ham])[
+  + *function* Unpack-Hamiltonian *begin*
+    - *input:* $C,n$ #comm[cykl Hamiltona $C subset.eq E$, liczba zmiennych #sat3]
+
+    - *output:* $A$ #comm[$A in {bb(0),bb(1)}^n$ ewaluacja zmienych dla #sat3]
+    + $A = [fal, fal, dots, fal]$ #comm[tablica o długości $n$]
+    + *for* $(v,u) in C$
+      + $i <- num(v)$ #comm[numer wierzchołka $v$]
+      + *if* $i <= n$ *and* $i + n = num(u)$ #comm[jest to wierzchołek $p_i$ i cykl biegnie w prawo]
+        + $A[i] = tru$ #comm[zmienna $x_i$ ewaluowana jest na `true`]
+      + *end*
+   + *end* 
+   + *return* $A$
+  + *end*
+]
+)
+
+Jeśli któraś ze zmiennych $x_i$ nie była nigdy użyta w klauzuli, jej wierzchołki $p_i, d_i$ zostają usunięte a w ich miejsce umieszczamy inne wierzchołki nie będące wierzchołkami początkowymi. Sprawia to że ewaluacja tej zmiennej zostanie odczytana jako losowa, co nie ma jednak żadnego wpływu na poprawność rozwiązania ponieważ ewaluacja zmiennej $x_i$ nie ma znaczenia dla spełnienia klauzul.
+
+== Redukcja #sat3 do #vc
+
+
+// === Algorytm
+
+Algorytm jest dosyć elementarny i sam nasuwa się na myśl jeżeli zrozumieliśmy zasadę działania konwersji, wystarczy jedynie ustalić odpowiednie numerowanie wierzchołków aby ułatwić ich łączenie, wierzchołki numerujemy kolejnymi liczbami naturalnymi z przedziału $angle.l 1 , 2n+3m angle.r$ gdzie $n$ to ilość zmiennych a $m$ ilość klauzul.
+
+$
+num(x_i) &= i \
+num(not x_i) &= n + i \
+num(u_(i,j)) &= 2n + 3i + j  \
+$
+
+Numerowanie w tym wypadku oznacza unilalne przyporządkowanie wierzchołkom liczb narutalnych, co jest bardzo naturalne jeśli rozważamy struktury komputerowe, jest to więc funckja róznowartościowa przyporządkowująca elementom liczby naturalne, przy czym implementacja komputerowa algorytmów wymaga aby była to funkcja "na" przedział liczb naturalnych rozboczynający się od liczby 1.
+
+// $
+// num: V ->^(1-1) bb(N) \
+// num[V] = angle.l 1,|V| angle.r inter bb(N) \
+// // num(v) = j" - numer wierzchołka" v\
+// v_i equiv num^(-1)(i) equiv v in V : num(v) = i\
+// num(v_i) = i
+// $
+
+// Numerowanie jest to więc funckja róznowartościowa przyporządkowująca elementom liczby naturalne, przy czym implementacja komputerowa algorytmów wymaga aby była to funkcja "na" przedział liczb naturalnych rozboczynający się od liczby 1.
+
+#figure(
+  kind: "algorithm",
+  supplement: [Algorytm],
+  pseudocode-list(booktabs: true, numbered-title: [Redukcja #sat3 do #vc])[
+  + *function* 3SAT-VertexCover$(W,n)$
+    + $|V| = 2 dot n + 3dot|W|$ #comm[ustalamy zbiór wierzchołków]
+    + $G=(V,E)$
+    + *for* $i in 1 dots n$ #comm[dla każdej zmiennej]
+        + $d<-n+i$
+        + $E arrow.l (i,d)$ #comm[łączymy wierzchołek zmiennej z jej negacją]
+    + *end*    
+    + *for* $w in W$ #comm[dla każdej klauzuli]
+      + $c arrow.l$ następny wolny wierzchołek z $V$
+      + *for* $u in w$ #comm[dla zmiennych w klauzuli]
+        + *if* u < 0 #comm[wybieramy odpowiednie miejsce w podgrafie zmiennych]
+          + $d<-n+(-u)$  
+        + *else*
+          + $d<-u$   
+        + *end*
+        + $E arrow.l (c,d)$
+    + *end*
+    + $s <- n + 2dot|W|$
+    + *return* ($G$,s)
+  + *end*
+]
+)
+
+Algorytm tworzy najpierw podgrafy zmiennych, a następnie podgrafy klauzul od razu łącząc je z odpowiednimi zmiennymi według przedstawionych wytycznych. Pozostaje nam jedynie zbadać jego złożoność obliczeniową, zawiera on następujące operacje.
+
+
+  + $O(n)$ - pętla *for* tworząca podgrafy zmiennych
+  + $O(m)$ - pętla *for* tworząca podgrafy klauzul
+
+Co daje nam w sumie złożoność $O(n+m)$ a więc złożoność liniową. Jest więc to istotnie wielomianowa konwersja i może posłużyć jako dowód NP złożoności problemu #vc.
+
+
+=== Odzyskanie rozwiązania
+
+Odpakowanie rozwiązania oryginalnego problemu #sat3 jest bardzo łatwe, dzięki odpowiedniemu numerowaniu wierzchołków którego użyliśmy. Wystarczy jedynie sprawdzić dla wierzchołków $1dots n$  czy znajdują się one w zbiorze #vc.
+
+#figure(
+  kind: "algorithm",
+  supplement: [Algorytm],
+  pseudocode-list(booktabs: true, numbered-title: [Odzyskanie rozwiązania #sat3 z #vc])[
+  + *function* Unpack-Hamiltonian *begin*
+    - *input:* $C,n$ #comm[zbiór #vc $C subset.eq V$, liczba zmiennych #sat3]
+
+    - *output:* $A$ #comm[$A in {bb(0),bb(1)}^n$ ewaluacja zmienych dla #sat3]
+    + $A = (fal, fal, dots, fal)$ #comm[tablica o długości $n$]
+    + *for* $i in 1 dots n$
+      + *if* $v_i in C$ 
+        + $A[i] = tru$
+      + *end*
+    + *end* 
+   + *return* $A$
+  + *end*
+]
+)
+
+Obecność w zbiorze #vc wierzchołka $v_i$ gdzie $i in chevron 1,n chevron.r$ oznacza ewaluację zmiennej $x_i$ na `true`, w p.p. jeśli nie ma tam tego wierzchołka, w zbiorze musi znajdować się wierzchołek $v_(n+i)$ a więc zmienna ewaluowana jest na `false`.
+
+
+
+== Wybrane modele #mip
 
 = Implementacja systemu w języku Julia
 == Wybór technologii i środowiska
