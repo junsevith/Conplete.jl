@@ -7,6 +7,8 @@
 
 #set text(lang: "pl")
 
+#set math.equation(numbering: "1.")
+
 #let comm(it) = text(fill:luma(100))[ #h(5pt) \\\\ #it]  
 #let path = 1.2pt + rgb(255, 100, 100)
 
@@ -94,6 +96,7 @@
   popraw_sieroty: true,
 )
 
+
 = Wstęp
 
 Celem pracy jest stworzenie biblioteki redukcji problemów klasy NP w języku programowania #link("https://julialang.org/")[Julia]. W bibliotece zaimplementowano następującą część drzewa konwersji problemów klasy NP. 
@@ -103,7 +106,7 @@ Celem pracy jest stworzenie biblioteki redukcji problemów klasy NP w języku pr
 
 = Podstawy teoretyczne <theory>
 
-W tym rozdziale przedstawimy podstawy teoretyczne niezbędne aby zrozumieć istotę przedstawianych zagadnień. Rozpoczniemy definiując wszystkie niezbędne pojęcia potrzebne do zdefiniowania #np -zupełności, która to będzie punktem wyjścia dla zagadnień opisanych w tej pracy.
+W tym rozdziale przedstawimy podstawy teoretyczne niezbędne aby zrozumieć istotę przedstawianych zagadnień. Rozpoczniemy definiując wszystkie niezbędne pojęcia potrzebne do zdefiniowania #np - zupełności, która to będzie punktem wyjścia dla zagadnień opisanych w tej pracy.
 
 == Klasa złożoności NP
 
@@ -141,9 +144,11 @@ Definicja ta z kolei jest równoważna stwierdzeniu że istnieje, weryfikator dz
 
 #def[Klasa #np][
    jest klasą wszystkich problemów rozwiązywanych przez niedeterministyczny algorytm działający w czasie wielomianowym
-]
+] <npdef>
 
 Nazwa #np pochodzi od angielskiego określenia _Nondeterministic-Polynoimial_. Możemy łatwo zauważyć że $#p subset.eq np$, jest to spowodowane faktem że algorytm deterministyczny jest szczególnym przypadkiem algorytmu niedeterministycznego. Równość tych klas jest jednak wciąż nierozstrzygnięta i pozostaje jednym z najważniejszych problemów informatyki.
+
+Z @npdef[definicji] wynika fakt który często jest używany jako nieformalna definicja klasy #np tzn. jeśli istnieje algorytm weryfikujący rozwiązanie problemu $cal(P)$ w czasie wielomianowym (sprawdzający czy rozwiązanie jest poprawne) to $cal(P) in np$. Fakt ten jest bardziej oczywisty dla definicji opartej na weryfikatorach.
 
 
 == Pojęcie redukcji
@@ -189,7 +194,7 @@ Z praktycznego jednak względu problemy decyzyjne, choć są lepsze w rozważani
 
 Widzimy że istnieje bezpośrednia relacja pomiędzy problemami funkcyjnymi a problemami decyzyjnymi, tzn. każdemu problemowi funkcyjnemu odpowiada problem decyzyjny gdzie zwracamy #tak jeśli istnieje odpowiednie rozwiązanie i #nie jeśli takie nie istnieje. 
 
-W rzeczywistości istnieje swojego rodzaju równoważność pomiędzy problemami decyzyjnymi i funkcyjnymi tzn. jeśli możemy rozwiązać wersję decyzyjną problemu możemy też rozwiązać wersję funkcyjną w podobnym czasie. Jest to oparte na podstawie pojęcia *samoredukowalności* które to zachodzi dla większości problemów $P in np$, omówienie tego pojęcia wykracza jednak poza zakres tej pracy.
+W rzeczywistości istnieje swojego rodzaju równoważność pomiędzy problemami decyzyjnymi i funkcyjnymi tzn. jeśli możemy rozwiązać wersję decyzyjną problemu możemy też rozwiązać wersję funkcyjną w podobnym czasie. Jest to oparte na podstawie pojęcia *samoredukowalności* które to zachodzi dla większości problemów $P in np$, omówienie tego pojęcia wykracza jednak poza zakres tej pracy. W ogólności możemy jednak założyć że problem funkcyjny będzie co najmniej tak trudny jak odpowiadający mu problem decyzyjny, tzn. dla decyzyjnego problemu #np - Zupełnego, problem funkcyjny będzie #np - trudny
 
 Dla problemów funkcyjnych istnieje nieco inne, bardziej ogólniejsze pojęcie redukcji które jest bliższe operacjom zaimplementowanym w bibliotece
 
@@ -250,9 +255,12 @@ Jak widzimy redukcja Turinga jest bezpośrednio realizowana za pomocą kilku alg
 
 W rzeczywistości transformacja rozwiązań bardzo często wymaga dodatkowych informacji o redukcji które w redukcji Turinga mogą być zachowane w algorytmie. W bibliotece jednak powoduje to potrzebę przekazania do algorytmów $cal(E)$ i $cal(C)$ zarówno egzemplarza problemu jak i jego rozwiązania.
 
+
 == Klasyczne problemy NP-zupełne
 
-Mając już zdefiniowane wszystkie pojęcia, możemy podać kilka przykładów problemów NP-zupełnych. Zaczniemy od problemu *spełnialności formuł logicznych* w skrócie #rsat, jest to najbardziej podstawowy problem NP-zupełny a zarazem pierwszy dla którego udowodniono NP-zupełność o czym mówi *Twierdzenie Cook'a* @sudkamp_languages_2006. 
+Mając już zdefiniowane wszystkie pojęcia, możemy zdefiniować formalnie problemy które będą zawarte w pracy. Większość definicji została zaczerpnięta z książki @rivest_wprowadzenie_2024, dla problemów tam nieobecnych wykorzystano definicje z @sudkamp_languages_2006. Wszystkie definicje zostały zarazem zweryfikowane z książką @garey_computers_1990[Appendix] która stanowi doskonały katalog formalnych definicji problemów z klasy #np.
+
+Najbardziej podstawowym problemem z kalsy #np jest problem *spełnialności formuł logicznych* w skrócie #rsat. Jest to również pierwszy problem dla którego udowodniono #np - zupełność, o czym mówi *twierdzenie Cook'a* którego dokładniejszy opis możemy zobaczyć w @rivest_wprowadzenie_2024[Lemat 34.6]. W skrócie mówi ono że problem #rsat może w pewien sposób emulować działanie algorytmu niedeterministycznego, a więc można z jego pomocą rozwiązać dowolny inny problem.
 
 #pro[#rsat - Spełnialność formuł logicznych][
   #pad(left:1em)[
@@ -269,6 +277,8 @@ Mając już zdefiniowane wszystkie pojęcia, możemy podać kilka przykładów p
   *Pytanie* : Czy istnieje  wartościowanie $pi : V -> {tru, fal}$ dla którego formuła jest spełniona?
 ]]
 
+Kolejnym problemem będącym niejako uproszczeniem struktury problemu #rsat jest problem:
+
 #pro[#sat - Spełnialność formuł w postaci koniunkcyjnej normalnej][
   #pad(left:1em)[
   *Dane wejściowe* : #box(baseline: 100% - 7pt)[
@@ -283,7 +293,7 @@ Mając już zdefiniowane wszystkie pojęcia, możemy podać kilka przykładów p
   *Pytanie* : Czy istnieje  wartościowanie $pi : V -> {tru, fal}$ dla którego formuła jest spełniona?
 ]] <cnfsat>
 
-Znanym jest fakt że dowolna formuła może zostać zapisana w postaci CNF, przy czym są to również transformacje wielomianowe. Ten typ redukcji realizuje na przykład transformacja Tseytin @tseitin_complexity_1983. Z tego powodu, oraz z racji łatwości w zapisie to #sat jest używany jako bazowy format problemu spełnialności i to on jest bazowym problemem w tej pracy.
+Znanym jest fakt że dowolna formuła może zostać zapisana w postaci CNF. Wielomianową (a w dodatku liniową) transformację tego typu realizuje transformacja Tseytin @tseitin_complexity_1983, która nie została jednak zawarta w bibliotece. Z powodu równoważności tych problemów, oraz znacznie łatwiejszego, znormalizowanego zapisu problemu #sat to właśnie on jest standardem w informatycznych zastosowaniach problemu spełnialności, i to także on jest bazowym problemem w tej pracy.
 
 #pro[#sat3 - Spełnialność formuł 3-CNF][
   #pad(left:1em)[
@@ -295,10 +305,9 @@ Znanym jest fakt że dowolna formuła może zostać zapisana w postaci CNF, przy
   *Pytanie* : Czy istnieje  wartościowanie $pi : V -> {tru, fal}$ dla którego formuła jest spełniona?
 ]] <sat3>
 
-Jest to ostatni problem z rodziny problemów spełnialności formuł i stanowi on często punkt wyjścia dla redukcji do dalszych problemów.
+Jest to ostatni problem z rodziny problemów spełnialności formuł i dzięki jego jeszcze większej regularności stanowi on często punkt wyjścia dla redukcji do dalszych problemów.
 
-
-Pozostałe problemy to popularne problemy pochodne, możemy podzielić je na 3 grupy gdzie pierwsza grupa to problemy pokrycia:
+Wychodząc z zagadnienia spełnialności, natrafiamy na różnorakie problemy pochodne, możemy je z grubsza podzielić na kilka grup o podobnej specyfice. W pierwszej z omawianych grup znajdują się problemy pokrycia struktur. Podstawowym problemem jest tutaj #vc definiujący zagadnienie pokrycia wszystkich krawędzi w grafie za pomocą podzbioru wierzchołków.
 
 #pro[#vc - Problem pokrycia wierzchołkowego][
   #pad(left:1em)[
@@ -312,6 +321,8 @@ Pozostałe problemy to popularne problemy pochodne, możemy podzielić je na 3 g
   forall (v,u) in E : u in V' or v in V'
   $
 ]] <vc>
+
+Kolejnymi w grupie są problemy bardzo blisko związanie z #vc
 
 #pro[#cli - Problem kliki][
   #pad(left:1em)[
@@ -333,6 +344,8 @@ Pozostałe problemy to popularne problemy pochodne, możemy podzielić je na 3 g
   *Pytanie* : Czy istnieje podzbiór wierzchołków $V' subset.eq V$ rozmiaru co najmniej $k$, w którym każda para wierzchołków jest połączona krawędzią należącą do $E$?
 ]]<ind>
 
+Na pierwszy rzut oka powiązanie tych problemów nie jest oczywiste, są to jednak problemy niemalże równoważne, zauważmy że dla grafu $G = (V,E)$ podzbiór $V' subset.eq V$ jest pokryciem wierzchołkowym wtedy i tylko wtedy gdy jego dopełnienie $V \\ V'$ jest zbiorem niezależnym zobacz @kleinberg_algorithm_2006[Tw. 8.3]. Ponadto $V'$ jest zbiorem niezależnym wtedy i tylko wtedy gdy $V'$ jest kliką w dopełnieniu grafu $G^C = (V,E^C)$.
+
 #pro[#hit - Problem zbioru przecianjącego][
   #pad(left:1em)[
   *Dane wejściowe* : #box(baseline: 100% - 7pt)[
@@ -344,7 +357,9 @@ Pozostałe problemy to popularne problemy pochodne, możemy podzielić je na 3 g
     *Pytanie* : Czy istnieje podzbiór $S' subset.eq S$ rozmiaru co najwyżej $k$, taki że dla dowolnego podzbioru $C in cal(C)$ przekrój $S' inter C$ jest niepusty?
 ]] <hit>
 
-Następna grupa to problemy dotyczące cykli w grafie:
+Możemy łatwo zauważyć że problem #hit jest uogólnieniem problemu #vc na "grafy" gdzie jedna krawędź może łączyć więcej niż 2 wierzchołki.
+
+Następna grupa to problemy dotyczące cykli w grafie, cyklem w grafie $G = (V,E)$ nazywamy ciąg wierzchołków $v_i in V : chevron v_0,v_1,dots,v_k chevron.r$ w którym każde dwa kolejne wierzchołki są połączone krawędzią z $E$ oraz $v_0 = v_k$. Ponadto w poniższych problemach będziemy rozpatrywać *cykle Hamiltona* czyli cykle odwiedzające wszystkie wierzchołki w grafie.
 
 #pro[#uham - Problem cyklu Hamiltona][
   #pad(left:1em)[
@@ -379,7 +394,7 @@ Następna grupa to problemy dotyczące cykli w grafie:
 ]] <tsp>
 
 
-Ostatnia grupa to problemy sum podzbiorów:
+Ostatnia grupa to problemy sum podzbiorów, w tych problemach zazwyczaj szukamy podzbioru liczb którego suma osiąga jakąś pożądaną wartość:
 
 #pro[#subs - Problem sumy podzbioru][
   #pad(left:1em)[
@@ -426,14 +441,7 @@ Ostatnia grupa to problemy sum podzbiorów:
 
 ]]<knap>
 
-
-
-== Problemy optymalizacyjne
-
-W rzeczywistości kilka z wcześniej wymienionych problemów to tak naprawdę problemy optymalizacyjne. *Problem optymalizacyjny* to problem gdzie z każdym dopuszczalnym rozwiązaniem związana jest pewna wartość i chcemy znaleźć rozwiązanie dopuszczalne z najlepszą wartością.
-
-Złożoność obliczeniowa problemów gdzie szukamy minimalnego lub maksymalnego rozwiązania znacząco się różni od problemów z klasy #np. Istnieje jednak przydatna zależność między problemami optymalizacyjnymi a decyzyjnymi. Możemy zazwyczaj przejść od problemu optymalizacyjnego do pokrewnego problemu decyzyjnego, wprowadzając dodatkowy parametr - ograniczenie optymalizowanej wartości, czego przykład możemy zobaczyć np. w @knap[Problemie #knap], gdzie stała $m$ jest ograniczeniem funkcji celu.
-Zależność ta została poza tym wykorzystana w kilku innych problemach wymienionych wyżej.
+Ostatnim z omawianych problemów a zarazem problemem w pewien sposób ukrytym jest problem #mip. Ukrytym ponieważ nie występuje on jawnie w bibliotece, jest on jednak wykorzystywany w algorytmie rozwiązującym: $cal(S)$. W rzeczywistości realizujemy więc niejawną redukcję do problemu #mip dla wszystkich wymienionych wcześniej problemów. Jest tak ponieważ rozwiązanie problemów #mip może być łatwo realizowane za pomocą szeroko dostępnych  narzędzi takich jak solvery MIP, które dodatkowo działają porównywalnie szybko. Redukcja do #mip jest również zazwyczaj dosyć łatwa, co sprawiło że metoda ta została wybrana jako domyślny sposób rozwiązywania egzemplarzy problemów w tej bibliotece.
 
 #pro[#mip - Programowanie całkowitoliczbowe][
   
@@ -455,6 +463,15 @@ Zależność ta została poza tym wykorzystana w kilku innych problemach wymieni
   $
 ] <mip>
 
+== Problemy optymalizacyjne <opt>
+
+W rzeczywistości kilka z wcześniej wymienionych problemów to tak naprawdę problemy optymalizacyjne. *Problem optymalizacyjny* to problem gdzie z każdym dopuszczalnym rozwiązaniem związana jest pewna wartość i chcemy znaleźć rozwiązanie dopuszczalne z najlepszą wartością.
+
+Złożoność obliczeniowa problemów gdzie szukamy minimalnego lub maksymalnego rozwiązania znacząco różni się problemów z klasy #np. Istnieje jednak przydatna zależność między problemami optymalizacyjnymi a decyzyjnymi. Możemy zazwyczaj przejść od problemu optymalizacyjnego do pokrewnego problemu decyzyjnego, wprowadzając dodatkowy parametr - ograniczenie optymalizowanej wartości, czego przykład możemy zobaczyć np. w @knap[Problemie #knap], gdzie stała $m$ jest ograniczeniem funkcji celu.
+Zależność ta została poza tym wykorzystana w kilku innych problemach wymienionych wyżej.
+
+
+
 = Analiza i opis wybranych redukcji
 
 == Redukcje trywialne
@@ -463,13 +480,7 @@ Zależność ta została poza tym wykorzystana w kilku innych problemach wymieni
 
 Ustalmy problem #sat3 jako: $W = w_1 and w_2 and dots and w_m$ formuła w postaci koniunkcyjnej normalnej gdzie $w_j = u_(j,1) or u_(j,2) or u_(j,3)$ oraz $X = {x_1, x_2, dots, x_n}$ zbiór zmiennych używanych w formułach.
 
-#vc to problem polegający na znalezieniu podzbioru wierzchołków w grafie nieskierowanym $G=(V,E), E subset.eq V times V$ takiego że:
-
-$
-C subset V and |C|<=n and forall (v,u) in E : v in C or u in C 
-$
-
-To znaczy, szukamy podzbioru wierzchołków takiego że każda krawędź w grafie dotyka co najmniej jednego wierzchołka z podzbioru, z tym że dla dowolnego $C$ ten problem jest trywialny bo wtedy może być $C = V$, ograniczamy więc jego wielkość parametrem 
+#vc to problem polegający na znalezieniu podzbioru wierzchołków takiego że każda krawędź w grafie dotyka co najmniej jednego wierzchołka z podzbioru, z tym że dla dowolnego $C$ ten problem jest trywialny bo wtedy może być $C = V$, ograniczamy więc jego wielkość parametrem 
 $C <= s$.
 
 Żeby emulować problem #sat3 szukamy najpierw struktury emulującej ewaluacje zmiennych w sensie problemu #vc, nietrudno taką znaleźć a wygląda ona tak:
@@ -1373,10 +1384,11 @@ Ważną funkcjonalnością systemu jest rozszeczenie grafu transformacji przez u
 
 = Wybrane algorytmy redukcji
 
+W tym rozdziale przedstawimy algorytmy realizujące wybrane, nietrywialne redukcje. Konstrukcja takiego algorytmu nie jest zazwyczaj wysoce skomplikowana, jeśli dobrze zrozumieliśmy proces redukcji. Wykorzystują one jednak pewną właściwość która może się wydać oczywista z programistycznego punktu widzenia, warto jednak o niej wspomnieć. Mowa tutaj o *numerowaniu* czyli przypisywaniu do jakichś obiektów liczb naturalnych. Formalnie możemy zapisać to w taki sposób $N : X -> NN$, dla dowolnego skończonego zbioru $X$. Numerowanie w komputerach jest powszechne i służy jako sposób identyfikacji obiektów, w szczególności w jakiejś strukturze danych. Wybór odpowiedniego numerowania w naszym wypadku jest o tyle ważny ponieważ pozwala on na odpowiednią identyfikację komponentów struktury egzemplarza danego problemu, co z kolei jest często niezbędne do ekstrakcji rozwiązania za pomocą algorytmu $cal(E)$. Dlatego właśnie często będziemy definiować specyficzne numerowanie dla egzemplarzy wynikowych algorytmu $cal(R)$ czego przykład możemy zobaczyć w @num_ex[Równaniu]
 
 == Redukcja #sat3 do #ham
 
-Istnieje kilka równoważnych metod redukcji #sat3 do #ham, w pracy rozważone zostały metody _Sudkampa_ @sudkamp_languages_2006, oraz metoda _Kleinberg-Tardos_ @kleinberg_algorithm_2006, zbadaliśmy więc optymalność redukcji pod względem rozmiaru wynikowego egzemplarza problemu.  Podczas gdy najbardziej popularna jest metoda K-T, metoda Sudkampa jest bardziej przejrzysta, pomimo że jest zdecydowanie mniej optymalna. Sudkamp w książce @sudkamp_languages_2006 proponuje sprytny podgraf klauzuli który dobrze emuluje tą logikę, podczas gdy w książce @kleinberg_algorithm_2006 jako podgraf klauzuli wykorzystany jest jeden wierzchołek, uproszczenie to wymaga jednak znaczących zmian w podgrafie zmiennej. Jako podgraf zmiennej Sudkamp używa zaś bardziej skomplikowanego grafu który ciężej będzie dynamicznie konstruować w algorytmie.
+Istnieje kilka równoważnych metod redukcji #sat3 do #ham, w pracy rozważone zostały metody _Sudkampa_ @sudkamp_languages_2006, oraz metoda _Kleinberg-Tardos_ @kleinberg_algorithm_2006, aby wybrać najlepszą metodę zbadaliśmy optymalność redukcji pod względem rozmiaru wynikowego egzemplarza problemu.  Podczas gdy najbardziej popularna jest metoda K-T, metoda Sudkampa jest bardziej przejrzysta, pomimo że jest zdecydowanie mniej optymalna. Sudkamp w książce @sudkamp_languages_2006 proponuje sprytny podgraf klauzuli który dobrze emuluje tą logikę, podczas gdy w książce @kleinberg_algorithm_2006 jako podgraf klauzuli wykorzystany jest jeden wierzchołek, uproszczenie to wymaga jednak znaczących zmian w podgrafie zmiennej. Jako podgraf zmiennej Sudkamp używa zaś bardziej skomplikowanego grafu który ciężej będzie dynamicznie konstruować w algorytmie.
 
 Wzory na ilość wierzchołków i krawędzi w grafie $G=(V,E)$ wyglądają następująco dla $m$-ilość klauzul, $n$-ilość zmiennych, a $U(i)$ to maksimum z liczby wystąpień $x_i$ i wystąpień $not x_i$
 #v(5pt)
@@ -1598,9 +1610,9 @@ $
 num(x_i) &= i \
 num(not x_i) &= n + i \
 num(u_(i,j)) &= 2n + 3i + j  \
-$
+$ <num_ex>
 
-Numerowanie w tym wypadku oznacza unilalne przyporządkowanie wierzchołkom liczb narutalnych, co jest bardzo naturalne jeśli rozważamy struktury komputerowe, jest to więc funckja róznowartościowa przyporządkowująca elementom liczby naturalne, przy czym implementacja komputerowa algorytmów wymaga aby była to funkcja "na" przedział liczb naturalnych rozboczynający się od liczby 1.
+Numerowanie w tym wypadku oznacza uniklalne przyporządkowanie wierzchołkom liczb narutalnych, co jest bardzo naturalne jeśli rozważamy struktury komputerowe, jest to więc funckja róznowartościowa przyporządkowująca elementom liczby naturalne, przy czym implementacja komputerowa algorytmów wymaga aby była to funkcja "na" przedział liczb naturalnych rozpoczynający się od liczby 1.
 
 // $
 // num: V ->^(1-1) bb(N) \
@@ -1675,7 +1687,20 @@ Obecność w zbiorze #vc wierzchołka $v_i$ gdzie $i in chevron 1,n chevron.r$ o
 
 
 
-== Wybrane modele #mip
+== Wybrane metody rozwiązywania 
+
+Tak jak wcześniej wspomnieliśmy w  rozwiązanie egzemplarza za pomocą algorytmu $cal(S)$ odbywa się w znacznej większości poprzez redukcję do problemu #mip. Dlatego więc w tym podrozdziale wymienimy kilka modeli programowania całkowitoliczbowego które zostały wykorzystanie w bibliotece.
+
+ W problemach #mip wymagane jest ustalenie funkcji celu którą będziemy minimalizować lub maksymalizować. Ponieważ jednak niektóre z omawianych problemów to problemy stricte decyzyjne, okazjonalnie jako funkcja celu została wykorzystana funkcja stała $f: X -> {1}$. W tym przypadku nie interesuje nas w ogóle jej wartość, szukamy jedynie wartości spełniających ograniczenia.
+
+W innym wypadku, gdy mamy do czynienia z wersją decyzyjną problemu optymalizacyjnego, musimy zastosować ograniczenie funkcji celu
+
+=== #ham
+
+=== #cli
+
+=== #tsp
+Problem komiwojażera jest jednym z najbardziej popularnych problemów z klasy #np, jest przedmiotem wielu rozważań, powstało także wiele algorytmów rozwiązujących go, a dodatkowo posiadamy również *Solvery* zajmujące się rozwiązywaniem tego problemu. Jednym z najlepszych solverów dostępnych w internecie jest solver #link("https://www.math.uwaterloo.ca/tsp/concorde.html")[*Concorde*], w dodatku jest on dostępny w języku Julia za pomocą biblioteki #link("https://github.com/chkwon/Concorde.jl")[*Concorde.jl*]. Solver ten został wykorzystany w bibliotece jako szybsza alternatywa dla modeli #mip. 
 
 = Implementacja systemu w języku Julia
 == Wybór technologii i środowiska
