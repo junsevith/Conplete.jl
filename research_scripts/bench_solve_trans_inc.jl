@@ -8,7 +8,7 @@ solver = CPLEX.Optimizer
 
 include("save_data.jl")
 
-function bench(problem, name, path, sec=10)
+function bench(problem, name, path::Vector{Type{<:NPProblem}}, sec=10)
     suite = BenchmarkGroup()
 
     x = problem
@@ -67,7 +67,7 @@ smol = [
   2 3 5
 ]
 
-bench(SAT3(smol), "knap", [SubsetSum, Partition, Knapsack])
+bench(SAT3(smol), "knap", Vector{Type{<:NPProblem}}([SubsetSum, Partition, Knapsack]))
 # bench("bin", [SubsetSum, Partition, BinPacking])
 # bench("ham", [DirHamCycle, HamCycle, TSP])
 
