@@ -1,3 +1,9 @@
 [deps]
+BenchmarkTools = "6e4b80f9-dd63-53aa-95a3-0cdb28fa8baf"
+CPLEX = "a076750e-1247-5638-91d2-ce28b192dca0"
 Concorde = "df6a336b-a67f-4155-81fc-4f05fe893652"
 Conplete = "ad4576df-0cfb-40d1-a195-8ac8b2a72e08"
+IterTools = "c8e1da08-722c-5040-9ed9-7db0dc04731e"
+JSON = "682c06a0-de6a-54ab-a142-c8b1cf79cde6"
+JuMP = "4076af6c-e467-56ae-b986-b466b2749572"
+Statistics = "10745b16-79ce-11e8-11f9-7d13ad32a3b2"

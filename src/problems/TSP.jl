@@ -1,5 +1,5 @@
 function transform(parent::HamCycle, target::Type{TSP})
-    return TSP(map(x -> x == 1 ? 0 : 1, adjacency_matrix(parent.graph)), 0)
+    return TSP(map!(x -> 1-x, Matrix(adjacency_matrix(parent.graph))), 0)
 end
 
 extract(sol::TSPSolution, parent::HamCycle) = HamCycleSolution(sol.cycle)

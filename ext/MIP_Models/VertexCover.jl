@@ -3,7 +3,7 @@ function Conplete.solve(solver, problem::VertexCover)
 
     # set_optimizer_attribute(model, "msg_lev", 3)
     set_silent(model)
-    @variable(model, v[vertices(problem.graph)], Bin)
+    @variable(model, v[1:nv(problem.graph)], Bin)
 
     for e in edges(problem.graph)
       @constraint(model, v[src(e)] + v[dst(e)] >= 1)

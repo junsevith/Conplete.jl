@@ -8,6 +8,8 @@ function Conplete.solve(solver, inst::HittingSet)
         @constraint(model, sum(i -> x[i], s) >= 1)
     end
 
+    @constraint(model, sum(x) <= inst.size)
+
     @objective(model, Min, sum(x))
 
     optimize!(model)
