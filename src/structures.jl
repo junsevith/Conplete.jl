@@ -118,17 +118,13 @@ struct BinPackingSolution <: NPSolution
     assignment::Vector{Int}
 end
 
-struct Knapsack{T<:Integer} <: NPProblem
-    weights::Vector{T}
-    values::Vector{T}
-    max_weight::T
-    min_value::T
+struct Knapsack{S<:Integer,V<:Integer} <: NPProblem
+    elements::Vector{S}
+    values::Vector{V}
+    size::S
+    min_value::V
 end
 
-"""
-Solution to a Subset Sum problem containing a set of indices of selected elements
-
-"""
 struct KnapsackSolution{S<:AbstractSet{Int}} <: NPSolution
     subset::S
 end

@@ -97,3 +97,15 @@ function construct(target::Type{CliqueSolution}, sol::SAT3Solution, parent::SAT3
 
     return CliqueSolution(clique)
 end
+
+function transform(parent::VertexCover, target::Type{Clique})
+    return Clique(Graphs.complement(parent.graph), nv(parent.graph) - parent.size)
+end
+
+function extract(solution::CliqueSolution, instance::VertexCover)
+    return VertexCoverSolution(setdiff(Set(1:nv(instance.graph)), solution.clique))
+end
+
+function construct(target::Type{CliqueSolution}, solution::VertexCoverSolution, parent::VertexCover)
+    return CliqueSolution(setdiff(Set(1:nv(parent.graph)), solution.cover))
+end

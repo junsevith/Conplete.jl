@@ -67,3 +67,16 @@ function construct(target::Type{SubsetSumSolution}, sol::SAT3Solution, parent::S
 
     return SubsetSumSolution(subset)
 end
+
+function transform(inst::Partition, target::Type{SubsetSum})
+    v = _safehalf(sum(inst.elements))
+    return SubsetSum(inst.elements, v)
+end
+
+function extract(sol::SubsetSumSolution, parent::Partition)
+   return PartitionSolution(sol.subset)
+end
+
+function construct(target::Type{SubsetSumSolution}, sol::PartitionSolution, parent::Partition)
+   return SubsetSumSolution(sol.subset)
+end

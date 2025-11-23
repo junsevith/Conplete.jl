@@ -8,6 +8,7 @@ abstract type NPProblem end
 abstract type NPSolution end
 
 include("structures.jl")
+include("utils.jl")
 
 include("problems/CnfSAT.jl")
 include("problems/SAT3.jl")
@@ -84,6 +85,7 @@ export BinPacking
 export BinPackingSolution
 
 export Knapsack
+export KnapsackSolution
 
 """
     solve(solver, problem) -> solution
