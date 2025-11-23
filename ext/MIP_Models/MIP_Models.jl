@@ -14,5 +14,6 @@ include("CNFSAT.jl")
 include("HittingSet.jl")
 include("Partition.jl")
 include("BinPacking.jl")
+include("Knapsack.jl")
 
 end

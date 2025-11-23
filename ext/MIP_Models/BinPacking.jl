@@ -1,6 +1,8 @@
 function Conplete.solve(solver, inst::BinPacking)
     model = Model(solver)
 
+    @warn "This model provides accurate solutions only for values < 2^54 due to float conversion"
+
     n = length(inst.elements)
     m = inst.bins
 

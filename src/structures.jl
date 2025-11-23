@@ -79,7 +79,7 @@ end
 
 struct SubsetSum{T<:Integer} <: NPProblem
     elements::Vector{T}
-    sum::BigInt
+    sum::T
 end
 
 """
@@ -116,4 +116,15 @@ end
 
 struct BinPackingSolution <: NPSolution
     assignment::Vector{Int}
+end
+
+struct Knapsack{S<:Integer,V<:Integer} <: NPProblem
+    elements::Vector{S}
+    values::Vector{V}
+    size::S
+    min_value::V
+end
+
+struct KnapsackSolution{S<:AbstractSet{Int}} <: NPSolution
+    subset::S
 end

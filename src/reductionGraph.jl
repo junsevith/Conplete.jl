@@ -26,7 +26,8 @@ global solutions = Bijection{Type{<:NPProblem},Type{<:NPSolution}}(
     TSP => TSPSolution,
     HittingSet => HittingSetSolution,
     Partition => PartitionSolution,
-    BinPacking => BinPackingSolution
+    BinPacking => BinPackingSolution,
+    Knapsack => KnapsackSolution
     )
 
 global problemGraph = let

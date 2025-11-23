@@ -83,6 +83,10 @@ println(solver)
       global sat3_cnf = test_algo(SAT3, cnf, cnf_sol)
     end
 
+    @testset "3SAT->CNFSAT" begin
+      _ = test_algo(CNFSAT, sat3, sat3_sol)
+    end
+
     @testset "3SAT->VertexCover" begin
       global vc_sat3 = test_algo(VertexCover, sat3, sat3_sol)
     end
@@ -100,7 +104,11 @@ println(solver)
     end
 
     @testset "Clique->VertexCover" begin
-      global cli_vc = test_algo(VertexCover, cli_sat3...)
+      global vc_cli = test_algo(VertexCover, cli_sat3...)
+    end
+
+    @testset "VertexCover->Clique" begin
+      global cli_vc = test_algo(Clique, vc_sat3...)
     end
 
     @testset "DirHamCycle->HamCycle" begin
@@ -122,6 +130,18 @@ println(solver)
 
     @testset "Partition->BinPacking" begin
       global bin_par = test_algo(BinPacking, par_sub...)
+    end
+
+    @testset "Partition->Knapsack" begin
+      global knap_par = test_algo(Knapsack, par_sub...)
+    end
+
+    @testset "Partition->SubsetSum" begin
+      global sub_par = test_algo(SubsetSum, par_sub...)
+    end
+
+    @testset "SubsetSum->Knapsack" begin
+      global knap_sub = test_algo(Knapsack, sub_sat3...)
     end
 
   end
@@ -151,22 +171,37 @@ println(solver)
       chaindata = chain_transform(sat3, chainpath)
 
       @test typeof(first(chaindata)) == SAT3
-      @test typeof(last(chaindata)) == Knapsack
+      @test typeof(last(chaindata)) == Knapsack{BigInt,BigInt}
 
       chaindata = chain_transform(sat3, Knapsack)
 
       @test typeof(first(chaindata)) == SAT3
-      @test typeof(last(chaindata)) == Knapsack
+      @test typeof(last(chaindata)) == Knapsack{BigInt,BigInt}
 
       target = transform(sat3, chainpath)
 
-      @test typeof(target) == Knapsack
+      @test typeof(target) == Knapsack{BigInt,BigInt}
 
       target = transform(sat3, Knapsack)
 
-      @test typeof(target) == Knapsack
+      @test typeof(target) == Knapsack{BigInt,BigInt}
 
     end
+  end
+
+  @testset "Optional parameters" begin
+    parent, parent_sol = sat3, sat3_sol
+
+    res = transform(parent, CNFSAT)
+
+    @time sol = solve(solver, res)
+    @test validate(sol, res)
+
+    ext = extract(sol, parent)
+    @test validate(ext, parent)
+
+    con = construct(CNFSATSolution, parent_sol)
+    @test validate(con, res)
   end
 
 

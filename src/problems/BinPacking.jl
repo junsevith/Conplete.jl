@@ -13,7 +13,8 @@ function validate(sol::BinPackingSolution, inst::BinPacking)
 end
 
 function transform(inst::Partition{T}, target::Type{BinPacking}) where T<:Integer
-   return BinPacking(inst.elements, 2, T(sum(inst.elements) ÷ 2))
+   v = _safehalf(sum(inst.elements))
+   return BinPacking(inst.elements, 2, T(v))
 end
 
 function extract(sol::BinPackingSolution, parent::Partition)
