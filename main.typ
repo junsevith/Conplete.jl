@@ -1,13 +1,24 @@
 #import "temp.typ": project
 #import "@preview/diagraph:0.3.5": raw-render, render
 #import "@preview/fletcher:0.5.8" as fletcher: diagram, edge, node, shapes
-#import "@preview/lilaq:0.4.0" as lq
+#import "@preview/lilaq:0.5.0" as lq
 #import "@preview/lovelace:0.3.0": *
 #import "@preview/frame-it:1.2.0": *
+#import "@preview/tiaoma:0.3.0"
+#import "@preview/codly:1.3.0": *
+#import "@preview/codly-languages:0.1.1": *
+#import "@preview/zero:0.5.0": *
+#import "@preview/funarray:0.4.0": unzip
 
+#show: codly-init.with()
+
+#codly(languages: codly-languages)
 #set text(lang: "pl")
 
-#set math.equation(numbering: "1.")
+#set math.equation(numbering: "(1.)")
+
+#let weblink(..arg) = text(fill:rgb("c44"), weight: "bold" )[#underline[#link(..arg)] #footnote[#arg.pos().at(0)]]
+
 
 #let comm(it) = text(fill:luma(100))[ #h(5pt) \\\\ #it]  
 #let path = 1.2pt + rgb(255, 100, 100)
@@ -31,10 +42,6 @@
 #let pro = frame(kind: "problem", "Problem", red)
 // This is necessary. Don't forget this!
 #show: frame-style(styles.hint)
-
-#let problem-stype(title,tags,body,supplement,number,arg) = {
-  
-}
 
 #show: frame-style(kind: "problem", styles.hint)
 
@@ -66,6 +73,14 @@
 
 #let num = `num`
 
+#let node = node.with(radius: 1.5em, shape: circle, fill:white)
+
+#let tran = link(<tran>,$cal(T)$)
+#let solve = link(<solve>,$cal(S)$)
+#let extr = link(<extr>,$cal(E)$)
+#let con = link(<con>,$cal(C)$)
+
+
 #show: project.with(
   title: "Wielomianowe redukcje między trudnymi problemami decyzyjnymi z klasy NP",
   subtitle: "Praca Dyplomowa Inżynierska",
@@ -96,13 +111,9 @@
   popraw_sieroty: true,
 )
 
-
-= Wstęp
+#heading(numbering: none)[Wstęp]
 
 Celem pracy jest stworzenie biblioteki redukcji problemów klasy NP w języku programowania #link("https://julialang.org/")[Julia]. W bibliotece zaimplementowano następującą część drzewa konwersji problemów klasy NP. 
-
-#let node = node.with(radius: 1.5em, shape: circle, fill:white)
-
 
 = Podstawy teoretyczne <theory>
 
@@ -208,21 +219,21 @@ Wyrocznia jest więc w gruncie rzeczy hipotetycznym algorytmem rozwiązującym p
   Dla denego problemu $P_1$ obliczenia funkcji $f : I_P_1 -> S_P_2$. Mówimy że $P_1$ jest redukowalny w sensie Turinga do problemu $P_2$ jeśli istnieje algorytm $cal(R)$ dla problemu $P_1$ korzystający z wyroczni dla problemu $P_2$. Mówimy wtedy że $cal(R)$ jest redukcją w sensie Turinga z $P_1$ do $P_2$ i zapisujemy $P_1 scripts(<=)_T P_2$
 ]
 
-Widzimy że redukcja Karpa jest w rzeczywistości szczególnm przypadkeim redukcji Turinga, gdy mamy do czynienia z problemem decyzyjnym. 
+Widzimy że redukcja Karpa jest w rzeczywistości szczególnym przypadkiem redukcji Turinga, gdy mamy do czynienia z problemem decyzyjnym. 
 Tak samo jak dla redukcji Karpa definiujemy redukcje wielomianowe oznaczane są $P_1 scripts(<=)_T^p P_2$ i to właśnie takie redukcje będą implementowane w tej pracy, podzielimy jedynie algorytm $cal(R)$ na osobne części realizujące poszczególne operacje, tak aby można było je łatwo wykorzystać.  Strukturę redukcji Turinga oraz naszą interpretację zilustrowano na @turing_red[Rysunku]
 
 
 #figure(sdiagram(
     edge((-0.7,0),(0,0),"->", stroke:path),
   node((0,0),$I_P_1$),
-  // edge("->",$cal(S)_P_1$),
+  // edge("->",$solve_P_1$),
   node((1,0),$S_P_1$),
   node((0,1),$I_P_2$),
-  edge("->",$cal(S)_P_2$, stroke:path),
+  edge("->",$solve_P_2$, stroke:path),
   node((1,1),$S_P_2$),
-  edge((0,0),(0,1),"->",$cal(T)$, stroke:path),
-  edge((1,0),(1,1),"->",$cal(C)$, shift:5pt, label-side:left),
-  edge((1,0),(1,1),"<-",$cal(E)$, shift:-5pt, stroke:path),
+  edge((0,0),(0,1),"->",solve, stroke:path),
+  edge((1,0),(1,1),"->",con, shift:5pt, label-side:left),
+  edge((1,0),(1,1),"<-",extr, shift:-5pt, stroke:path),
   edge((1,0),(1.7,0),"->", stroke:path),
   
   edge((-4.7,0),(-4,0),"->"),
@@ -246,21 +257,21 @@ Tak samo jak dla redukcji Karpa definiujemy redukcje wielomianowe oznaczane są 
 caption:[Struktura redukcji Turinga w porównaniu z algorytmami omawianymi w pracy]
 ) <turing_red>
 
-Jak widzimy redukcja Turinga jest bezpośrednio realizowana za pomocą kilku algorytmów które możemy opisać w następujący sposób. Dodatkowo definiujemy algorytm $cal(C)$ który jest dopełnieniem funkcjonalności w bibliotece.
+Jak widzimy redukcja Turinga jest bezpośrednio realizowana za pomocą kilku algorytmów które możemy opisać w następujący sposób. Dodatkowo definiujemy algorytm #con który jest dopełnieniem funkcjonalności w bibliotece.
 
-- $cal(T)$ - transformacja (redukcja) egzemplarza $x in P_1$ do $x' in P_2$
-- $cal(S)$ - rozwiązanie egzemplarza $x' in P_2$, odpowiednik wyroczni
-- $cal(E)$ - ekstrakcja rozwiązania $y in S_P_1$ z rozwiązania $y' in S_P_2$ 
-- $cal(C)$ - konstrukcja rozwiązania $y' in S_P_2$ przy pomocy rozwiązania $y in S_P_1$
+- #solve - transformacja (redukcja) egzemplarza $x in P_1$ do $x' in P_2$ <tran>
+- #solve - rozwiązanie egzemplarza $x' in P_2$, odpowiednik wyroczni <solve>
+- #extr - ekstrakcja rozwiązania $y in S_P_1$ z rozwiązania $y' in S_P_2$ <extr>
+- #con - konstrukcja rozwiązania $y' in S_P_2$ przy pomocy rozwiązania $y in S_P_1$ <con>
 
-W rzeczywistości transformacja rozwiązań bardzo często wymaga dodatkowych informacji o redukcji które w redukcji Turinga mogą być zachowane w algorytmie. W bibliotece jednak powoduje to potrzebę przekazania do algorytmów $cal(E)$ i $cal(C)$ zarówno egzemplarza problemu jak i jego rozwiązania.
+W rzeczywistości transformacja rozwiązań bardzo często wymaga dodatkowych informacji o redukcji które w redukcji Turinga mogą być zachowane w algorytmie. W bibliotece jednak powoduje to potrzebę przekazania do algorytmów #extr i #con zarówno egzemplarza problemu jak i jego rozwiązania.
 
 
 == Klasyczne problemy NP-zupełne
 
 Mając już zdefiniowane wszystkie pojęcia, możemy zdefiniować formalnie problemy które będą zawarte w pracy. Większość definicji została zaczerpnięta z książki @rivest_wprowadzenie_2024, dla problemów tam nieobecnych wykorzystano definicje z @sudkamp_languages_2006. Wszystkie definicje zostały zarazem zweryfikowane z książką @garey_computers_1990[Appendix] która stanowi doskonały katalog formalnych definicji problemów z klasy #np.
 
-Najbardziej podstawowym problemem z kalsy #np jest problem *spełnialności formuł logicznych* w skrócie #rsat. Jest to również pierwszy problem dla którego udowodniono #np - zupełność, o czym mówi *twierdzenie Cook'a* którego dokładniejszy opis możemy zobaczyć w @rivest_wprowadzenie_2024[Lemat 34.6]. W skrócie mówi ono że problem #rsat może w pewien sposób emulować działanie algorytmu niedeterministycznego, a więc można z jego pomocą rozwiązać dowolny inny problem.
+Najbardziej podstawowym problemem z klasy #np jest problem *spełnialności formuł logicznych* w skrócie #rsat. Jest to również pierwszy problem dla którego udowodniono #np - zupełność, o czym mówi *twierdzenie Cook'a* którego dokładniejszy opis możemy zobaczyć w @rivest_wprowadzenie_2024[Lemat 34.6]. W skrócie mówi ono że problem #rsat może w pewien sposób emulować działanie algorytmu niedeterministycznego, a więc można z jego pomocą rozwiązać dowolny inny problem.
 
 #pro[#rsat - Spełnialność formuł logicznych][
   #pad(left:1em)[
@@ -346,20 +357,20 @@ Kolejnymi w grupie są problemy bardzo blisko związanie z #vc
 
 Na pierwszy rzut oka powiązanie tych problemów nie jest oczywiste, są to jednak problemy niemalże równoważne, zauważmy że dla grafu $G = (V,E)$ podzbiór $V' subset.eq V$ jest pokryciem wierzchołkowym wtedy i tylko wtedy gdy jego dopełnienie $V \\ V'$ jest zbiorem niezależnym zobacz @kleinberg_algorithm_2006[Tw. 8.3]. Ponadto $V'$ jest zbiorem niezależnym wtedy i tylko wtedy gdy $V'$ jest kliką w dopełnieniu grafu $G^C = (V,E^C)$.
 
-#pro[#hit - Problem zbioru przecianjącego][
+#pro[#hit - Problem zbioru przecinającego][
   #pad(left:1em)[
   *Dane wejściowe* : #box(baseline: 100% - 7pt)[
     $S$ - Skończony zbiór \
-    $cal(C)$ - skończona rodzina podzbiorów $S$ \
+    #con - skończona rodzina podzbiorów $S$ \
     $k$ - liczba naturalna
   ] 
 
     *Pytanie* : Czy istnieje podzbiór $S' subset.eq S$ rozmiaru co najwyżej $k$, taki że dla dowolnego podzbioru $C in cal(C)$ przekrój $S' inter C$ jest niepusty?
 ]] <hit>
 
-Możemy łatwo zauważyć że problem #hit jest uogólnieniem problemu #vc na "grafy" gdzie jedna krawędź może łączyć więcej niż 2 wierzchołki.
+Możemy zauważyć że problem #hit jest uogólnieniem problemu #vc na "grafy" gdzie jedna krawędź może łączyć więcej niż 2 wierzchołki.
 
-Następna grupa to problemy dotyczące cykli w grafie, cyklem w grafie $G = (V,E)$ nazywamy ciąg wierzchołków $v_i in V : chevron v_0,v_1,dots,v_k chevron.r$ w którym każde dwa kolejne wierzchołki są połączone krawędzią z $E$ oraz $v_0 = v_k$. Ponadto w poniższych problemach będziemy rozpatrywać *cykle Hamiltona* czyli cykle odwiedzające wszystkie wierzchołki w grafie.
+Następna grupa to problemy dotyczące cykli w grafie, cyklem w grafie $G = (V,E)$ nazywamy ciąg wierzchołków $v_i in V : chevron v_0,v_1,dots,v_k chevron.r$ w którym każde dwa kolejne wierzchołki są połączone krawędzią z $E$ oraz $v_0 = v_k$. Ponadto w poniższych problemach będziemy rozpatrywać *cykle Hamiltona* czyli cykle odwiedzające wszystkie wierzchołki w grafie dokładnie raz.
 
 #pro[#uham - Problem cyklu Hamiltona][
   #pad(left:1em)[
@@ -428,6 +439,8 @@ Ostatnia grupa to problemy sum podzbiorów, w tych problemach zazwyczaj szukamy 
 
 ]]<bin>
 
+Możemy zauważyć że powyższe problemy są w zasadzie równoważne, różni je jedynie konfiguracja. Często #subs oraz #part bywają nazywane podproblemami problemu plecakowego który w tej grupie jest zdecydowanie najbardziej popularny.
+
 #pro[#knap - Problem plecakowy][
   #pad(left:1em)[
   *Dane wejściowe* : #box(baseline: 100% - 7pt)[
@@ -441,7 +454,7 @@ Ostatnia grupa to problemy sum podzbiorów, w tych problemach zazwyczaj szukamy 
 
 ]]<knap>
 
-Ostatnim z omawianych problemów a zarazem problemem w pewien sposób ukrytym jest problem #mip. Ukrytym ponieważ nie występuje on jawnie w bibliotece, jest on jednak wykorzystywany w algorytmie rozwiązującym: $cal(S)$. W rzeczywistości realizujemy więc niejawną redukcję do problemu #mip dla wszystkich wymienionych wcześniej problemów. Jest tak ponieważ rozwiązanie problemów #mip może być łatwo realizowane za pomocą szeroko dostępnych  narzędzi takich jak solvery MIP, które dodatkowo działają porównywalnie szybko. Redukcja do #mip jest również zazwyczaj dosyć łatwa, co sprawiło że metoda ta została wybrana jako domyślny sposób rozwiązywania egzemplarzy problemów w tej bibliotece.
+Ostatnim z omawianych problemów a zarazem problemem w pewien sposób ukrytym jest problem #mip. Ukrytym ponieważ nie występuje on jawnie w bibliotece, jest on jednak wykorzystywany w algorytmie rozwiązującym: #solve. W rzeczywistości realizujemy więc niejawną redukcję do problemu #mip dla wszystkich wymienionych wcześniej problemów. Jest tak ponieważ rozwiązanie problemów #mip może być łatwo realizowane za pomocą szeroko dostępnych  narzędzi takich jak solvery MIP, które dodatkowo działają porównywalnie szybko. Redukcja do #mip jest również zazwyczaj dosyć łatwa, co sprawiło że metoda ta została wybrana jako domyślny sposób rozwiązywania egzemplarzy problemów w tej bibliotece.
 
 #pro[#mip - Programowanie całkowitoliczbowe][
   
@@ -467,13 +480,13 @@ Ostatnim z omawianych problemów a zarazem problemem w pewien sposób ukrytym je
 
 W rzeczywistości kilka z wcześniej wymienionych problemów to tak naprawdę problemy optymalizacyjne. *Problem optymalizacyjny* to problem gdzie z każdym dopuszczalnym rozwiązaniem związana jest pewna wartość i chcemy znaleźć rozwiązanie dopuszczalne z najlepszą wartością.
 
-Złożoność obliczeniowa problemów gdzie szukamy minimalnego lub maksymalnego rozwiązania znacząco różni się problemów z klasy #np. Istnieje jednak przydatna zależność między problemami optymalizacyjnymi a decyzyjnymi. Możemy zazwyczaj przejść od problemu optymalizacyjnego do pokrewnego problemu decyzyjnego, wprowadzając dodatkowy parametr - ograniczenie optymalizowanej wartości, czego przykład możemy zobaczyć np. w @knap[Problemie #knap], gdzie stała $m$ jest ograniczeniem funkcji celu.
+Złożoność obliczeniowa problemów gdzie szukamy minimalnego lub maksymalnego rozwiązania różni się problemów z klasy #np. Istnieje jednak przydatna zależność między problemami optymalizacyjnymi a decyzyjnymi. Możemy zazwyczaj przejść od problemu optymalizacyjnego do pokrewnego problemu decyzyjnego, wprowadzając dodatkowy parametr - ograniczenie optymalizowanej wartości, czego przykład możemy zobaczyć np. w @knap[Problemie #knap], gdzie stała $m$ jest ograniczeniem funkcji celu.
 Zależność ta została poza tym wykorzystana w kilku innych problemach wymienionych wyżej.
 
 
 
 = Analiza i opis wybranych redukcji
-
+gadżety itd.
 == Redukcje trywialne
 
 == Redukcja #sat3 do #vc
@@ -1294,34 +1307,34 @@ Jak widzimy Cykl Hamiltona jeśli tylko może "ucieka" do podgrafu klauzuli tzn.
 Otrzymaliśmy więc prawidłowy graf emulujący za pomocą #ham problem #sat3, przykładową ewaluację #sat3 możemy zobaczyć na @3sat-ham[Rysunku]. 
 
 
-= Projekt systemu odwzorowującego graf redukcji
+= Projekt systemu odwzorowującego graf redukcji <proj>
 
 == Założenia i cel projektu
-Celem projektu jest stworzenie biblioteki programistycznej implementującej redukcje problemów NP-zupełnych. Biblioteka powinna zapewniać jak najbardziej kompletną funkcjonalność aby stanowiła pomoc w możliwie wielu zastosowaniach i prezentowała dużą wartość dodaną. Oto kilka założeń jakie towarzyszyły mi podczas konstrukcji biblioteki:
+Celem projektu jest stworzenie biblioteki programistycznej implementującej redukcje problemów NP-zupełnych.  Przy czym głównym zastosowaniem owych redukcji jest wykorzystanie algorytmu dla dowolnego problemu #np - zupełnego do rozwiązania innych problemów z grafu redukcji. Biblioteka powinna zapewniać jak najbardziej kompletną funkcjonalność aby stanowiła pomoc w możliwie wielu zastosowaniach i prezentowała dużą wartość dodaną. Oto kilka założeń jakie towarzyszyły nam podczas konstrukcji biblioteki:
 
-+ *Idiomatyczność i Łatwość wykorzystania* - sposób użycia biblioteki powinien być na pierwszy rzut oka możliwie oczywisty dla sprawnego użytkownika, wszystkie nazwy elementów biblioteki powinny być logicznie podparte i nieskomplikowane 
++ *Idiomatyczność i Łatwość wykorzystania* - sposób użycia biblioteki powinien być na pierwszy rzut oka możliwie oczywisty dla sprawnego użytkownika, działanie elementów biblioteki powinno być logicznie podparte i nieskomplikowane, nazewnictwo powinno być intuicyjne i spójne 
 
-+ *Wydajność* - wszystkie części biblioteki powinny być skonstruowane możliwie optymalnie, aby skrócić czas działania oraz wpływ na skomplikowanie danych wynikowych
++ *Wydajność* - wszystkie części biblioteki powinny być skonstruowane możliwie optymalnie, aby skrócić czas działania oraz możliwie zmniejszyć wzrost rozmiaru egzemplarza. Implementowane redukcje muszą działać w czasie wielomianowym, aby zachować przynależność do klasy #np.
 
-+ *Spójność* - wszystkie elementy biblioteki powinny być wzajemnie spójne, powinny dzielić sposoby ich wykorzystania, oraz odpowiednio ze sobą współgrać
++ *Spójność* - wszystkie elementy biblioteki powinny być wzajemnie spójne, powinny współdzielić sposoby ich wykorzystania, oraz odpowiednio ze sobą współgrać
 
 + *Kompatybilność* - ponieważ mamy do czynienia z zagadnieniami które nie są wysoce ustandaryzowanie, biblioteka musi być możliwie kompatybilna z dowolnymi wybranymi przypadkami uzycia, oraz stosować się do przyjętych standardów jeżeli tylko takie istnieją.
 
 == Interfejsy wykorzystywane w systemie
 
-W celu zachowania spójności w bibliotece zastosowano interfejsy funkcyjne. Odpowiadają one bezpośrednio algorytmom zdefiniowanym w @theory[Rozdziale].
+W celu ujednolicenia operacji a co za tym idzie zwiększenia spójności, dostęp do funkcjonalności biblioteki zawarto w kilku interfejsach funkcyjnych. Odpowiadają one bezpośrednio algorytmom zdefiniowanym w @theory[Rozdziale].
 
 - #smallcaps[Transform]$(I_P_1,P_2) -> I_P_2$ - transformacja (redukcja) egzemplarza problemu $P_1$ do egzemplarza problemu $P_2$, odpowiednik algorytmu $cal(T)_(P_1->P_2)$
 
-- #smallcaps[Solve]$(I_P) -> {S_P,$ #nie$}$ - rozwiązanie zadanej instancji problemu, odpowiednik  $cal(S)_P$
+- #smallcaps[Solve]$(I_P) -> {S_P,$ #nie$}$ - rozwiązanie zadanej instancji problemu, odpowiednik  $solve_P$
 
 - #smallcaps[Extract]$(S_P_2,I_P_1) -> S_P_1$ - odpakowanie rozwiązania egzemplarza $I_P_2$ będącego wynikiem transformacji, do rozwiązania źródłowego egzemplarza $I_P_1$, odpowiednik algorytmu $cal(E)_(P_1->P_2)$
 
 - #smallcaps[Construct]$(P_2,S_P_1,I_P_1) -> S_P_2$ - skonstruowanie rozwiązania dla egzemplarza $I_P_2$ będącego wynikiem transformacji, wykorzystując rozwiązanie źródłowego egzemplarza $I_P_1$, odpowiednik algorytmu $cal(C)_(P_1->P_2)$
 
-- #smallcaps[Validate]$(S_X, I_X) -> {tru, fal}$ - sprawdzenie poprawności zadanego rozwiązania instancji problemu $X$, odpowiednik algorytmu $cal(V)_X$
+- #smallcaps[Validate]$(S_X, I_X) -> {$#tak, #nie$}$ - sprawdzenie poprawności zadanego rozwiązania instancji problemu $X$, odpowiednik algorytmu $cal(V)_X$
 
-Przedstawione interfejsy prezentują całość funkcjonalności biblioteki
+Przedstawione interfejsy prezentują całość funkcjonalności biblioteki. Warto dodać że funkcja #smallcaps[Transform] poza operacją redukcji musi realizować odpowiednie zachowanie informacji o egzemplarzu źródłowym w celu ułatwienia późniejszej ekstrakcji rozwiązania, więcej w tym temacie opowiemy w  @algos[rozdziale].
 
 == Implementacja grafu redukcji
 Poniższy graf prezentuje problemy dla których zaimplementowano funkcjonalności, gdzie krawędź $P_1 -> P_2$ oznacza implementację wszystkich interfejsów dla danej pary problemów $P_1, P_2$.
@@ -1380,11 +1393,14 @@ Wykorzystanie łańcucha instancji $C_(1..n)$ jest wymagane dla interfejsów #sm
 
 == Możliwość rozbudowy o kolejne problemy
 
-Ważną funkcjonalnością systemu jest rozszeczenie grafu transformacji przez użytkownika. Dostępne jest dodanie dowolnych problemów jako wierzchołków w grafie, oraz dowolnych transformacji jako krawędzi w grafie. Rozszerzenie takie będzie współgrać całkowicie z systemem, pod warunkiem przestrzegania przez uzytkownika definicji interfejsów, o których było mowa powyżej.
+System został zaprojektowany zgodnie z zasadą otwartości na rozbudowę, ważną funkcjonalnością systemu jest rozszeczenie grafu transformacji przez użytkownika. Rozszerzenie takie będzie współgrać całkowicie z systemem, pod warunkiem przestrzegania przez użytkownika definicji interfejsów, o których było mowa powyżej.
 
-= Wybrane algorytmy redukcji
 
-W tym rozdziale przedstawimy algorytmy realizujące wybrane, nietrywialne redukcje. Konstrukcja takiego algorytmu nie jest zazwyczaj wysoce skomplikowana, jeśli dobrze zrozumieliśmy proces redukcji. Wykorzystują one jednak pewną właściwość która może się wydać oczywista z programistycznego punktu widzenia, warto jednak o niej wspomnieć. Mowa tutaj o *numerowaniu* czyli przypisywaniu do jakichś obiektów liczb naturalnych. Formalnie możemy zapisać to w taki sposób $N : X -> NN$, dla dowolnego skończonego zbioru $X$. Numerowanie w komputerach jest powszechne i służy jako sposób identyfikacji obiektów, w szczególności w jakiejś strukturze danych. Wybór odpowiedniego numerowania w naszym wypadku jest o tyle ważny ponieważ pozwala on na odpowiednią identyfikację komponentów struktury egzemplarza danego problemu, co z kolei jest często niezbędne do ekstrakcji rozwiązania za pomocą algorytmu $cal(E)$. Dlatego właśnie często będziemy definiować specyficzne numerowanie dla egzemplarzy wynikowych algorytmu $cal(R)$ czego przykład możemy zobaczyć w @num_ex[Równaniu]
+Dostępne jest dodanie dowolnych problemów jako wierzchołków w grafie, oraz dowolnych transformacji jako krawędzi w grafie. 
+
+= Wybrane algorytmy redukcji <algos>
+
+W tym rozdziale przedstawimy algorytmy realizujące wybrane, nietrywialne redukcje. Konstrukcja takiego algorytmu nie jest zazwyczaj wysoce skomplikowana, jeśli dobrze zrozumieliśmy proces redukcji. Wykorzystują one jednak pewną właściwość która może się wydać oczywista z programistycznego punktu widzenia, warto jednak o niej wspomnieć. Mowa tutaj o *numerowaniu* czyli przypisywaniu do jakichś obiektów liczb naturalnych. Formalnie możemy zapisać to w taki sposób $N : X -> NN$, dla dowolnego skończonego zbioru $X$. Numerowanie w komputerach jest powszechne i służy jako sposób identyfikacji obiektów, w szczególności w jakiejś strukturze danych. Wybór odpowiedniego numerowania w naszym wypadku jest o tyle ważny ponieważ pozwala on na odpowiednią identyfikację komponentów struktury egzemplarza danego problemu, co z kolei jest często niezbędne do ekstrakcji rozwiązania za pomocą algorytmu #extr. Dlatego właśnie często będziemy definiować specyficzne numerowanie dla egzemplarzy wynikowych algorytmu $cal(R)$ czego przykład możemy zobaczyć w @num_ex[Równaniu]
 
 == Redukcja #sat3 do #ham
 
@@ -1604,7 +1620,7 @@ Jeśli któraś ze zmiennych $x_i$ nie była nigdy użyta w klauzuli, jej wierzc
 
 // === Algorytm
 
-Algorytm jest dosyć elementarny i sam nasuwa się na myśl jeżeli zrozumieliśmy zasadę działania konwersji, wystarczy jedynie ustalić odpowiednie numerowanie wierzchołków aby ułatwić ich łączenie, wierzchołki numerujemy kolejnymi liczbami naturalnymi z przedziału $angle.l 1 , 2n+3m angle.r$ gdzie $n$ to ilość zmiennych a $m$ ilość klauzul.
+Algorytm jest dosyć elementarny i sam nasuwa się na myśl jeżeli zrozumieliśmy zasadę działania konwersji, wystarczy jedynie ustalić odpowiednie numerowanie wierzchołków aby ułatwić ich łączenie, wierzchołki numerujemy kolejnymi liczbami naturalnymi z przedziału $chevron 1 , 2n+3m chevron.r$ gdzie $n$ to ilość zmiennych a $m$ ilość klauzul.
 
 $
 num(x_i) &= i \
@@ -1689,35 +1705,430 @@ Obecność w zbiorze #vc wierzchołka $v_i$ gdzie $i in chevron 1,n chevron.r$ o
 
 == Wybrane metody rozwiązywania 
 
-Tak jak wcześniej wspomnieliśmy w  rozwiązanie egzemplarza za pomocą algorytmu $cal(S)$ odbywa się w znacznej większości poprzez redukcję do problemu #mip. Dlatego więc w tym podrozdziale wymienimy kilka modeli programowania całkowitoliczbowego które zostały wykorzystanie w bibliotece.
+Tak jak wcześniej wspomnieliśmy w  rozwiązanie egzemplarza za pomocą algorytmu #solve odbywa się w znacznej większości poprzez redukcję do problemu #mip. Dlatego więc w tym podrozdziale wymienimy kilka modeli programowania całkowitoliczbowego które zostały wykorzystanie w bibliotece.
 
  W problemach #mip wymagane jest ustalenie funkcji celu którą będziemy minimalizować lub maksymalizować. Ponieważ jednak niektóre z omawianych problemów to problemy stricte decyzyjne, okazjonalnie jako funkcja celu została wykorzystana funkcja stała $f: X -> {1}$. W tym przypadku nie interesuje nas w ogóle jej wartość, szukamy jedynie wartości spełniających ograniczenia.
 
-W innym wypadku, gdy mamy do czynienia z wersją decyzyjną problemu optymalizacyjnego, musimy zastosować ograniczenie funkcji celu
+W innym wypadku, gdy mamy do czynienia z wersją decyzyjną problemu optymalizacyjnego, musimy zastosować ograniczenie funkcji celu, które zasadniczo jest również zwykłym ograniczeniem. Dla czytelności zapiszemy je jednak przy funkcji celu.
 
 === #ham
 
+=== #subs i pochodne
+
 === #cli
 
-=== #tsp
-Problem komiwojażera jest jednym z najbardziej popularnych problemów z klasy #np, jest przedmiotem wielu rozważań, powstało także wiele algorytmów rozwiązujących go, a dodatkowo posiadamy również *Solvery* zajmujące się rozwiązywaniem tego problemu. Jednym z najlepszych solverów dostępnych w internecie jest solver #link("https://www.math.uwaterloo.ca/tsp/concorde.html")[*Concorde*], w dodatku jest on dostępny w języku Julia za pomocą biblioteki #link("https://github.com/chkwon/Concorde.jl")[*Concorde.jl*]. Solver ten został wykorzystany w bibliotece jako szybsza alternatywa dla modeli #mip. 
+Sformułowanie modelu dla problemu kliki nie jest oczywiste, podejście naiwne w tym wypadku skutkuje modelem niepotrzebnie skomplikowanym. Dlatego spróbujemy zastosować mniej oczywiste podejście, wcześniej w @theory[rozdziale] wspomnieliśmy o bliskim związku problemu #cli z problemem #ind, co możemy wykorzystać. Okazuje się że model dla problemu zbioru niezależnego jest dosyć prosty, dlatego możemy go nieco zmodyfikować aby rozwiązywał problem #cli. Model ten został zaczerpnięty z pracy @seda_maximum_2023.
 
-= Implementacja systemu w języku Julia
+$
+"maximize" quad &z = sum_(t = 1)^n x_t \
+"subject to" quad & z >= k \
+& x_t + x_j <= 1, quad & forall{v_t,v_j} in.not E\
+
+& x_i in {0,1}, & i = 1, dots, n  \
+$
+
+Jak widać operujemy tu implicytnie na grafie dopełnionym, tzn. szukamy zbioru niezależnego w grafie $G^C = (V,E^C)$. Działanie tego modelu można streścić zdaniem: _jeżeli nie istnieje krawędź pomiędzy dwoma wierzchołkami, nie mogą oba jednocześnie należeć do kliki_. Zdanie to jest równoważne definicji problemu #cli.
+ 
+
+=== #tsp
+Problem komiwojażera jest jednym z najbardziej popularnych problemów z klasy #np, jest przedmiotem wielu rozważań, powstało także wiele algorytmów rozwiązujących go, a dodatkowo posiadamy również *Solvery* zajmujące się rozwiązywaniem tego problemu. Jednym z najlepszych solverów dostępnych w internecie jest solver #weblink("https://www.math.uwaterloo.ca/tsp/concorde.html")[*Concorde*], w dodatku jest on dostępny w języku Julia za pomocą biblioteki #weblink("https://github.com/chkwon/Concorde.jl")[*Concorde.jl*]. Solver ten został wykorzystany w bibliotece jako szybsza alternatywa dla modeli #mip. 
+
+= Implementacja systemu
+
+W tym rozdziale przedstawimy szczegóły implementacyjne biblioteki. Będzie on koncentrował się na przekształceniu opisanej wyżej teorii na praktyczne programy.
 == Wybór technologii i środowiska
+Jako język programowania został wybrany język #weblink("https://julialang.org/")[Julia], jest to doskonałe narzędzie w szczególności skierowane do zastosowań matematycznych i obliczeń naukowych. Zawarty w nim dynamiczny system typów pozwala na tworzenie elastycznych i łatwych w użyciu systemów, jest on przy tym językiem kompilowanym, z szczególnym naciskiem na wydajność. Język Julia posiada również bogaty wybór bibliotek o zastosowaniach matematyczno-naukowych, następujące z nich zostały użyte w tym projekcie:
+
+- #weblink("https://juliagraphs.org/Graphs.jl/v1.5/")[Graphs.jl] - bardzo szybka biblioteka dostarczająca implementacje grafów skierowanych i nieskierowanych, została wykorzystana jako podstawa reprezentacji problemów grafowych
+
+- #weblink("https://github.com/JuliaCollections/Bijections.jl")[Bijections] - biblioteka oferująca dwukierunkową mapę, używana do translacji typów
+
+- #weblink("https://github.com/JuliaCollections/DataStructures.jl")[DataStructures] - biblioteka oferująca różnorakie struktury danych, kolejka z tej biblioteki jest wykorzystywana w algorytmach redukcji
+
+- #weblink("https://juliapackages.com/p/itertools")[IterTools] - biblioteka oferująca dodatkowe funkcjonalności w szybkim przetwarzaniu danych za pomocą iteratorów
+
+W bibliotece wykorzystano jedną z nowych funkcjonalności języka, a mianowicie *extensions*, czyli rozszerzenia. Umożliwia ona dodanie opcjonalnych funkcjonalności w bibliotece, zależnych od innych zaimportowanych bibliotek. Ręczne zaimportowanie tych bibliotek umożliwia dostęp do dodatkowej funkcjonalności rozwiązywania odpowiednich problemów
+
+- #weblink("https://jump.dev/JuMP.jl/stable/")[JuMP] - biblioteka do modelowania problemów programowania liniowego i całkowitoliczbowego, zapewniająca interfejs do wykorzystania solverów LP i MIP, została użyta do rozwiązywania problemów #mip, a co za tym idzie implementacji algorytmu #solve
+
+- #weblink("https://github.com/chkwon/Concorde.jl")[Concorde.jl] - interfejs do nowoczesnego solvera dla problemu #tsp
 == Hierarchia typów i metod
+
+Podstawą biblioteki są typy abstrakcyjne reprezentujące abstrakcyjny egzemplarz problemu oraz abstrakcyjne rozwiązanie. Typy te są rodzicami wszystkich konkretnych typów i umożliwiają definiowanie współdzielonych funkcjonalności
+
+```julia
+abstract type NPProblem end
+abstract type NPSolution end
+struct CNFSAT <: NPProblem ...
+```
+
+W bibliotece zastosowano omówione wcześniej w @proj[rozdziale] interfejsy funkcyjne. W postaci ogólnej wyglądają one w następujący sposób:
+
+#figure(
+  table(
+  columns: 3,
+  align: horizon + left,
+  table.header(
+    [*Funkcja*], [*Argumenty*], [*Rezultat*],
+  ),
+  [`transform`],[`I::NPProblem` \ `P::Type{<:NPProblem}`], [`NPProblem`],
+  [`solve`],[`solver` \ `I::NPProblem`], [`NPSolution` \ lub \ `nothing`],
+  [`extract`],[`S::NPSolution` \ `I::NPProblem`], [`NPSolution`],
+  [`validate`],[`S::NPSolution` \ `I::NPProblem`], [`bool`],
+  [`construct`],[`P::Type{<:NPSolution}` \ `S::NPSolution` \ `I::NPProblem`], [`NPSolution`],
+),
+caption: [Abstrakcyjne interfejsy funkcyjne w bibliotece]
+) <interfaces>
+
+// #figure(
+//   ```julia
+// transform(I::NPProblem, P::Type{<:NPProblem}) -> NPProblem
+//     solve(solver, I::NPProblem)               -> NPSolution
+//   extract(S::NPSolution, I::NPProblem)        -> NPSolution
+//  validate(S::NPSolution, I::NPProblem)        -> bool
+// construct(P::Type{<:NPSolution}, S::NPSolution, I::NPProblem)-> NPSolution
+// ```,
+// supplement: [Schemat],
+// caption: [Abstrakcyjne interfejsy funkcyjne w bibliotece]
+// ) <interfaces>
+
+ 
+
+W bibliotece wykorzystano funkcjonalność języka Julia o nazwie *multiple dispatch*. Pozwala ona na przypisanie do jednej funkcji o określonej nazwie, kilku implementacji zależnych od zadanych argumentów, owe osobne implementacje nazywamy *metodami*. W bibliotece każdy konkretny algorytm został zaimplementowany jako metoda dla odpowiedniej funkcji, przy czym te konkretne metody przyjmują również konkretne egzemplarze problemu.
+
+```julia
+function transform(sat3::SAT3, target::Type{VertexCover}) ...
+```
+
+Jeśli dla zadanych argumentów konkretna metoda nie istnieje, oznacza to że nie została zaimplementowana redukcja dla wybranych problemów.  Język stara się wtedy znaleźć metodę ogólniejszą, wykonywana wtedy jest metoda przyjmująca abstrakcyjne wersje problemów (taka jak przedstawiono na @interfaces[Schemacie]).
+
 == Implementacja wybranych problemów NP-zupełnych
+
+Każdy egzemplarz problemu reprezentowany jest przez strukturę, będącą podtypem abstrakcyjnego problemu `NPProblem`. Jako podstawa przechowywania danych została wykorzystana standardowa dla języka implementacja dynamicznej tablicy - `Vector`. Wszystkie definicje struktur zostały zawarte w pliku structures.jl. Poniżej przedstawimy i omówimy kilka wybranych implementacji.
+
+W bibliotece zarówno liczby naturalne jak i liczby całkowite zapisujemy wykorzystując typ całkowity `Int`. Podejście unifikujące wszystkie typy całkowite jest zalecane dla języka Julia, eliminuje ono błędy powstałe na skutek niezgodności typów (w szczególności częste w bibliotece JuMP), i powoduje znikomy wpływ na zakres możliwych przechowycwanych wartości. Dodatkowo typ dodatnich liczb całkowitych `UInt` w języku Julia jest utożsamiany z niskopoziomowymi operacjami na bitach. Konwencja ta jest powszechna zarówno w języku jak i bibliotekach.
+
+```julia
+struct SAT3 <: NPProblem
+    variable_count::Int
+    clauses::Matrix{Int}
+end
+```
+
+Dla problemu #sat3 struktura wygląda w sposób następujący, ponieważ nazwa typu w języku nie może zaczynać się od litery musiała ona zostać nieznacznie zmieniona. Nie określamy zbioru zmiennych, zamiast tego stosujemy uproszczenie: zmienne zaczynają się zawsze od $x_1$ i przechowujemy jedynie ich ilość, czyli `variable_count` $= n$. Klauzule zostały przedstawione jako macierz liczb całkowitych $M_(3 times m)$ gdzie $m$ to liczba klauzul. W macierzy dodatnia liczba całkowita $i$ oznacza użycie zmiennej $x_i$ a liczba $-i$ oznacza użycie negacji tej zmiennej $not x_i$, jest to standardowe podejście używane do zapisu problemów w bazach danych egzemplarzy #sat3 dostępnych w internecie. W ogólności zakładamy również że każda z zmiennych została użyta w klauzuli co najmniej raz, w przeciwnym wypadku niektóre z algorytmów mogą działać niepoprawnie.
+
+```julia
+struct CNFSAT <: NPProblem
+    variable_count::Int
+    clauses::Vector{Vector{Int}}
+end
+```
+
+Dla problemu #sat długość klauzuli może być dowolna, dlatego musimy zaastosować inne podejście. Zestaw klauzul w tym wypadku zapisujemy jako tablice dynamicznych tablic, co pozwala na przechowywanie klauzul o dowolnej długości.
+
+Dla problemów grafowych graf zapisujemy wykorzystując struktury z wcześniej wspomnianej biblioteki #weblink("https://juliagraphs.org/Graphs.jl/v1.5/")[Graphs.jl], poza tym przechowujemy wszystkie niezbędne parametry wspomniane w definicji problemu jako liczby całkowite.
+
+```julia 
+struct VertexCover <: NPProblem
+    graph::SimpleGraph
+    size::Int
+end
+```
+
+Dla problemu #tsp graf pełny jest w domyśle i przechowujemy jedynie funkcję celu jako macierz o rozmiarze odpowiadającym macierzy incydencji grafu.
+
+```julia
+struct TSP <: NPProblem
+    weights::Matrix{Int}
+    length::Int
+end
+```
+
+Dla problemów sum podzbiorów, powszechny jest bardzo duży rozmiar liczb składowych (w szczególności w algorytmach transformacji #tran), dlatego zdecydowaliśmy się na podejście generyczne umożliwiające użycie dowolnego typu całkowitego, na przykład standardowy typ liczb o zmiennej wielkości `BigInt`.
+
+```julia
+struct BinPacking{T<:Integer} <: NPProblem
+    elements::Vector{T}
+    bins::Int
+    bin_size::T
+end
+```
+Do oznaczania ilości jednak wykorzystano standardowy typ liczb całkowitych. Robimy tak ponieważ ze względu na ich znaczny wpływ na czas rozwiązywania, wartości te są zazwyczaj stosunkowo małe. Nawet dla maksymalnej dla typu `Int` liczby czas rozwiązywania wyniesie niewyobrażalnie długo. 
+
+== Implementacje egzemplarzy rozwiązań
+W następnej części omówimy wybrane implementacje struktur reprezentujących rozwiązania problemów.
+
+Dla problemu #sat rozwiązanie zapisujemy za pomocą struktury `BitVector`, pozwala ona na efektywne zapisywanie wartości Bool'owskich w małym obszarze pamięci. Wykorzystuje ona liczby całkowite do zapisywania wartości zero-jedynkowych bezpośrednio do bitów pamięci.
+```julia
+struct CNFSATSolution <: NPSolution
+    evaluation::BitVector
+end
+```
+
+Do zapisu podzbiorów na przykład dla problemu #subs, wykorzystujemy strukturę zbioru. W tym przypadku w podzbiorze nie zapisujemy wartości samej liczby, a jedynie jej miejsce w tablicy, w odpowiadającym egzemplarzu problemu. Podejście takie jest bardziej efektywne pamięciowo i jest zgodne z interfejsami jakie ustaliliśmy.
+
+```julia
+struct SubsetSumSolution{S<:AbstractSet{Int}} <: NPSolution
+    subset::S
+end
+```
+
+Stosujemy tu ponownie podejście generyczne pozwalające na wybór implementacji zbioru, w zależności od wymagań użytkownika. Algorytmy ekstrakcji i konstrukcji zwracają jednak strukturę `BitSet` która w podobny sposób jak `BitVector` efektywnie zapisuje zbiory gęsto rozmieszczonych liczb całkowitych.
+
+Dla problemów dotyczących cykli, sam cykl zapisujemy za pomocą tablicy gdzie oznaczamy krawędź wychodzącą z danego wierzchołka. To znaczy dla ciągu określającego cykl $(e_1,e_2,dots,e_n)$, wartośc $e_4 = 7$ oznacza że cykl z wierzchołka o numerze 4 przechodzi do wierzchołka o numerze 7.
+
+```julia
+struct HamCycleSolution <: NPSolution
+    cycle::Vector{Int}
+end
+```
+
+Istnieje kilka możliwych sposobów zapisywania drogi cyklu, wybrany został jednak sposób powyższy ze względu na stały czas dostępu przy weryfikacji dowolnej krawędzi w cyklu.
+
 == Implementacja redukcji między problemami
+Tak jak wspomniano, poszczególne algorytmy zaimplementowano jako metody funkcji `transform`. Wybór odpowiedniej metody zachodzi na podstawie typów argumentów zadanych w funkcji. Jeśli podano poprawną kombinację argumentów, a nie istnieje metoda odpowiadająca zadanym typom, następuje próba przeprowadzenia transformacji łańcuchowej.
+
+Transformacja łańcuchowa służy do transformacji problemów nie połączonych bezpośrednio w grafie redukcji i zakończy się powodzeniem jedynie gdy istnieje odpowiednia ścieżka łącząca problemy w grafie redukcji. Uproszczona wersja wykorzystuje tą samą funkcję `transform` jak zwyczajna transformacja, jeśli jednak wymagane jest również użycie ekstrakcji lub konstrukcji rozwiązań wymagane jest użycie funkcji `chain_transform`.
+
+```julia
+chain_transform(I::NPProblem, P::Type{<:NPProblem})
+chain_transform(I::NPProblem, C::Vector{Type{<:NPProblem}})
+```
+
+Funkcja ta zwraca ciąg wszystkich egzemplarzy problemów utworzonych podczas transformacji łańcuchowej. Przydatna jest ona również w wypadku gdy chcemy uzyskać jeden z problemów pośrednich. Możliwa jest również specyfikacja dokładnej ścieżki transformacji w grafie redukcji, za pomocą drugiej metody tej funkcji.
+
+
 == Mechanizm konstrukcji i ekstrakcji rozwiązań
+
+Przetwarzanie rozwiązań zaimplementowano, tak jak w przypadku transformacji, jako metody funkcji `extract` i `construct`. Metody te jednak wymagają więcej danych niż egzemplarz rozwiązania, zobacz @interfaces.
+
+- metoda `extract` wymaga dodatkowych informacji o redukcji które są czerpane z źródłowego egzemplarza problemu
+- metoda `construct` w strukturze bardzo przypomina algorytm transformacji, z tą różnicą że zamiast konstruować egzemplarz problemu, konstruuje jego rozwiązanie, dlatego jako argumenty potrzebne są zarówno źródłowy egzemplarz problemu jak i rozwiązanie. Dodatkowo musimy podać dla jakiego typu problemu konstruujemy rozwiązanie.
+
+Tak samo jak w wypadku transformacji istnieje możliwość przetwarzania łańcuchowego, z tą różnicą że musimy podać kompletny łańcuch egzemplarzy pośrednich. Wymaganie to jest oczywiste jeśli spojrzymy na zwyczajne interfejsy, a jego ominięcie wymagało by przeprowadzenia redundantnych transformacji.
+
+```julia
+  extract(S::NPSolution, C::Vector{NPProblem})
+construct(S::NPSolution, C::Vector{NPProblem})
+```
+
+W bibliotece zawarto również uproszczone metody realizujące te funkcjonalności bez dostarczania łańcucha egzemplarzy, ich używanie nie jest jednak zalecane z powodu niepotrzebnego powtarzania transformacji egzemplarzy problemów.
+
 == Przykłady działania systemu
 
+W tym rozdziale przedstawimy przykładowy przypadek użycia biblioteki, zarówno funkcji zwyczajnych jak i łańcuchowych, do rozwiązywania wybranych problemów. Zakładamy że posiadamy własny algorytm `my-solve` rozwiązujący problem #vc. 
+
 = Testy i analiza działania
+
+#let names = (
+  DirHamCycle : link(<ham>,smallcaps[Directed-Ham-Cycle]),
+  HamCycle : [#uham],
+  TSP : [#tsp],
+  Clique : [#cli],
+  VertexCover : [#vc],
+  HittingSet : [#hit],
+  SAT3 : [#sat3],
+  "HittingSet{Set{Int64}}" : [#hit]
+)
+
+#set-round(
+  mode:       "places",
+  precision:  3,
+  pad:        false,
+  direction:  "nearest",
+)
+
+
+#let mjson = json("test_data/trans_pro/cli20251124_02-05-40.974.json")
+
+#let (xses, times, gctimes, memory, allocs, stds, vcs ) = mjson
+
+#let x = mjson.values()
+
+
+#figure(
+  ztable(
+  columns: 5,
+  align: (left, right, right, right, right),
+  format: (none, auto, auto, auto, auto),
+  table.header(
+    [*Transformacja do \ problemu*], [*Czas działania*], [*Czas Garbage \ Collectora *], [*Wykorzystana \ pamięć*], [*Alokacje*]
+  ),
+  ..for x in unzip(x) {(
+    [#names.at(x.first())], [#(x.at(1)/1e6)#nonum[ ms]], [#(x.at(2)/1e6)#nonum[ ms]], [#(x.at(3)/1e6)#nonum[ MiB]], [#x.at(4)],
+  )}
+),
+)
+
+#figure(
+  ztable(
+  columns: 4,
+  align: (left, right, right, right),
+  format: (none, auto, auto, auto),
+  table.header(
+    [*Transformacja do \ problemu*], [*Czas działania*], [*Odchylenie \ standardowe *], [*Współczynnik \ zmienności*]
+  ),
+  ..for x in unzip(x) {(
+    [#names.at(x.first())], [#(x.at(1)/1e6)#nonum[ ms]], [#(x.at(5)/1e6)#nonum[ ms]], [#(x.at(6))],
+  )}
+),
+)
+
+
+#figure(
+  lq.diagram(
+  width: 10cm,
+  height: 6cm,
+  xaxis: (
+    ticks: xses
+      .map(rotate.with(-45deg, reflow: true))
+      .map(align.with(right))
+      .enumerate(),
+    subticks: none,
+  ),
+  yaxis: (
+    scale: "log",
+    lim: (calc.pow(10,0), calc.pow(10,3)),
+  ),
+  lq.bar(
+    range(3),
+    times.map(x => x / 1e6),
+    base: 1,
+    // yerr: stds.map(x => x / 1e6),
+  )
+)
+)
+
+#let (xses, times, gctimes, memory, allocs ) = json("test_data/trans_n/lin_cliClique20251123_04-12-40.140.json")
+
+#figure(
+  lq.diagram(
+  width: 10cm,
+  height: 6cm,
+  xlabel:"Rozmiar danych",
+  ylabel:[Czas transformacji w ms],
+  // yscale:"log",
+  lq.plot(
+    (20,50,75,100,125,150,175,200,225,250),
+    times.map(x => x/1000000),
+  )
+)
+)
+
+#let (xses, times, gctimes, memory, allocs ) = json("test_data/sol_n/sat_SAT320251123_20-59-35.368.json")
+// #let (xses, times, gctimes, memory, allocs ) = json("test_data/sol_n/sat_SAT320251124_06-14-39.158.json")
+
+#figure(
+  lq.diagram(
+  width: 10cm,
+  height: 6cm,
+  xlabel:"Rozmiar danych",
+  ylabel:[Czas rozwiązania w ms],
+  // yscale:"log",
+  lq.plot(
+    (20,50,75,100,125,150,175,225,250),
+    times.map(x => x/1000000),
+  )
+)
+)
+
+#let satd = json("test_data/sol_n/hit_SAT320251124_00-35-15.158.json")
+#let vcd = json("test_data/sol_n/hit_VertexCover20251124_00-35-15.530.json")
+#let hitd = json("test_data/sol_n/hit_HittingSet20251124_00-35-15.532.json")
+
+
+#figure(
+  lq.diagram(
+  width: 10cm,
+  height: 6cm,
+  legend: (position: left + top),
+  xlabel:"Rozmiar danych",
+  ylabel:[Czas rozwiązania w ms],
+  yscale:"log",
+  lq.plot(
+    (20,50,75,100,125,150,175),
+    satd.times.map(x => x/1000000),
+    label: [#sat3],
+  ),
+  lq.plot(
+    (20,50,75,100,125,150,175),
+    vcd.times.map(x => x/1000000),
+    label: [#vc],
+  ),
+  lq.plot(
+    (20,50,75,100,125,150,175),
+    hitd.times.map(x => x/1000000),
+    label: [#hit],
+  ),
+)
+)
+
+#let data = json("test_data/sol_pro/cli20251124_05-49-18.803.json")
+#let data2 = json("test_data/sol_pro/hit20251124_05-50-33.409.json")
+
+#figure(
+  lq.diagram(
+  width: 10cm,
+  height: 5cm,
+  ylabel:[Czas rozwiązania w ms],
+  // yscale:"log",
+  xaxis: (
+    ticks: data.xses.map(x => names.at(x))
+      .map(rotate.with(-45deg, reflow: true))
+      .map(align.with(right))
+      .enumerate(),
+    subticks: none,
+  ),
+  lq.bar(
+    (0,1,2,3),
+    data.times.map(x => x/1000000),
+    base: 1,
+    z-index:1,
+  ),
+  lq.bar(
+  (0,2,3),
+  data2.times.map(x => x/1000000),
+  offset:0.1,
+  base: 1,
+  z-index:2,
+  ),
+)
+)
+
+
 == Weryfikacja poprawności implementacji
 == Analiza złożoności obliczeniowej operacji redukcji
+
+- liniowy wzrost czasu transformacji (jest)
+- stały czas transformacji dla danych o tym samym rozmiarze (tabela?)
+- ekspo wzrost czasu rozwiązywania dla kolejnych transformacji
+
 == Wpływ redukcji na szybkość rozwiązania problemu
 
 = Podsumowanie i wnioski
 
-= Dodatek
+= Dodatek A - pliki źródłowe i wykorzystane narzędzia
+
+Pliki źródłowe biblioteki możemy znaleźć w repozytorium git pod adresem:
+
+#let qrlink(addr) = figure(
+  table(
+  stroke: none,
+  columns: 2,
+  align: horizon + center,
+  weblink(addr),
+  tiaoma.qrcode(addr),
+ )
+)
+
+#qrlink("https://github.com/junsevith/Conplete.jl")
+
+Dokumentacja biblioteki jest hostowana na stronie WW pod adresem:
+
+#qrlink("https://junsevith.github.io/Conplete.jl/dev/")
+
+
+= Dodatek B
 
 // Daje nam to więc dwie opcje
 

@@ -19,16 +19,6 @@
   set text(lang: language, size: 12pt, costs: ( hyphenation: 100%, runt: 100%, widow: 100%, orphan: 100%, ))
   set heading(numbering: "1.1")
   show figure.caption: set text(11pt)
-
-  
-
-  // show link: it => {
-  // text(
-  //   fill: rgb(255, 100, 100),  // Light red
-  //   weight: "bold",
-  //   it.body
-  // )
-// }
   
   show regex(" ([^\s]{1,3} )+"): it => context {
     let page_num = here().page()
@@ -103,6 +93,15 @@
   
   show heading: it => {
     if it.level == 1 and it.numbering != none {
+      pagebreak()
+      block()[
+      #v(40pt)
+      #text(size: 30pt)[#dict.chapter #counter(heading).display() #linebreak()]
+      // #v(-10pt)
+      #text(size: 30pt, weight: "regular")[#it.body ]
+      #v(50pt)
+      ]
+    } else if it.level == 1 and it.numbering == none and it.outlined == true {
       pagebreak()
       block()[
       #v(40pt)
