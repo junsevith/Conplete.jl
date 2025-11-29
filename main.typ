@@ -1,5 +1,5 @@
 #import "temp.typ": project
-#import "@preview/diagraph:0.3.5": raw-render, render
+// #import "@preview/diagraph:0.3.5": raw-render, render
 #import "@preview/fletcher:0.5.8" as fletcher: diagram, edge, node, shapes
 #import "@preview/lilaq:0.5.0" as lq
 #import "@preview/lovelace:0.3.0": *
@@ -62,6 +62,20 @@
 #let mip = link(<mip>,smallcaps[Integer-Programming])
 #let ind = link(<ind>,smallcaps[Independent-Set])
 
+// #let ham = link(<ham>,smallcaps[Skierowany Cykl Hamiltona])
+// #let uham = link(<ham>,smallcaps[Cykl Hamiltona])
+// #let vc = link(<vc>,smallcaps[Pokrycie Wierzchołkowe])
+// #let cli = link(<cli>,smallcaps[Klika])
+// #let subs = link(<subs>,smallcaps[Suma Podzbioru])
+// #let part = link(<part>,smallcaps[Partycja])
+// #let bin = link(<bin>,smallcaps[Bin-Packing])
+// #let tsp = link(<tsp>,smallcaps[Komiwojażer])
+// #let knap = link(<knap>,smallcaps[Plecak])
+// #let hit = link(<hit>,smallcaps[Hitting-Set])
+// #let mip = link(<mip>,smallcaps[Programowanie Całkowitoliczbowe])
+// #let ind = link(<ind>,smallcaps[Zbiór niezależny])
+
+
 #let np = $cal(N P)$
 #let p = $cal(P)$
 
@@ -101,19 +115,44 @@
   date: "2025",
   keywords: (
     "Klasa trudności NP",
+    "NP-zupełność",
     "Redukcje problemów",
     "Programowanie Całkowitoliczbowe",
   ),
-  abstract: [W pracy przewiduje się analizę wielomianowych redukcji między trudnymi problemami decyzyjnymi z klasy NP.
-    W ramach pracy planuje się implementacje w języku julia części drzewa redukcji klasycznych problemów NP-zupełnych.
-    Korzeniem tego drzewa będzie problem spełnialności formuł logicznych.
-    Implementacja ta ma pozwolić na dołączanie do drzewa kolejnych problemów NP-zupełnych.],
+  abstract: [
+  Celem pracy jest analiza i implementacja wielomianowych redukcji między wybranymi problemami decyzyjnymi z klasy #np. W ramach projektu stworzono bibliotekę w języku Julia, realizującą drzewo transformacji z korzeniem w problemie #sat, obejmujące takie zagadnienia jak #sat3, #vc, #cli czy #uham .
+  
+  W pracy przeprowadzono analizę porównawczą metod redukcji, wybierając dla problemu cyklu Hamiltona metodę Kleinberg-Tardos ze względu na optymalizację rozmiaru grafu. Zaimplementowano również mechanizmy rozwiązywania instancji oparte na redukcji do programowania całkowitoliczbowego. Zastosowanie typów generycznych w strukturach danych pozwoliło na obsługę problemów numerycznych o dużej skali, a przeprowadzone testy potwierdziły wielomianową złożoność opracowanych algorytmów.
+
+  #heading(numbering: none)[Abstract]
+
+  The objective of this thesis is to analyze and implement polynomial reductions between selected decision problems in the #np class. A library was created in the Julia language, implementing a transformation tree rooted in the #sat problem, covering problems such as #sat3, #vc, #cli, and #uham.
+
+  The study involved a comparative analysis of reduction methods, selecting the Kleinberg-Tardos method for the Hamiltonian cycle problem due to graph size optimization. Mechanisms for solving instances based on reduction to Integer Programming were also implemented. The use of generic types in data structures allowed for handling large-scale numerical problems, and conducted tests confirmed the polynomial complexity of the developed algorithms.
+  
+  ],
   popraw_sieroty: true,
 )
 
-#heading(numbering: none)[Wstęp]
+#heading(numbering: none, supplement: none)[Wstęp]
 
-Celem pracy jest stworzenie biblioteki redukcji problemów klasy NP w języku programowania #link("https://julialang.org/")[Julia]. W bibliotece zaimplementowano następującą część drzewa konwersji problemów klasy NP. 
+Teoria złożoności obliczeniowej i pytanie o równość klas $cal(P)$ i #np stanowią fundament współczesnej informatyki. Kluczowym narzędziem analizy w tym obszarze jest redukcja wielomianowa, która pozwala klasyfikować trudność problemów oraz dostarcza praktycznych metod ich rozwiązywania poprzez transformację instancji. 
+
+Niniejsza praca dyplomowa koncentruje się na analizie oraz implementacji wielomianowych redukcji między wybranymi trudnymi problemami decyzyjnymi z klasy #np. 
+Głównym celem pracy jest stworzenie biblioteki programistycznej w języku Julia, realizującej część drzewa redukcji klasycznych problemów NP-zupełnych. Język Julia został wybrany ze względu na swoje ukierunkowanie na obliczenia naukowe oraz wysoką wydajność.
+
+Jako korzeń drzewa redukcji przyjęto problem spełnialności formuł logicznych (#rsat), a w szczególności jego wariant #sat, który stanowi standard w informatycznych zastosowaniach i punkt wyjścia dla dalszych transformacji. W ramach pracy zrealizowano implementację redukcji dla szeregu klasycznych problemów, takich jak: #sat3, #vc, #uham, #subs oraz innych problemów grafowych i optymalizacyjnych.
+
+Praca została podzielona na sześć rozdziałów.
+
+- *Rozdział pierwszy* wprowadza niezbędne podstawy teoretyczne, definiując klasę złożoności NP, pojęcie redukcji w sensie Karpa i Turinga oraz omawiając formalne definicje problemów NP-zupełnych.
+- *Rozdział drugi* zawiera szczegółową analizę wybranych redukcji, w tym konstrukcję gadżetów dla problemów grafowych, takich jak redukcja 3-SAT do #vc czy #ham.
+- *Rozdział trzeci* przedstawia projekt systemu, założenia dotyczące interfejsów funkcyjnych (transformacja, ekstrakcja, konstrukcja rozwiązania) oraz strukturę grafu redukcji.
+- *Rozdział czwarty* opisuje konkretne algorytmy realizujące redukcje, w tym analizę ich złożoności oraz metody odzyskiwania rozwiązań. Omówiono tu również wybór metody Sudkampa dla problemu cyklu Hamiltona.
+- *Rozdział piąty* poświęcony jest szczegółom implementacyjnym w języku Julia, hierarchii typów oraz wykorzystanym bibliotekom zewnętrznym, takim jak JuMP czy Graphs.jl.
+- *Rozdział szósty* prezentuje wyniki testów weryfikujących poprawność implementacji oraz analizę wydajnościową algorytmów redukcji i ich wpływu na czas rozwiązywania problemów.
+
+Opracowane rozwiązanie pozwala na łączenie problemów w łańcuchy transformacji oraz umożliwia rozbudowę biblioteki o nowe problemy i redukcje, stanowiąc narzędzie o walorach edukacyjnych i badawczych.
 
 = Podstawy teoretyczne <theory>
 
@@ -486,8 +525,12 @@ Zależność ta została poza tym wykorzystana w kilku innych problemach wymieni
 
 
 = Analiza i opis wybranych redukcji
-gadżety itd.
+
+W tym rozdziale opiszemy kilka ciekawych redukcji zaimplementowanych w pracy. Redukcje takie zazwyczaj polegają na imitowaniu struktury jednego problemu za pomocą szczególnego przypadku drugiego. Struktury realizujące tą funkcję nazywamy *gadżetami* (ang. gadgets), słowo to jest w szczególności używane w przypadku problemów grafowych, gdzie są one bardzo często wykorzystywane. W poniższym rozdziale przejdziemy krok po kroku przez proces konstrukcji redukcji uzasadniając kolejne kroki i argumentując podjęte decyzje.
+
 == Redukcje trywialne
+
+Kilka redukcji zawartych w bibliotece jest wyjątkowo łatwych do wykonania jeśli przyjrzymy się ich specyfice. Przykładem tutaj może być redukcja #sat3 do #sat, możemy łatwo zauważyć że #sat3 jest właściwie szczególnym przypadkiem problemu #sat, a egzemplarze tłumaczą się bezpośrednio. Redukcje takie zostały zaimplementowane w bibliotece, szerzej omawiać jednak będziemy te ciekawsze, oparte na pewnym bardziej zaawansowanym procesie.
 
 == Redukcja #sat3 do #vc
 
@@ -1326,7 +1369,7 @@ W celu ujednolicenia operacji a co za tym idzie zwiększenia spójności, dostę
 
 - #smallcaps[Transform]$(I_P_1,P_2) -> I_P_2$ - transformacja (redukcja) egzemplarza problemu $P_1$ do egzemplarza problemu $P_2$, odpowiednik algorytmu $cal(T)_(P_1->P_2)$
 
-- #smallcaps[Solve]$(I_P) -> {S_P,$ #nie$}$ - rozwiązanie zadanej instancji problemu, odpowiednik  $solve_P$
+- #smallcaps[Solve]$(I_P) -> {S_P,$ #nie$}$ - rozwiązanie zadanej instancji problemu, odpowiednik  $solve_P$, jest to funkcjonalność opcjonalna, biblioteka przewiduje dostarczenie tego algorytmu przez użytkownika
 
 - #smallcaps[Extract]$(S_P_2,I_P_1) -> S_P_1$ - odpakowanie rozwiązania egzemplarza $I_P_2$ będącego wynikiem transformacji, do rozwiązania źródłowego egzemplarza $I_P_1$, odpowiednik algorytmu $cal(E)_(P_1->P_2)$
 
@@ -1377,7 +1420,7 @@ Poniższy graf prezentuje problemy dla których zaimplementowano funkcjonalnośc
     node((1,3), hit),
   ),
   caption:[Graf redukcji zaimplementowany w bibliotece]
-)
+) <tree>
 
 Warto zauważyć że dla niektórych problemów krawędzie biegną w obie strony, w tym wypadku transformacja zarówna jak i inne interfejsy dostępne są w obie strony.
 
@@ -1393,18 +1436,105 @@ Wykorzystanie łańcucha instancji $C_(1..n)$ jest wymagane dla interfejsów #sm
 
 == Możliwość rozbudowy o kolejne problemy
 
-System został zaprojektowany zgodnie z zasadą otwartości na rozbudowę, ważną funkcjonalnością systemu jest rozszeczenie grafu transformacji przez użytkownika. Rozszerzenie takie będzie współgrać całkowicie z systemem, pod warunkiem przestrzegania przez użytkownika definicji interfejsów, o których było mowa powyżej.
+System został zaprojektowany zgodnie z zasadą otwartości na rozbudowę, ważną funkcjonalnością systemu jest rozszerzenie grafu transformacji przez użytkownika, poprzez dodanie kolejnych problemów i redukcji. Rozszerzenie takie będzie współgrać całkowicie z systemem, pod warunkiem przestrzegania przez użytkownika definicji interfejsów, o których było mowa powyżej.
 
+Dostępne jest dodanie dowolnych problemów jako wierzchołków w grafie, oraz dowolnych transformacji jako krawędzi w grafie. Funkcjonalność ta będzie udostępniona użytkownikowi za pomocą funkcji  które należy wywołać. Sam graf redukcji jest natomiast zaimplementowany jako rzeczywista struktura danych, inicjowana statycznie w bibliotece, a wspomniane operacje rzeczywiście modyfikują ten graf.
 
-Dostępne jest dodanie dowolnych problemów jako wierzchołków w grafie, oraz dowolnych transformacji jako krawędzi w grafie. 
+Operacje realizujące transformacje łańcuchowe wykorzystują graf redukcji do znajdywania odpowiednich ścieżek, przez co jego odpowiednia struktura jest niezbędna dla ich działania
 
 = Wybrane algorytmy redukcji <algos>
 
 W tym rozdziale przedstawimy algorytmy realizujące wybrane, nietrywialne redukcje. Konstrukcja takiego algorytmu nie jest zazwyczaj wysoce skomplikowana, jeśli dobrze zrozumieliśmy proces redukcji. Wykorzystują one jednak pewną właściwość która może się wydać oczywista z programistycznego punktu widzenia, warto jednak o niej wspomnieć. Mowa tutaj o *numerowaniu* czyli przypisywaniu do jakichś obiektów liczb naturalnych. Formalnie możemy zapisać to w taki sposób $N : X -> NN$, dla dowolnego skończonego zbioru $X$. Numerowanie w komputerach jest powszechne i służy jako sposób identyfikacji obiektów, w szczególności w jakiejś strukturze danych. Wybór odpowiedniego numerowania w naszym wypadku jest o tyle ważny ponieważ pozwala on na odpowiednią identyfikację komponentów struktury egzemplarza danego problemu, co z kolei jest często niezbędne do ekstrakcji rozwiązania za pomocą algorytmu #extr. Dlatego właśnie często będziemy definiować specyficzne numerowanie dla egzemplarzy wynikowych algorytmu $cal(R)$ czego przykład możemy zobaczyć w @num_ex[Równaniu]
 
+== Redukcja #sat3 do #vc
+
+
+// === Algorytm
+
+Algorytm jest dosyć elementarny i sam nasuwa się na myśl jeżeli zrozumieliśmy zasadę działania konwersji, wystarczy jedynie ustalić odpowiednie numerowanie wierzchołków aby ułatwić ich łączenie, wierzchołki numerujemy kolejnymi liczbami naturalnymi z przedziału $chevron 1 , 2n+3m chevron.r$ gdzie $n$ to ilość zmiennych a $m$ ilość klauzul.
+
+$
+num(x_i) &= i \
+num(not x_i) &= n + i \
+num(u_(i,j)) &= 2n + 3i + j  \
+$ <num_ex>
+
+Numerowanie w tym wypadku oznacza uniklalne przyporządkowanie wierzchołkom liczb narutalnych, co jest bardzo naturalne jeśli rozważamy struktury komputerowe, jest to więc funckja róznowartościowa przyporządkowująca elementom liczby naturalne, przy czym implementacja komputerowa algorytmów wymaga aby była to funkcja "na" przedział liczb naturalnych rozpoczynający się od liczby 1.
+
+// $
+// num: V ->^(1-1) bb(N) \
+// num[V] = angle.l 1,|V| angle.r inter bb(N) \
+// // num(v) = j" - numer wierzchołka" v\
+// v_i equiv num^(-1)(i) equiv v in V : num(v) = i\
+// num(v_i) = i
+// $
+
+// Numerowanie jest to więc funckja róznowartościowa przyporządkowująca elementom liczby naturalne, przy czym implementacja komputerowa algorytmów wymaga aby była to funkcja "na" przedział liczb naturalnych rozboczynający się od liczby 1.
+
+#figure(
+  kind: "algorithm",
+  supplement: [Algorytm],
+  pseudocode-list(booktabs: true, numbered-title: [Redukcja #sat3 do #vc])[
+  + *function* 3SAT-VertexCover$(W,n)$
+    + $|V| = 2 dot n + 3dot|W|$ #comm[ustalamy zbiór wierzchołków]
+    + $G=(V,E)$
+    + *for* $i in 1 dots n$ #comm[dla każdej zmiennej]
+        + $d<-n+i$
+        + $E arrow.l (i,d)$ #comm[łączymy wierzchołek zmiennej z jej negacją]
+    + *end*    
+    + *for* $w in W$ #comm[dla każdej klauzuli]
+      + $c arrow.l$ następny wolny wierzchołek z $V$
+      + *for* $u in w$ #comm[dla zmiennych w klauzuli]
+        + *if* u < 0 #comm[wybieramy odpowiednie miejsce w podgrafie zmiennych]
+          + $d<-n+(-u)$  
+        + *else*
+          + $d<-u$   
+        + *end*
+        + $E arrow.l (c,d)$
+    + *end*
+    + $s <- n + 2dot|W|$
+    + *return* ($G$,s)
+  + *end*
+]
+)
+
+Algorytm tworzy najpierw podgrafy zmiennych, a następnie podgrafy klauzul od razu łącząc je z odpowiednimi zmiennymi według przedstawionych wytycznych. Pozostaje nam jedynie zbadać jego złożoność obliczeniową, zawiera on następujące operacje.
+
+
+  + $O(n)$ - pętla *for* tworząca podgrafy zmiennych
+  + $O(m)$ - pętla *for* tworząca podgrafy klauzul
+
+Co daje nam w sumie złożoność $O(n+m)$ a więc złożoność liniową. Jest więc to istotnie wielomianowa konwersja i może posłużyć jako dowód NP złożoności problemu #vc.
+
+
+=== Odzyskanie rozwiązania
+
+Odpakowanie rozwiązania oryginalnego problemu #sat3 jest bardzo łatwe, dzięki odpowiedniemu numerowaniu wierzchołków którego użyliśmy. Wystarczy jedynie sprawdzić dla wierzchołków $1dots n$  czy znajdują się one w zbiorze #vc.
+
+#figure(
+  kind: "algorithm",
+  supplement: [Algorytm],
+  pseudocode-list(booktabs: true, numbered-title: [Odzyskanie rozwiązania #sat3 z #vc])[
+  + *function* Unpack-Hamiltonian *begin*
+    - *input:* $C,n$ #comm[zbiór #vc $C subset.eq V$, liczba zmiennych #sat3]
+
+    - *output:* $A$ #comm[$A in {bb(0),bb(1)}^n$ ewaluacja zmienych dla #sat3]
+    + $A = (fal, fal, dots, fal)$ #comm[tablica o długości $n$]
+    + *for* $i in 1 dots n$
+      + *if* $v_i in C$ 
+        + $A[i] = tru$
+      + *end*
+    + *end* 
+   + *return* $A$
+  + *end*
+]
+)
+
+Obecność w zbiorze #vc wierzchołka $v_i$ gdzie $i in chevron 1,n chevron.r$ oznacza ewaluację zmiennej $x_i$ na `true`, w p.p. jeśli nie ma tam tego wierzchołka, w zbiorze musi znajdować się wierzchołek $v_(n+i)$ a więc zmienna ewaluowana jest na `false`.
+
 == Redukcja #sat3 do #ham
 
-Istnieje kilka równoważnych metod redukcji #sat3 do #ham, w pracy rozważone zostały metody _Sudkampa_ @sudkamp_languages_2006, oraz metoda _Kleinberg-Tardos_ @kleinberg_algorithm_2006, aby wybrać najlepszą metodę zbadaliśmy optymalność redukcji pod względem rozmiaru wynikowego egzemplarza problemu.  Podczas gdy najbardziej popularna jest metoda K-T, metoda Sudkampa jest bardziej przejrzysta, pomimo że jest zdecydowanie mniej optymalna. Sudkamp w książce @sudkamp_languages_2006 proponuje sprytny podgraf klauzuli który dobrze emuluje tą logikę, podczas gdy w książce @kleinberg_algorithm_2006 jako podgraf klauzuli wykorzystany jest jeden wierzchołek, uproszczenie to wymaga jednak znaczących zmian w podgrafie zmiennej. Jako podgraf zmiennej Sudkamp używa zaś bardziej skomplikowanego grafu który ciężej będzie dynamicznie konstruować w algorytmie.
+Istnieje kilka równoważnych metod redukcji #sat3 do #ham, w pracy rozważone zostały metody _Sudkampa_ @sudkamp_languages_2006, oraz metoda _Kleinberg-Tardos_ @kleinberg_algorithm_2006, aby wybrać najlepszą metodę zbadaliśmy optymalność redukcji pod względem rozmiaru wynikowego egzemplarza problemu.  Podczas gdy najbardziej popularna jest metoda K-T, metoda Sudkampa jest bardziej przejrzysta, pomimo że jest zdecydowanie mniej optymalna. Sudkamp w książce @sudkamp_languages_2006 proponuje sprytny podgraf klauzuli który dobrze emuluje tą logikę, podczas gdy w książce @kleinberg_algorithm_2006 jako podgraf klauzuli wykorzystany jest jeden wierzchołek, uproszczenie to wymaga jednak znaczących zmian w podgrafie zmiennej. Jako podgraf zmiennej Sudkamp używa zaś bardziej skomplikowanego grafu który trudniej będzie dynamicznie konstruować w algorytmie.
 
 Wzory na ilość wierzchołków i krawędzi w grafie $G=(V,E)$ wyglądają następująco dla $m$-ilość klauzul, $n$-ilość zmiennych, a $U(i)$ to maksimum z liczby wystąpień $x_i$ i wystąpień $not x_i$
 #v(5pt)
@@ -1424,7 +1554,7 @@ $
 caption: [Wzory na liczbę wierzchołków i krawędzi w grafach]
 )
 
-Przeprowadziliśmy analizę wykresów ilości zmiennych dla worst i best case  które pokazują odpowiednio największe i najmniejsze ilości, oraz dla avg case który został obliczony według benchmarkowych problemów #sat3 dostępnych w internecie. W tym przypadku worst-best case zależy od ilości unikalncyh zmiennych w problemie gdzie best case to $|V_"best"| = 3$ (jedynie 3 różne zmienne w klauzulach) a worst case to $|V_"worst"| = 3x$ (każda zmienna w klauzuli jest inna). 
+Przeprowadziliśmy analizę wykresów ilości zmiennych dla worst i best case  które pokazują odpowiednio największe i najmniejsze ilości, oraz dla average case który został obliczony według benchmarkowych problemów #sat3 dostępnych w internecie. W tym przypadku worst-best case zależy od ilości unikalnych zmiennych w problemie gdzie best case to $|V_"best"| = 3$ (jedynie 3 różne zmienne w klauzulach) a worst case to $|V_"worst"| = 3x$ (każda zmienna w klauzuli jest inna). 
 
 \
 #figure(
@@ -1498,7 +1628,7 @@ Metoda Sudkampa w większym stopniu zależy od ilości klauzul a metoda K-T zale
 
 #show figure: set figure.caption(position: bottom)
 
-Jak widzimy metoda S-T okazuje się być wyraźnie lepsza dla ilości wierzchołków i nieznacznie lepsza co do ilości krawędzi, wybrałem więc ostatecznie tą metodę i to ona jest przedstawiona w powyższym rozdziale.
+Jak widzimy metoda K-T okazuje się być wyraźnie lepsza dla ilości wierzchołków i nieznacznie lepsza co do ilości krawędzi, wybrałem więc ostatecznie tą metodę i to ona jest przedstawiona w powyższym rozdziale.
 
 
  === Algorytm
@@ -1615,95 +1745,9 @@ Aby to zrobić musimy sprawdzić kierunek przejścia cyklu po podgrafach zmienny
 
 Jeśli któraś ze zmiennych $x_i$ nie była nigdy użyta w klauzuli, jej wierzchołki $p_i, d_i$ zostają usunięte a w ich miejsce umieszczamy inne wierzchołki nie będące wierzchołkami początkowymi. Sprawia to że ewaluacja tej zmiennej zostanie odczytana jako losowa, co nie ma jednak żadnego wpływu na poprawność rozwiązania ponieważ ewaluacja zmiennej $x_i$ nie ma znaczenia dla spełnienia klauzul.
 
-== Redukcja #sat3 do #vc
 
 
-// === Algorytm
-
-Algorytm jest dosyć elementarny i sam nasuwa się na myśl jeżeli zrozumieliśmy zasadę działania konwersji, wystarczy jedynie ustalić odpowiednie numerowanie wierzchołków aby ułatwić ich łączenie, wierzchołki numerujemy kolejnymi liczbami naturalnymi z przedziału $chevron 1 , 2n+3m chevron.r$ gdzie $n$ to ilość zmiennych a $m$ ilość klauzul.
-
-$
-num(x_i) &= i \
-num(not x_i) &= n + i \
-num(u_(i,j)) &= 2n + 3i + j  \
-$ <num_ex>
-
-Numerowanie w tym wypadku oznacza uniklalne przyporządkowanie wierzchołkom liczb narutalnych, co jest bardzo naturalne jeśli rozważamy struktury komputerowe, jest to więc funckja róznowartościowa przyporządkowująca elementom liczby naturalne, przy czym implementacja komputerowa algorytmów wymaga aby była to funkcja "na" przedział liczb naturalnych rozpoczynający się od liczby 1.
-
-// $
-// num: V ->^(1-1) bb(N) \
-// num[V] = angle.l 1,|V| angle.r inter bb(N) \
-// // num(v) = j" - numer wierzchołka" v\
-// v_i equiv num^(-1)(i) equiv v in V : num(v) = i\
-// num(v_i) = i
-// $
-
-// Numerowanie jest to więc funckja róznowartościowa przyporządkowująca elementom liczby naturalne, przy czym implementacja komputerowa algorytmów wymaga aby była to funkcja "na" przedział liczb naturalnych rozboczynający się od liczby 1.
-
-#figure(
-  kind: "algorithm",
-  supplement: [Algorytm],
-  pseudocode-list(booktabs: true, numbered-title: [Redukcja #sat3 do #vc])[
-  + *function* 3SAT-VertexCover$(W,n)$
-    + $|V| = 2 dot n + 3dot|W|$ #comm[ustalamy zbiór wierzchołków]
-    + $G=(V,E)$
-    + *for* $i in 1 dots n$ #comm[dla każdej zmiennej]
-        + $d<-n+i$
-        + $E arrow.l (i,d)$ #comm[łączymy wierzchołek zmiennej z jej negacją]
-    + *end*    
-    + *for* $w in W$ #comm[dla każdej klauzuli]
-      + $c arrow.l$ następny wolny wierzchołek z $V$
-      + *for* $u in w$ #comm[dla zmiennych w klauzuli]
-        + *if* u < 0 #comm[wybieramy odpowiednie miejsce w podgrafie zmiennych]
-          + $d<-n+(-u)$  
-        + *else*
-          + $d<-u$   
-        + *end*
-        + $E arrow.l (c,d)$
-    + *end*
-    + $s <- n + 2dot|W|$
-    + *return* ($G$,s)
-  + *end*
-]
-)
-
-Algorytm tworzy najpierw podgrafy zmiennych, a następnie podgrafy klauzul od razu łącząc je z odpowiednimi zmiennymi według przedstawionych wytycznych. Pozostaje nam jedynie zbadać jego złożoność obliczeniową, zawiera on następujące operacje.
-
-
-  + $O(n)$ - pętla *for* tworząca podgrafy zmiennych
-  + $O(m)$ - pętla *for* tworząca podgrafy klauzul
-
-Co daje nam w sumie złożoność $O(n+m)$ a więc złożoność liniową. Jest więc to istotnie wielomianowa konwersja i może posłużyć jako dowód NP złożoności problemu #vc.
-
-
-=== Odzyskanie rozwiązania
-
-Odpakowanie rozwiązania oryginalnego problemu #sat3 jest bardzo łatwe, dzięki odpowiedniemu numerowaniu wierzchołków którego użyliśmy. Wystarczy jedynie sprawdzić dla wierzchołków $1dots n$  czy znajdują się one w zbiorze #vc.
-
-#figure(
-  kind: "algorithm",
-  supplement: [Algorytm],
-  pseudocode-list(booktabs: true, numbered-title: [Odzyskanie rozwiązania #sat3 z #vc])[
-  + *function* Unpack-Hamiltonian *begin*
-    - *input:* $C,n$ #comm[zbiór #vc $C subset.eq V$, liczba zmiennych #sat3]
-
-    - *output:* $A$ #comm[$A in {bb(0),bb(1)}^n$ ewaluacja zmienych dla #sat3]
-    + $A = (fal, fal, dots, fal)$ #comm[tablica o długości $n$]
-    + *for* $i in 1 dots n$
-      + *if* $v_i in C$ 
-        + $A[i] = tru$
-      + *end*
-    + *end* 
-   + *return* $A$
-  + *end*
-]
-)
-
-Obecność w zbiorze #vc wierzchołka $v_i$ gdzie $i in chevron 1,n chevron.r$ oznacza ewaluację zmiennej $x_i$ na `true`, w p.p. jeśli nie ma tam tego wierzchołka, w zbiorze musi znajdować się wierzchołek $v_(n+i)$ a więc zmienna ewaluowana jest na `false`.
-
-
-
-== Wybrane metody rozwiązywania 
+== Wybrane metody rozwiązywania <models>
 
 Tak jak wcześniej wspomnieliśmy w  rozwiązanie egzemplarza za pomocą algorytmu #solve odbywa się w znacznej większości poprzez redukcję do problemu #mip. Dlatego więc w tym podrozdziale wymienimy kilka modeli programowania całkowitoliczbowego które zostały wykorzystanie w bibliotece.
 
@@ -1711,17 +1755,42 @@ Tak jak wcześniej wspomnieliśmy w  rozwiązanie egzemplarza za pomocą algoryt
 
 W innym wypadku, gdy mamy do czynienia z wersją decyzyjną problemu optymalizacyjnego, musimy zastosować ograniczenie funkcji celu, które zasadniczo jest również zwykłym ograniczeniem. Dla czytelności zapiszemy je jednak przy funkcji celu.
 
-=== #ham
+=== #uham
+
+Do rozwiązywania problemów powiązanych z cyklem Hamiltona wykorzystano lekko zmodyfikowaną formulację problemu #tsp autorstwa _Dantzig-Fulkerson-Johnson_ @dantzig_solution_1954. W formulacji tej wykorzystujemy macierz zmiennych decyzyjnych, gdzie zmienna $x_(i j) = 1$ oznacza krawędź w cyklu biegnącą z wierzchołka $i$ do wierzchołka $j$. Przedstawia się ona w następujący sposób:
+
+$
+"min" quad &1 \
+"przy ograniczeniach" quad & sum_(i=1,i!=j)^n x_(i j) = 1 & j = 1,dots,n \
+& sum_(j=1,i!=j)^n x_(i j) = 1 & i = 1,dots,n \
+& sum_(i in Q) sum_(j!=i, j in Q) x_(i j) <= |Q| - 1 quad & forall Q subset.neq {1,dots,n}, |Q| >=2 \
+
+& x_(i j) in {0,1}, & i = 1, dots, n quad j = 1,dots,n   \
+$<dfj>
+
+Możemy jednak zauważyć że formulacja ta tworzy eksponencjalną liczbę ograniczeń (wszystkie podzbiory ${1,dots,n}$), dlatego ograniczenia te tworzymy dynamicznie. Przed-ostatnie ograniczenie na @dfj[równaniu] sprawia że nie możliwe jest wystąpienie rozwiązania złożonego z kilku mniejszych cykli, odpowiednie ograniczenie utworzymy więc dopiero gdy znajdziemy taki cykl w potencjalnym rozwiązaniu, podzbiorem $Q$ w tym wypadku będą wszystkie krawędzie w tym cyklu.
+
+Z bardziej praktycznego punktu widzenia, funkcjonalność ta może być realizowana przez _solver-independent callbacks_ co jest rozwiązaniem szybszym (jeśli solver je obsługuje), lub dodanie ograniczeń do modelu i ponowne jego rozwiązanie.
 
 === #subs i pochodne
+
+Formulacja modelu dla problemu #subs i pokrewnych, jest wyjątkowo łatwa, występuje w niej jednak unikatowy problem. Spójrzmy najpierw na model
+
+$
+"max" quad &1 \
+"przy ograniczeniach" quad & sum_(i=i)^n s_i x_i = t quad &\
+& x_i in {0,1}, quad & i = 1, dots, n  \
+$
+
+Jak widzimy jedynym ograniczeniem jest suma wybranego podzbioru. Problemem w tym wypadku są solvery które w większości wypadków operują na liczbach zmiennoprzecinkowych, najczęściej 64-bitowych. Powoduje to problem w wypadku gdy liczby w zbiorze $s_i in S$ są zbyt duże, co niestety jest bardzo częste dla egzemplarza wynikowego redukcji z problemu #sat3. W przypadku dużych liczb ich sumowanie może spowodować stratę dokładności a co za tym idzie niedokładny wynik. Testy pokazują że sytuacja ta może wystąpić już dla liczb 13 cyfrowych, jeśli tylko jest ich odpowiednio dużo. Najważniejszym wyznacznikiem wystąpienia tego problemu wydaje się być wielkość sumy wszystkich elementów ze zbioru $sum_(s in S) s$.
 
 === #cli
 
 Sformułowanie modelu dla problemu kliki nie jest oczywiste, podejście naiwne w tym wypadku skutkuje modelem niepotrzebnie skomplikowanym. Dlatego spróbujemy zastosować mniej oczywiste podejście, wcześniej w @theory[rozdziale] wspomnieliśmy o bliskim związku problemu #cli z problemem #ind, co możemy wykorzystać. Okazuje się że model dla problemu zbioru niezależnego jest dosyć prosty, dlatego możemy go nieco zmodyfikować aby rozwiązywał problem #cli. Model ten został zaczerpnięty z pracy @seda_maximum_2023.
 
 $
-"maximize" quad &z = sum_(t = 1)^n x_t \
-"subject to" quad & z >= k \
+"max" quad &z = sum_(t = 1)^n x_t \
+"przy ograniczeniach" quad & z >= k \
 & x_t + x_j <= 1, quad & forall{v_t,v_j} in.not E\
 
 & x_i in {0,1}, & i = 1, dots, n  \
@@ -1735,7 +1804,7 @@ Problem komiwojażera jest jednym z najbardziej popularnych problemów z klasy #
 
 = Implementacja systemu
 
-W tym rozdziale przedstawimy szczegóły implementacyjne biblioteki. Będzie on koncentrował się na przekształceniu opisanej wyżej teorii na praktyczne programy.
+// W tym rozdziale przedstawimy szczegóły implementacyjne biblioteki. Będzie on koncentrował się na przekształceniu opisanej wyżej teorii na praktyczne programy.
 == Wybór technologii i środowiska
 Jako język programowania został wybrany język #weblink("https://julialang.org/")[Julia], jest to doskonałe narzędzie w szczególności skierowane do zastosowań matematycznych i obliczeń naukowych. Zawarty w nim dynamiczny system typów pozwala na tworzenie elastycznych i łatwych w użyciu systemów, jest on przy tym językiem kompilowanym, z szczególnym naciskiem na wydajność. Język Julia posiada również bogaty wybór bibliotek o zastosowaniach matematyczno-naukowych, następujące z nich zostały użyte w tym projekcie:
 
@@ -1916,9 +1985,93 @@ W bibliotece zawarto również uproszczone metody realizujące te funkcjonalnoś
 
 == Przykłady działania systemu
 
-W tym rozdziale przedstawimy przykładowy przypadek użycia biblioteki, zarówno funkcji zwyczajnych jak i łańcuchowych, do rozwiązywania wybranych problemów. Zakładamy że posiadamy własny algorytm `my-solve` rozwiązujący problem #vc. 
+W tym rozdziale przedstawimy przykładowy przypadek użycia biblioteki, zarówno funkcji zwyczajnych jak i łańcuchowych, do rozwiązywania wybranych problemów. Zakładamy że posiadamy własny algorytm `my_solve` rozwiązujący problem #vc. Pierwszym krokiem będzie zaimportowanie egzemplarza problemu #sat3, biblioteka umożliwia wczytanie takowego z pliku w formacie `.cnf` lub ręczne utworzenie struktury z wykorzystaniem odpowiednich danych.
 
-= Testy i analiza działania
+#codly(inset: (top: 4pt, bottom: 4pt))
+
+```julia
+instance = SAT3("my_inst.cnf") # importujemy egzemplarz
+res_inst = transform(instance, VertexCover) # dokonujemy transformacji
+red_sol = my_solve(reduced) # rozwiązujemy egzemplarz wynikowy
+solution = extract(red_sol, instance) # odpakowywujemy rozwiązanie
+@assert validate(solution, instance) # weryfikujemy rozwiązanie
+```
+
+Jeśli posiadamy rozwiązanie dla problemu źródłowego możemy użyć funkcji `construct`  aby uzyskać rozwiązanie dla egzemplarza wynikowego redukcji, w następujący sposób.
+
+```julia
+instance = SAT3("solved_inst.cnf")
+res_inst = transform(instance, HamCycle)
+parent_sol = SAT3Solution([1,1,0,1,0,0,1,1,1])
+@assert validate(parent_sol, instance)
+solution = construct(HamCycleSolution, solution, instance)
+@assert validate(solution, res_inst)
+```
+#pagebreak()
+Natomiast wykorzystanie transformacji łańcuchowej wygląda w następujący sposób:
+
+```julia
+instance = SAT3("my_inst.cnf")
+chain = chain_transform(instance, Knapsack) # funkcja zwracająca łańcuch
+parent_sol = my_solve(last(chain))
+solution = extract(parent_sol, chain)
+@assert validate(solution, instance)
+```
+
+Możliwe jest również dokładne ustalenie ścieżki transformacji
+
+```julia
+instance = SAT3("my_inst.cnf")
+path = [Clique, VertexCover, HittingSet] # ustalona ścieżka redukcji
+chain = chain_transform(instance, path) # zwracamy łańcuch
+res_inst = transform(instance, path) # lub jedynie wynikowy egzemplarz
+@assert last(chain) == res_inst
+```
+
+
+= Testy i analiza działania <tests>
+
+W poniższym rozdziale przedstawimy testy poprawności oraz wydajności biblioteki
+
+== Weryfikacja poprawności implementacji
+
+Poprawność implementacji biblioteki jest testowana na bieżąco za pomocą testów jednostkowych, które w języku julia pomaga realizować standardowa biblioteka #weblink("https://docs.julialang.org/en/v1/stdlib/Test/")[Test]. Testy wykonywane są dla następujących przypadków użycia
+
++ Wykorzystanie wszystkich interfejsów dla każdej z zaimplementowanych redukcji (patrz @tree)
++ Wykorzystanie funkcji łańcuchowych
++ Rozszerzenie biblioteki o własne problemy i redukcje
+
+Testy jednostkowe można wywołać w bibliotece za pomocą następującego ciągu komend konsolowych, wywoływanych w folderze kodu źródłowego biblioteki
+
+#codly(inset: (top: 2pt, bottom: 2pt))
+
+```
+../Conplete.jl> julia --project
+julia> ]
+(Conplete) pkg> test
+  Testing Conplete
+```
+
+Aby wywołać testy należy przejść z konsoli `REPL` języka Julia do menadżera pakietów co realizowane jest za pomocą klawisza `]`. Testy jednostkowe zostały umieszczone w pod-module biblioteki w folderze `/test` w pliku `testitems.jl`.
+
+
+== Analiza złożoności obliczeniowej operacji redukcji
+
+Aby zaprezentować szybkość operacji redukcji oraz wpływ na zasoby komputera zaprezentujemy wyniki testów wydajnościowych dla wybranych transformacji. Testy wydajnościowe zostały przeprowadzone przy pomocy biblioteki #weblink("https://juliaci.github.io/BenchmarkTools.jl/stable/")[BenchmarkTools] służącej właśnie do pomiaru wydajności programów w tym języku. Dodatkowo do operacji statystycznych wykorzystano standardową bibliotekę #weblink("https://docs.julialang.org/en/v1/stdlib/Statistics/")[Statistics]. Skrypty realizujące testy wydajnościowe możemy znaleźć w folderze `/research_scripts` w repozytorium kodu źródłowego biblioteki
+
+
+#pagebreak()
+Parametry komputera na którym zostały przeprowadzone testy to:
+
+#figure(
+  table(
+    columns: 2,
+    [*System*], [Windows 11 Pro 64-bit],
+    [*CPU*], [AMD Ryzen 7 7700],
+    [*Pamięć RAM*], [32GB Dual-Channel DDR5 6000MHz]
+  ),
+  caption: [Parametry komputera na którym przeprowadzono testy]
+)
 
 #let names = (
   DirHamCycle : link(<ham>,smallcaps[Directed-Ham-Cycle]),
@@ -1928,7 +2081,9 @@ W tym rozdziale przedstawimy przykładowy przypadek użycia biblioteki, zarówno
   VertexCover : [#vc],
   HittingSet : [#hit],
   SAT3 : [#sat3],
-  "HittingSet{Set{Int64}}" : [#hit]
+  "HittingSet{Set{Int64}}" : [#hit],
+  SubsetSum : [#subs],
+  CNFSAT : [#sat],
 )
 
 #set-round(
@@ -1938,27 +2093,33 @@ W tym rozdziale przedstawimy przykładowy przypadek użycia biblioteki, zarówno
   direction:  "nearest",
 )
 
+Pierwszymi wynikami jakie zaprezentujemy będą pomiary transformacji z problemu #sat3, transformacje te są jednymi z najbardziej zaawansowanych w zakresie całej biblioteki. Danymi wejściowymi dla pomiarów są jednorodnie losowe egzemplarze #sat3 pozyskane ze strony #weblink("https://www.cs.ubc.ca/~hoos/SATLIB/benchm.html")[SATLIB] o rozmiarze 250 zmiennych i 1065 klauzul. Poniższe tabele prezentują średnie arytmetyczne z testów dla kilkunastu różnych danych wejściowych po 30 wykonań dla jednej danej.
+@mem prezentuje pomiary wykorzystania pamięci dla algorytmów transformacji.
 
-#let mjson = json("test_data/trans_pro/cli20251124_02-05-40.974.json")
+#let mjson = json("test_data/trans_pro/cli20251128_00-44-21.226.json")
 
 #let (xses, times, gctimes, memory, allocs, stds, vcs ) = mjson
 
 #let x = mjson.values()
 
-
 #figure(
   ztable(
-  columns: 5,
+  columns: 4,
   align: (left, right, right, right, right),
   format: (none, auto, auto, auto, auto),
   table.header(
-    [*Transformacja do \ problemu*], [*Czas działania*], [*Czas Garbage \ Collectora *], [*Wykorzystana \ pamięć*], [*Alokacje*]
+    [*Transformacja do \ problemu*],  [*Czas Garbage \ Collectora *], [*Wykorzystana \ pamięć*], [*Alokacje*]
   ),
   ..for x in unzip(x) {(
-    [#names.at(x.first())], [#(x.at(1)/1e6)#nonum[ ms]], [#(x.at(2)/1e6)#nonum[ ms]], [#(x.at(3)/1e6)#nonum[ MiB]], [#x.at(4)],
+    [#names.at(x.first())], [#(x.at(2)/1e6)#nonum[ ms]], [#(x.at(3)/1e6)#nonum[ MiB]], [#x.at(4)],
   )}
 ),
-)
+caption: [Średnie koszty pamięciowe poszczególnych redukcji]
+) <mem>
+
+W @mem[tabeli] możemy zobaczyć że algorytmy nie wywołują praktycznie Garbage Collector'a oznacza to że nie jest alokowana żadna zbędna pamięć, która musi zostać następnie zwolniona.
+
+#let scale = 1e3
 
 #figure(
   ztable(
@@ -1969,58 +2130,122 @@ W tym rozdziale przedstawimy przykładowy przypadek użycia biblioteki, zarówno
     [*Transformacja do \ problemu*], [*Czas działania*], [*Odchylenie \ standardowe *], [*Współczynnik \ zmienności*]
   ),
   ..for x in unzip(x) {(
-    [#names.at(x.first())], [#(x.at(1)/1e6)#nonum[ ms]], [#(x.at(5)/1e6)#nonum[ ms]], [#(x.at(6))],
+    [#names.at(x.first())], [#(x.at(1)/scale)#nonum[ #sym.mu\s]], [#(x.at(5)/scale)#nonum[ #sym.mu\s]], [#(x.at(6))],
   )}
 ),
-)
+caption: [Średnie koszty czasowe poszczególnych redukcji]
+) <times>
 
+W @times[tabeli] przedstawiono średnie czasy działania algorytmów wraz z odchyleniem standardowym oraz współczynnikiem zmienności. Pokazuje nam to że zmiana czasu działania w zależności od danych wejściowych (dla danych o tym samym rozmiarze) jest znikoma - współczynnik zmienności wyniósł $<=5%$. Możemy również zobaczyć że trywialna redukcja $sat3 -> sat$ zajmuje stosunkowo mało czasu a redukcja do problemu #cli której wynikiem jest graf bliski pełnemu, zajmuje stosunkowo dużo czasu i pamięci z powodu $O(n^2)$ czasu konstrukcji takiego grafu, w porównaniu do liniowego czasu $O(n)$ działania większości innych algorytmów.
 
-#figure(
-  lq.diagram(
-  width: 10cm,
-  height: 6cm,
-  xaxis: (
-    ticks: xses
-      .map(rotate.with(-45deg, reflow: true))
-      .map(align.with(right))
-      .enumerate(),
-    subticks: none,
-  ),
-  yaxis: (
-    scale: "log",
-    lim: (calc.pow(10,0), calc.pow(10,3)),
-  ),
-  lq.bar(
-    range(3),
-    times.map(x => x / 1e6),
-    base: 1,
-    // yerr: stds.map(x => x / 1e6),
-  )
-)
-)
+Teoretyczna analiza algorytmów pokazuje nam że redukcje działają w czasie wielomianowym, postaramy się jednak pokazać rzeczywiste dane popierające te wyniki. Testy przeprowadzono dla jednostajnie losowych egzemplarzy #sat3 z bazy danych SATLIB o rozmiarze 20-250 zmiennych.
 
-#let (xses, times, gctimes, memory, allocs ) = json("test_data/trans_n/lin_cliClique20251123_04-12-40.140.json")
+#let cliq = json("test_data/trans_n/cli_Clique20251124_00-42-00.856.json")
+#let subset = json("test_data/trans_n/bin_SubsetSum20251124_00-42-52.105.json")
+#let hailton = json("test_data/trans_n/ham_DirHamCycle20251124_00-43-55.546.json")
+#let vertex = json("test_data/trans_n/hit_VertexCover20251124_00-42-13.784.json")
+
+#let scale = 1e6
+#let satrange = (20,50,75,100,125,150,175,200,225,250)
 
 #figure(
   lq.diagram(
-  width: 10cm,
+  width: 12cm,
   height: 6cm,
   xlabel:"Rozmiar danych",
   ylabel:[Czas transformacji w ms],
+  legend: (position: left + top),
+  // yscale:"log",
+  // lq.plot(
+  //   (20,50,75,100,125,150,175,200,225,250),
+  //   cliq.times.map(x => x/scale),
+  // ),
+  lq.plot(
+    satrange,
+    subset.times.map(x => x/scale),
+    label: [#subs]
+  ),
+  lq.plot(
+    satrange,
+    hailton.times.map(x => x/scale),
+    label: [#names.at("DirHamCycle")]
+  ),
+  lq.plot(
+    satrange,
+    vertex.times.map(x => x/scale),
+    label: [#vc]
+  ),
+),
+caption: [Wzrost czasu transformacji przy wzroście rozmiaru danych]
+) <w18>
+
+Na @w18[wykresie] możemy zobaczyć przewidywany liniowy wzrost czasu wykonywania, oraz różnice w szybkości pomiędzy algorytmami. Na @w19[wykresie] natomiast możemy zobaczyć kwadratowy wzrost czasu dla transformacji do problemu #cli.
+
+#figure(
+  lq.diagram(
+  width: 12cm,
+  height: 6cm,
+  xlabel:"Rozmiar danych",
+  ylabel:[Czas transformacji w ms],
+  legend: (position: left + top),
   // yscale:"log",
   lq.plot(
-    (20,50,75,100,125,150,175,200,225,250),
-    times.map(x => x/1000000),
-  )
-)
-)
+    satrange,
+    cliq.times.map(x => x/scale),
+    label: [#cli]
+  ),
+  lq.plot(
+    satrange,
+    satrange.map(x=>(x*x)/1300),
+    color: luma(210),
+    label: $1/1200 x^2$
+  ),
+),
+caption: [Wzrost czasu transformacji dla problemu #cli]
+) <w19>
+
+Testy potwierdzają więc wielomianowy czas działania algorytmów, oraz pokazują ich dosyć szybkie działanie a także niewielkie zużycie pamięci.
+
+// #figure(
+//   lq.diagram(
+//   width: 10cm,
+//   height: 6cm,
+//   xaxis: (
+//     ticks: xses
+//       .map(rotate.with(-45deg, reflow: true))
+//       .map(align.with(right))
+//       .enumerate(),
+//     subticks: none,
+//   ),
+//   yaxis: (
+//     scale: "log",
+//     lim: (calc.pow(10,0), calc.pow(10,3)),
+//   ),
+//   lq.bar(
+//     range(5),
+//     times.map(x => x / 1e6),
+//     base: 1,
+//     // yerr: stds.map(x => x / 1e6),
+//   )
+// )
+// )
+
+#pagebreak()
+
+== Wpływ redukcji na szybkość rozwiązania problemu
+
+Z powodu różnej specyfiki badanych problemów trudno pokazać wpływ transformacji na rozmiar danych. Aby jednak zobrazować ten wpływ w pewien sposób, pokażemy wpływ transformacji na czas rozwiązywania problemu. Do rozwiązywania wykorzystano wspomniane w @models[rozdziale] modele programowania całkowitoliczbowego oraz solver *IBM CPLEX* @noauthor_ibm_2025 w wersji 22.1.2
+
+W ogólności przewidywany czas działania dla solvera jest eksponencjalny, testy pokazują jednak doskonałą wydajność rozwiązywania problemów #rsat. Na @satres[wykresie] możemy zobaczyć niemal liniowy stosunek czasu działania do rozmiaru danych, co pokazuje doskonałą technologię współczesnych solverów.
+
+
 
 #let (xses, times, gctimes, memory, allocs ) = json("test_data/sol_n/sat_SAT320251123_20-59-35.368.json")
 // #let (xses, times, gctimes, memory, allocs ) = json("test_data/sol_n/sat_SAT320251124_06-14-39.158.json")
 
 #figure(
   lq.diagram(
-  width: 10cm,
+  width: 12cm,
   height: 6cm,
   xlabel:"Rozmiar danych",
   ylabel:[Czas rozwiązania w ms],
@@ -2029,8 +2254,9 @@ W tym rozdziale przedstawimy przykładowy przypadek użycia biblioteki, zarówno
     (20,50,75,100,125,150,175,225,250),
     times.map(x => x/1000000),
   )
-)
-)
+),
+caption: [Czas rozwiązywania #sat3 w stosunku do rozmiaru danych wejściowych]
+) <satres>
 
 #let satd = json("test_data/sol_n/hit_SAT320251124_00-35-15.158.json")
 #let vcd = json("test_data/sol_n/hit_VertexCover20251124_00-35-15.530.json")
@@ -2039,7 +2265,7 @@ W tym rozdziale przedstawimy przykładowy przypadek użycia biblioteki, zarówno
 
 #figure(
   lq.diagram(
-  width: 10cm,
+  width: 12cm,
   height: 6cm,
   legend: (position: left + top),
   xlabel:"Rozmiar danych",
@@ -2060,8 +2286,15 @@ W tym rozdziale przedstawimy przykładowy przypadek użycia biblioteki, zarówno
     hitd.times.map(x => x/1000000),
     label: [#hit],
   ),
-)
-)
+),
+caption: [Czas rozwiązywania problemów w stosunku do rozmiaru danych wejściowych]
+) <asd21>
+
+W przypadku bardziej złożonych problemów czas działania okazuje się jednak być eksponencjalny. Na @asd21[wykresie] możemy zobaczyć czasy działania dla problemów #vc and #hit przedstawione w skali logarytmicznej. 
+
+Testy wydają się pokazywać wzrost czasu działania dla konkretnego rozmiaru danych, na @asd21[wykresie] możemy zaobserwować gwałtowny wzrost czasu działania dla rozmiaru $x = 125$, bliższe zbadanie tego fenomenu zdaje się wykluczać czynniki zewnętrzne a jego dokładny powód nie jest znany.
+
+Następna grupa wykresów porównuje czasy rozwiązywania tego samego egzemplarza #sat3 przed i po kolejnych transformacjach. Wykresy odpowiadają wybranym ścieżki transformacji problemów w grafie redukcji. Na @asd22[wykresie] możemy zobaczyć znaczny wzrost czasu rozwiązania po transformacji do #cli następne transformacje nie mają jednak znacznego wpływu. Dzieje się tak ponieważ dalsze transformacje  to operacje dużo prostsze w porównaniu do tej pierwszej.
 
 #let data = json("test_data/sol_pro/cli20251124_05-49-18.803.json")
 #let data2 = json("test_data/sol_pro/hit20251124_05-50-33.409.json")
@@ -2071,10 +2304,10 @@ W tym rozdziale przedstawimy przykładowy przypadek użycia biblioteki, zarówno
   width: 10cm,
   height: 5cm,
   ylabel:[Czas rozwiązania w ms],
-  // yscale:"log",
+  yscale:"log",
   xaxis: (
     ticks: data.xses.map(x => names.at(x))
-      .map(rotate.with(-45deg, reflow: true))
+      .map(rotate.with(-30deg, reflow: true))
       .map(align.with(right))
       .enumerate(),
     subticks: none,
@@ -2092,49 +2325,109 @@ W tym rozdziale przedstawimy przykładowy przypadek użycia biblioteki, zarówno
   base: 1,
   z-index:2,
   ),
-)
-)
+),
+caption: [Wpływ redukcji na czas rozwiązywania problemu]
+) <asd22>
+
+Kolorem pomarańczowym zaznaczono alternatywną ścieżkę pomijającą problem #cli, to znaczy transformujemy #sat3 od razu do #vc. Okazuje się że powoduje to znaczący wzrost szybkości rozwiązywania (wykres jest w skali logarytmicznej). Powinna więc być to preferowana metoda redukcji dla tych problemów.
+
+#let data = json("test_data/sol_pro/ham20251129_02-00-47.022.json")
+
+#figure(
+  lq.diagram(
+  width: 10cm,
+  height: 5cm,
+  ylabel:[Czas rozwiązania w ms],
+  yscale:"log",
+  xaxis: (
+    ticks: data.xses.map(x => names.at(x))
+      .map(rotate.with(-30deg, reflow: true))
+      // .map(move.with(dx: -20pt))
+      .map(align.with(right))
+      .enumerate()
+      .map(x => if x.at(0) != 0 {(x.at(0),move(dx:-25pt)[#x.at(1)])} else {x}),
+    subticks: none,
+  ),
+  lq.bar(
+    (0,1,2,3),
+    data.times.map(x => x/1000000),
+    base: 1,
+    z-index:1,
+  ),
+),
+caption: [Wpływ redukcji na czas rozwiązywania problemu]
+) <asd23>
+
+Kolejny z wykresów (@asd23) prezentuje zmiany czasów rozwiązywania dla problemów cykli w grafie możemy tutaj zaobserwować znaczny wzrost czasu dla kolejnych redukcji, oraz spadek czasu dla problemu #tsp. Pokazuje to znaczny wpływ na rozmiar danych, w szczególności redukcja do #uham która potraja liczbę wierzchołków w grafie.
+Spadek czasu dla ostatniego problemu jest natomiast spowodowany użyciem zewnętrznego solvera *Concorde* dla tego problemu.
+
+Testy w gruncie rzeczy potwierdzają więc przewidywania z którymi rozpoczęliśmy: transformacje mają wielomianowy, najczęściej liniowy lub stały, wpływ na rozmiar danych który jednak powoduje eksponencjalne różnice czasów rozwiązywania.
 
 
-== Weryfikacja poprawności implementacji
-== Analiza złożoności obliczeniowej operacji redukcji
+#heading(numbering: none, supplement: none)[Podsumowanie i wnioski]
 
-- liniowy wzrost czasu transformacji (jest)
-- stały czas transformacji dla danych o tym samym rozmiarze (tabela?)
-- ekspo wzrost czasu rozwiązywania dla kolejnych transformacji
+Celem niniejszej pracy było zaprojektowanie i zaimplementowanie biblioteki redukcji problemów klasy NP w języku Julia, umożliwiającej transformację instancji, a także konstrukcję i ekstrakcję rozwiązań.Cel ten został w pełni zrealizowany poprzez stworzenie systemu obsługującego graf redukcji obejmujący kluczowe problemy NP-zupełne, takie jak #sat, #sat3, #cli, #vc, #uham, czy zagadnienia typu #subs.
 
-== Wpływ redukcji na szybkość rozwiązania problemu
+W toku prac przeprowadzono analizę teoretyczną i implementacyjną wybranych redukcji. Szczególną uwagę poświęcono optymalizacji rozmiaru instancji wynikowych. W przypadku redukcji problemu 3-SAT do problemu cyklu Hamiltona w grafie skierowanym (#ham) przeprowadzono analizę porównawczą metod Sudkampa oraz Kleinberg-Tardos. Ostatecznie, ze względu na generowanie mniejszej liczby wierzchołków i krawędzi w grafie wynikowym, do implementacji wybrano metodę Kleinberg-Tardos. Zaimplementowano również mechanizmy rozwiązywania problemów (algorytm #solve) oparte głównie na redukcji do programowania całkowitoliczbowego (#mip) z wykorzystaniem solverów MIP oraz dedykowanego solvera Concorde dla problemu komiwojażera.
 
-= Podsumowanie i wnioski
+Przeprowadzone testy i analiza działania systemu (@tests) pozwoliły na sformułowanie następujących wniosków:
 
-= Dodatek A - pliki źródłowe i wykorzystane narzędzia
++ *Złożoność redukcji*: Zaimplementowane algorytmy transformacji działają w czasie wielomianowym, najczęściej liniowym $O(n+m)$ lub – w przypadku problemu #cli – kwadratowym, co jest zgodne z założeniami teoretycznymi dla klasy #np.
 
-Pliki źródłowe biblioteki możemy znaleźć w repozytorium git pod adresem:
++ *Koszt redukcji*: Choć sama transformacja jest procesem szybkim, jej wpływ na czas rozwiązywania instancji wynikowej jest znaczący. Redukcje zazwyczaj zwiększają rozmiar instancji, co prowadzi do wykładniczego wzrostu czasu potrzebnego na znalezienie rozwiązania przez solver. Zaobserwowano, że bezpośrednie ścieżki redukcji są bardziej efektywne niż ścieżki wieloetapowe.
+
++ *Stabilność numeryczna*: W przypadku problemów sum podzbiorów (SUBSET-SUM) zidentyfikowano potencjalne problemy z dokładnością operacji zmiennoprzecinkowych w solverach przy bardzo dużych liczbach.
+
+Stworzona biblioteka charakteryzuje się idiomatycznością, spójnością interfejsów oraz otwartością na rozbudowę o kolejne problemy i redukcje przez użytkownika. Wykorzystanie mechanizmu multiple dispatch języka Julia pozwoliło na elastyczne zarządzanie metodami transformacji. System stanowi kompletne narzędzie prezentujące w praktyce teoretyczne zależności między trudnymi problemami obliczeniowymi, realizując założenia postawione we wstępie pracy.
+
+#heading(numbering: none, supplement: none)[Dodatek A - pliki źródłowe i wykorzystane narzędzia]
+
+Pliki źródłowe biblioteki możemy znaleźć w repozytorium Git pod adresem:
 
 #let qrlink(addr) = figure(
+  outlined: false,
   table(
   stroke: none,
-  columns: 2,
-  align: horizon + center,
-  weblink(addr),
+  columns: (1fr,0.5fr),
+  align: (horizon + right, horizon + left ),
+  link(addr),
   tiaoma.qrcode(addr),
  )
 )
 
 #qrlink("https://github.com/junsevith/Conplete.jl")
 
-Dokumentacja biblioteki jest hostowana na stronie WW pod adresem:
+Dokumentacja biblioteki jest hostowana na stronie WWW pod adresem:
 
 #qrlink("https://junsevith.github.io/Conplete.jl/dev/")
 
-
-= Dodatek B
-
-// Daje nam to więc dwie opcje
+Ten dokument został utworzony za pomocą nowoczesnej aplikacji do składu tekstu o nazwie *Typst* oraz jej wielu rozszerzeń umożliwiających m.in. generowanie rysunków grafów czy wykresów. Poniżej wylistowano wszystkie użyte rozszerzenia:
 
 
-Praca opiera się w istocie gruncie rzeczy na kilku faktach, z których wszystkie powiązane są z klasą obliczeniową #np. Zdefiniujemy je więc zaczynając od pojęcia Złożoności czasowej w szczególnym przypadku Niedeterministycznych maszyn Turinga. Jak wiemy maszyny takie różnią się od standardowych tym że z danego stanu możliwe jest kilka różnych przejść.
 
-#def[Złożoność czasowa][Weźmy $M$ niedeterministyczną maszynę Turinga. Złożoność czasowa maszyny $M$ jest funkcją $t c_M : bb(N) -> bb(N)$ taką że $t c_M (n)$ oznacza maksymalną liczbę przejść wykonanych w obliczeniu (dla dowolnych możliwych wyborów przejść) na wejściu o długości $n$]
+#table(
+stroke: none,
+columns: (auto,auto,1fr),
+align: horizon + left,
+[*Typst*], [\- skład tekstu], link("https://typst.app/"),
+[*Red Agora*], [\- baza wyglądu pracy], link("https://typst.app/universe/package/red-agora"),
+[*Fletcher*], [\- rysunki grafów], link("https://typst.app/universe/package/fletcher/"),
+[*Lilaq*], [\- wykresy], link("https://typst.app/universe/package/lilaq"),
+[*Lovelace*], [\- pseudokody], link("https://typst.app/universe/package/lovelace"),
+[*Farme-It*], [\- definicje i twierdzenia], link("https://typst.app/universe/package/frame-it"),
+[*Codly*], [\- programy i kod], link("https://typst.app/universe/package/codly"),
+[*Tiaoma*], [\- kody QR], link("https://typst.app/universe/package/tiaoma"),
+[*Zero*],[\- formatowanie liczb], link("https://typst.app/universe/package/zero"),
+)
 
-#def[Klasa złożoności $np$][Język $L$ jest akceptowany w *niedeterministycznym czasie wielomianowym* (ang. Nondeterministic Polynomial time - w skrócie NP) jeśli istnieje niedeterministyczna maszyna Turinga $M$ która akceptuje język $L$ w czasie $t c_M in O(n^r)$, gdzie $r$ jest liczbą naturalną niezależną od $n$. Rodzinę języków akceptowanych w niedeterministycznym czasie wielomianowym nazywamy $np$. ]
+
+// #heading(numbering: none, supplement: none)[Dodatek B]
+
+// // Daje nam to więc dwie opcje
+
+
+// Praca opiera się w istocie gruncie rzeczy na kilku faktach, z których wszystkie powiązane są z klasą obliczeniową #np. Zdefiniujemy je więc zaczynając od pojęcia Złożoności czasowej w szczególnym przypadku Niedeterministycznych maszyn Turinga. Jak wiemy maszyny takie różnią się od standardowych tym że z danego stanu możliwe jest kilka różnych przejść.
+
+// #def[Złożoność czasowa][Weźmy $M$ niedeterministyczną maszynę Turinga. Złożoność czasowa maszyny $M$ jest funkcją $t c_M : bb(N) -> bb(N)$ taką że $t c_M (n)$ oznacza maksymalną liczbę przejść wykonanych w obliczeniu (dla dowolnych możliwych wyborów przejść) na wejściu o długości $n$]
+
+// #def[Klasa złożoności $np$][Język $L$ jest akceptowany w *niedeterministycznym czasie wielomianowym* (ang. Nondeterministic Polynomial time - w skrócie NP) jeśli istnieje niedeterministyczna maszyna Turinga $M$ która akceptuje język $L$ w czasie $t c_M in O(n^r)$, gdzie $r$ jest liczbą naturalną niezależną od $n$. Rodzinę języków akceptowanych w niedeterministycznym czasie wielomianowym nazywamy $np$. ]

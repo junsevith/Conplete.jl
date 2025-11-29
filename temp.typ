@@ -8,32 +8,48 @@
   university: "Politechnika Wrocławska",
   faculty: "Wydział Informatyki i Telekomunikacji",
   department: "Katedra Podstaw Informatyki",
-  course: "Informatyka Algorytmiczna (INA)"
+  course: "Informatyka Algorytmiczna (INA)",
 )
 
-#let project(title: "", subtitle: none, school-logo: none, school-desc: pwr, company-logo: none, authors: (), mentors: (), jury: (), city: none, date: none, abstract: none, language: "pl", keywords: none, popraw_sieroty: false, body) = {
-  
+#let project(
+  title: "",
+  subtitle: none,
+  school-logo: none,
+  school-desc: pwr,
+  company-logo: none,
+  authors: (),
+  mentors: (),
+  jury: (),
+  city: none,
+  date: none,
+  abstract: none,
+  language: "pl",
+  keywords: none,
+  popraw_sieroty: false,
+  body,
+) = {
   // Set the document's basic properties.
   let dict = json("resources/i18n/" + language + ".json")
   set par(justify: true, leading: 0.65em)
-  set text(lang: language, size: 12pt, costs: ( hyphenation: 100%, runt: 100%, widow: 100%, orphan: 100%, ))
+  set text(lang: language, size: 12pt)
   set heading(numbering: "1.1")
   show figure.caption: set text(11pt)
-  
+
   show regex(" ([^\s]{1,3} )+"): it => context {
     let page_num = here().page()
-    if page_num > 1 and popraw_sieroty [#it.text.first()#it.text.slice(1).replace(" ", "\u{00A0}")]
-    else {it}
+    if page_num > 1 and popraw_sieroty [#it.text.first()#(
+        it.text.slice(1).replace(" ", "\u{00A0}")
+      )] else { it }
   }
-  
+
   set document(author: authors, title: title)
   set page(
     numbering: none,
     // number-align: center,
     header: context {
       // Omit page number on the first page
-      let page-number = here().page();
-      let page_even = calc.rem(page-number, 2) == 0;
+      let page-number = here().page()
+      let page_even = calc.rem(page-number, 2) == 0
 
       let chap = hydra(1, book: false)
       if chap != none and chap.fields().keys() == ("children",) {
@@ -41,7 +57,7 @@
       }
 
       let subch = hydra(2, skip-starting: false, book: false)
-              
+
       let heading = if page_even {
         chap
       } else if subch == none and chap != none {
@@ -49,7 +65,7 @@
       } else {
         subch
       }
-      
+
       if not heading == none {
         text(size: 12pt, weight: "regular")[
           #if page_even {
@@ -75,8 +91,8 @@
     },
     footer: context {
       // Omit page number on the first page
-      let page-number = here().page();
-      if s.get() == 0 and page-number > 1{
+      let page-number = here().page()
+      if s.get() == 0 and page-number > 1 {
         if calc.rem(page-number, 2) == 0 [
           #page-number
           #h(1fr)
@@ -88,27 +104,27 @@
     },
   )
 
-  
-  
-  
+
   show heading: it => {
     if it.level == 1 and it.numbering != none {
       pagebreak()
       block()[
-      #v(40pt)
-      #text(size: 30pt)[#dict.chapter #counter(heading).display() #linebreak()]
-      // #v(-10pt)
-      #text(size: 30pt, weight: "regular")[#it.body ]
-      #v(50pt)
+        #v(40pt)
+        #text(size: 30pt)[#dict.chapter #counter(
+            heading,
+          ).display() #linebreak()]
+        // #v(-10pt)
+        #text(size: 30pt, weight: "regular")[#it.body ]
+        #v(50pt)
       ]
-    } else if it.level == 1 and it.numbering == none and it.outlined == true {
+    } else if it.level == 1 and it.numbering == none and it.supplement == [] {
       pagebreak()
       block()[
-      #v(40pt)
-      #text(size: 30pt)[#dict.chapter #counter(heading).display() #linebreak()]
-      // #v(-10pt)
-      #text(size: 30pt, weight: "regular")[#it.body ]
-      #v(50pt)
+        #v(40pt)
+        // #text(size: 30pt)[#dict.chapter #counter(heading).display() #linebreak()]
+        // #v(-10pt)
+        #text(size: 30pt, weight: "bold")[#it.body ]
+        #v(50pt)
       ]
     } else {
       block()[
@@ -121,13 +137,19 @@
 
   place(top)[
     #box(height: IMAGE_BOX_MAX_HEIGHT)[
-      #v(8pt)
+      #v(0.5pt)
       #align(top + left)[
         #text(size: 16pt, weight: "extrabold")[#school-desc.university] \
+        #v(-4pt)
         #h(0.0em) #text(size: 12pt, weight: 700)[#school-desc.faculty] \
-        #v(-9pt) #line(length: 100% - IMAGE_BOX_MAX_WIDTH, stroke: 0.5pt, ) #v(-9pt)
+        #v(-7pt)
+        #line(length: 100% - IMAGE_BOX_MAX_WIDTH, stroke: 0.5pt)
+        #v(-7pt)
         #h(1em) #text(size: 12pt, weight: 400)[#school-desc.department] \
-        #h(1em) #text(size: 12pt)[#dict.course:] #text(size: 12pt, weight: "bold")[#school-desc.course]
+        #h(1em) #text(size: 12pt)[#dict.course:] #text(
+          size: 12pt,
+          weight: "bold",
+        )[#school-desc.course]
       ]
     ]
     #h(1fr)
@@ -141,9 +163,9 @@
       ]
     ]
   ]
-  
-  // Title box  
-  align(center + horizon )[
+
+  // Title box
+  align(center + horizon)[
     #if subtitle != none {
       text(size: 14pt, tracking: 2pt)[
         #smallcaps[
@@ -152,7 +174,9 @@
       ]
     }
     #line(length: 100%, stroke: 0.5pt)
-    #text(size: 20pt, weight: "bold", hyphenate: false)[#par(justify: false)[#title]]
+    #text(size: 20pt, weight: "bold", hyphenate: false)[#par(
+      justify: false,
+    )[#title]]
     #line(length: 100%, stroke: 0.5pt)
   ]
 
@@ -164,18 +188,18 @@
     [
       // Authors
       #if authors.len() > 0 {
-          text(weight: "bold")[
-            #if authors.len() > 1 {
-              dict.author_plural
-            } else {
-              dict.author
-            }
-            #linebreak()
-          ]
-          for author in authors {
-            author 
-            linebreak()
+        text(weight: "bold")[
+          #if authors.len() > 1 {
+            dict.author_plural
+          } else {
+            dict.author
           }
+          #linebreak()
+        ]
+        for author in authors {
+          author
+          linebreak()
+        }
       }
     ],
     [
@@ -203,17 +227,19 @@
           #for prof in jury [#prof #linebreak()]
         ]
       }
-    ]
+    ],
   )
 
   place(bottom)[
     #box(width: 100%)[
       #align(center)[
         //replace spaces in elements with nonbreakable space
-        #text(size: 12pt)[#par(justify: false)[#dict.keywords: #keywords.map(it => it.replace(" ", "\u{00A0}")).join(", ")]]
-    
-      #v(20pt)
-    
+        #text(size: 12pt)[#par(
+          justify: false,
+        )[#dict.keywords: #keywords.map(it => it.replace(" ", "\u{00A0}")).join(", ")]]
+
+        #v(20pt)
+
         #if city != none {
           city
         }
@@ -223,7 +249,7 @@
       ]
     ]
   ]
-  
+
   pagebreak()
 
   if abstract != none {
@@ -232,15 +258,13 @@
       #heading(numbering: none, outlined: false)[#dict.abstract]
       #abstract
     ]
-    
   }
 
-  
 
   pagebreak()
   // Table of contents.
   outline(depth: 3, indent: auto)
-  
+
   // pagebreak()
   // page(footer: none)[]
   // counter(page).update(0);
@@ -251,51 +275,53 @@
 
   set page(numbering: "I")
   counter(page).update(1)
-  
+
   bibliography("biblio.bib", full: true, style: "ieee")
-  
+
   pagebreak()
 
   let graph-outline(..args) = {
-  show outline: set heading(outlined: true)
-  outline(..args)
-}
-
-show outline.entry: it => {
-  // Check if this entry is for a heading
-  let is-heading = it.element.numbering == "1.1"
-  if is-heading {
-    // Make headings bold
-    strong(it)
-  } else {
-    // Keep figures/non-headings normal
-    it
+    show outline: set heading(outlined: true)
+    outline(..args)
   }
-}
 
-
+  show outline.entry: it => {
+    // Check if this entry is for a heading
+    let is-heading = it.element.numbering == "1.1"
+    if is-heading {
+      // Make headings bold
+      strong(it)
+    } else {
+      // Keep figures/non-headings normal
+      it
+    }
+  }
 
 
   // Table of figures.
   //odstęp pomiędzy numerkiem a wypisanym
   graph-outline(
     title: dict.figures_table,
-    target: figure.where(kind: image).or(heading.where(level: 1, numbering:"1.1")).or(figure.where(kind: "chart")),
-    indent: 0pt
+    target: figure
+      .where(kind: image)
+      .or(heading.where(level: 1, numbering: "1.1"))
+      .or(figure.where(kind: "chart")),
+    indent: 0pt,
   )
 
-graph-outline(
+  pagebreak()
+  graph-outline(
     title: dict.tables_table,
-    target: figure.where(kind: table)
-)
+    target: figure.where(kind: table),
+  )
 
   show link: it => {
-  text(
-    fill: black,  // Light red
-    weight: "regular",
-    it.body
-  )
-}
+    text(
+      fill: black, // Light red
+      weight: "regular",
+      it.body,
+    )
+  }
 
   show outline.entry: it => {
     if it.element.has("kind") {
@@ -327,11 +353,9 @@ graph-outline(
 
   graph-outline(
     title: dict.algo_table,
-    target: figure.where(kind: "algorithm")
+    target: figure.where(kind: "algorithm"),
   )
 
 
   // pagebreak()
-
-
 }
