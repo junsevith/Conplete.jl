@@ -58,15 +58,12 @@ function bench(name, path)
     for file in dir
         println(file)
 
-        problem = SAT3(dirname * "/" * file)
-        x = problem
+        x = SAT3(dirname * "/" * file)
 
         for p in path
             # println(p)
 
             suite[p][file] = @benchmarkable transform($x, $p)
-
-            x = transform(x, p)
 
         end
     end
@@ -77,12 +74,19 @@ function bench(name, path)
 
     println("running")
 
-    results = run(suite, verbose=true, samples=30)
+        results = run(
+        suite,
+        verbose=true,
+        samples=30,
+        seconds=100000,
+        gctrial=true,
+        gcsample=true,
+    )
 
-    save_group(path, mean(results),"trans_pro/" * name)
+    save_group(path, mean(results),"trans_pro_comp/" * name)
 end
 
-bench("cli", [Clique, VertexCover, HittingSet])
+bench("cli", [Clique, VertexCover, DirHamCycle, SubsetSum, CNFSAT])
 # bench("cli", [VertexCover, HittingSet])
 # bench("knap", [SubsetSum, Partition, Knapsack])
 # bench("bin", [SubsetSum, Partition, BinPacking])

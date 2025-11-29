@@ -1,15 +1,9 @@
-function Conplete.solve(solver, problem::Clique)
-    model = Model(solver)
+function Conplete.solve(model::Model, problem::Clique)
 
-    edges = adjacency_matrix(problem.graph)
+    @variable(model, v[1:nv(problem.graph)], Bin)
 
-    set_silent(model)
-    @variable(model, v[vertices(problem.graph)], Bin)
-
-    for i in axes(edges, 1), j in axes(edges, 2)
-        if i != j && edges[i,j] == 0
-            @constraint(model, v[i] + v[j] <= 1)
-        end
+    for e in edges(complement(problem.graph))
+        @constraint(model, v[src(e)] + v[dst(e)] <= 1)
     end
 
     @constraint(model, sum(v) >= problem.size)

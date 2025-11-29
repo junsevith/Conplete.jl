@@ -1,12 +1,10 @@
-function Conplete.solve(solver, inst::BinPacking)
-    model = Model(solver)
+function Conplete.solve(model::Model, inst::BinPacking)
 
-    @warn "This model provides accurate solutions only for values < 2^54 due to float conversion"
+    @warn "This model provides accurate solutions only for small numbers due to float conversion"
 
     n = length(inst.elements)
     m = inst.bins
 
-    set_silent(model)
     @variable(model, x[1:n, 1:m], Bin)
     @constraint(model, [e = 1:n], sum(x[e, :]) == 1)
     @constraint(model, [b = 1:m], sum(x[:, b] .* inst.elements) <= inst.bin_size)

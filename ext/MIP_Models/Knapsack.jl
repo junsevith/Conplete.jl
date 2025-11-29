@@ -1,9 +1,7 @@
-function Conplete.solve(solver, inst::Knapsack)
-    model = Model(solver)
+function Conplete.solve(model::Model, inst::Knapsack)
 
-    @warn "This model provides accurate solutions only for values < 2^54 due to float conversion"
+    @warn "This model provides accurate solutions only for small numbers due to float conversion"
 
-    set_silent(model)
     @variable(model, x[eachindex(inst.elements)], Bin)
     @constraint(model, sum(x .* inst.elements) <= inst.size)
     @constraint(model, sum(x .* inst.values) >= inst.min_value)

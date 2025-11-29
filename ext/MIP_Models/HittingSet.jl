@@ -1,7 +1,5 @@
-function Conplete.solve(solver, inst::HittingSet)
-    model = Model(solver)
+function Conplete.solve(model::Model, inst::HittingSet)
 
-    set_silent(model)
     @variable(model, x[1:inst.universe_size], Bin)
 
     for s in inst.sets

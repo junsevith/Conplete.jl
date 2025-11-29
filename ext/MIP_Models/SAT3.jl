@@ -1,7 +1,5 @@
-function Conplete.solve(solver, problem::SAT3)
-    model = Model(solver)
+function Conplete.solve(model::Model, problem::SAT3)
 
-    set_silent(model)
     @variable(model, x[1:problem.variable_count], Bin)
     rows = size(problem.clauses, 1)
 

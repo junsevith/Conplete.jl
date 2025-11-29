@@ -2,8 +2,7 @@
 # Modified version of https://jump.dev/JuMP.jl/stable/tutorials/algorithms/tsp_lazy_constraints/
 # When solver supports it, model uses Solver-independent Callbacks https://jump.dev/JuMP.jl/stable/manual/callbacks/#callbacks_manual
 
-function Conplete.solve(solver, problem::HamCycle)
-    model = Model(solver)
+function Conplete.solve(model::Model, problem::HamCycle)
     vert = vertices(problem.graph)
 
     n = nv(problem.graph)
@@ -12,7 +11,6 @@ function Conplete.solve(solver, problem::HamCycle)
 
     # display(edges)
 
-    set_silent(model)
     @variable(model, e[i=vert, j=vert] <= edges[i, j], Bin)
     @constraint(model, [i in vert, j in (i+1):n], e[i, j] == e[j, i])
     @constraint(model, [v in vert], sum(e[v, :]) == 2)
@@ -31,7 +29,7 @@ function Conplete.solve(solver, problem::HamCycle)
         if !(1 < length(cycle) < n)
             return  # Only add a constraint if there is a cycle
         end
-        println("Callback found cycle of length $(length(cycle))")
+        # println("Callback found cycle of length $(length(cycle))")
         S = [(i, j) for (i, j) in Iterators.product(cycle, cycle) if i < j]
         con = @build_constraint(
             sum(model[:e][i, j] for (i, j) in S) <= length(cycle) - 1,

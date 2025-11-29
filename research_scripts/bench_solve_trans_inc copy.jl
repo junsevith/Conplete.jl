@@ -6,31 +6,27 @@ using JuMP
 using Concorde
 using HiGHS
 
-solver = CPLEX.Optimizer
-# solver = HiGHS.Optimizer
-
 include("save_data.jl")
 
 # solve(s, i::TSP) = Conplete.solve(i)
 
-function bench1(problem, name, path::Vector{Type{<:NPProblem}}, sec=10)
+function model_setup(seed::Int32=42)
+  model = Model(CPLEX.Optimizer)
+  set_attribute(model, "CPX_PARAM_RANDOMSEED", seed)
+  set_attribute(model, "CPX_PARAM_PARALLELMODE", 1)
+  set_silent(model)
+  return model
+end
+
+function bench1(problem, name, path::Vector{Type{<:NPProblem}})
   suite = BenchmarkGroup()
 
   inst = chain_transform(problem, path)
 
-  suite[SAT3] = @benchmarkable solve($solver, $x)
+  types = map(typeof, inst)
 
-  for p in path
-    # println(p)
-
-    pog = transform(x, p)
-
-    display(pog)
-
-    suite[p] = @benchmarkable z = solve($solver, $pog)
-
-    x = pog
-
+  for i in inst
+    suite[typeof(i)] = @benchmarkable z = solve(model_setup(seed), $i) setup=(display($i);seed=rand(Int32(1):Int32(2000000000));display(seed))
   end
 
   println("tuning")
@@ -44,7 +40,7 @@ function bench1(problem, name, path::Vector{Type{<:NPProblem}}, sec=10)
   results = run(
     suite, 
     verbose=true,
-    samples=3,
+    samples=10,
     seconds=100000,
     gctrial=true,
     gcsample=true,
@@ -54,19 +50,18 @@ function bench1(problem, name, path::Vector{Type{<:NPProblem}}, sec=10)
 
   # save_group(path, mean(results), name)
 
-  pushfirst!(path, SAT3)
-
-  save2(path, results, "solve_trans_inc/" * name)
+  save2(types, results, "solve_trans_inc/" * name)
 
   return results
 end
 
 # fil = SAT3("test_data/lin_increase/n020m091.cnf")
 # fil = SAT3("test_data/lin_increase/n050m218.cnf")
-# fil = SAT3("test_data/lin_increase/n075m325.cnf")
-fil = SAT3("test_data/lin_increase/n100m430.cnf")
+fil = SAT3("test_data/lin_increase/n075m325.cnf")
+# fil = SAT3("test_data/lin_increase/n100m430.cnf")
 
-res = bench1(fil, "cli", Vector{Type{<:NPProblem}}([SAT3, Clique, VertexCover, HittingSet]))
+# res = bench1(fil, "cli", Vector{Type{<:NPProblem}}([Clique, VertexCover]))
+# res = bench1(fil, "cli", Vector{Type{<:NPProblem}}([Clique, VertexCover, HittingSet]))
 # bench1(fil, "hit", Vector{Type{<:NPProblem}}([VertexCover, HittingSet]))
 
 smol = [
@@ -107,6 +102,6 @@ matrix2 = [
   1 -4 -5
 ]
 
-# bench1(SAT3(matrix2), "ham", Vector{Type{<:NPProblem}}([DirHamCycle, HamCycle, TSP]))
+bench1(SAT3(matrix2), "ham", Vector{Type{<:NPProblem}}([DirHamCycle, HamCycle, TSP]))
 
 # bench1(fil, "cli", [Clique, VertexCover, HittingSet, SubsetSum, Partition,BinPacking, Knapsack,DirHamCycle, HamCycle, TSP])

@@ -56,10 +56,14 @@ function join_groups(group)
     y = map(x -> x[2], group)
     z = map(x -> (x.time, x.gctime, x.memory, x.allocs), y)
     d = unzip(z)
+
     e = map(mean, d)
 
-    std = std(d[1])
-    return e
+    st = stdm(d[1], e[1])
+
+    vc = st / e[1]
+
+    return (e..., st, vc)
 end
 
 function save_group(args, group, name)
@@ -73,6 +77,8 @@ function save_group(args, group, name)
         "gctimes" => d[2],
         "memory" => d[3],
         "allocs" => d[4],
+        "stds" => d[5],
+        "vcs" => d[6],
     ]
     
     display(m)

@@ -16,4 +16,10 @@ include("Partition.jl")
 include("BinPacking.jl")
 include("Knapsack.jl")
 
+function Conplete.solve(solver::DataType, problem::NPProblem)
+    model = Model(solver)
+    set_silent(model)
+    Conplete.solve(model, problem)
+end
+
 end

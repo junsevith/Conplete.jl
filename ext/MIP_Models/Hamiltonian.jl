@@ -2,8 +2,8 @@
 # Modified version of https://jump.dev/JuMP.jl/stable/tutorials/algorithms/tsp_lazy_constraints/
 # When solver supports it, model uses Solver-independent Callbacks https://jump.dev/JuMP.jl/stable/manual/callbacks/#callbacks_manual
 
-function Conplete.solve(solver, problem::DirHamCycle)
-    model = Model(solver)
+function Conplete.solve(model::Model, problem::DirHamCycle)
+
     vert = vertices(problem.graph)
     n = nv(problem.graph)
 
@@ -11,7 +11,6 @@ function Conplete.solve(solver, problem::DirHamCycle)
 
     # display(edges)
 
-    set_silent(model)
     @variable(model, e[i=vert, j=vert] <= edges[i, j], Bin)
 
     for v in vert
@@ -40,7 +39,7 @@ function Conplete.solve(solver, problem::DirHamCycle)
         if !(1 < length(cycle) < n)
             return  # Only add a constraint if there is a cycle
         end
-        println("Found cycle of length $(length(cycle))")
+        # println("Found cycle of length $(length(cycle))")
         S = [(i, j) for (i, j) in Iterators.product(cycle, cycle) if i != j]
         con = @build_constraint(
             sum(model[:e][i, j] for (i, j) in S) <= length(cycle) - 1,
@@ -73,7 +72,7 @@ function Conplete.solve(solver, problem::DirHamCycle)
     if !callback
         cycle = find_subtour(getcycle(value(model[:e])))
         while 1 < length(cycle) < n
-            println("Found cycle of length $(length(cycle))")
+            # println("Found cycle of length $(length(cycle))")
             S = [(i, j) for (i, j) in Iterators.product(cycle, cycle) if i != j]
             @constraint(
                 model,

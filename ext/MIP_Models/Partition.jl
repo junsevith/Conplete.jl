@@ -1,9 +1,7 @@
-function Conplete.solve(solver, inst::Partition)
-    model = Model(solver)
+function Conplete.solve(model::Model, inst::Partition)
 
-    @warn "This model provides accurate solutions only for values < 2^54 due to float conversion"
+    @warn "This model provides accurate solutions only for small numbers due to float conversion"
 
-    set_silent(model)
     @variable(model, x[eachindex(inst.elements)], Bin)
     @constraint(model, sum(x .* inst.elements) == sum(.-(x .- 1) .* inst.elements))
     @objective(model, Min, 1)

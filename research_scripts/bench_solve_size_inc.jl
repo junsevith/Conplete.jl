@@ -44,7 +44,7 @@ function bench(dirname, name, path::Vector{Type{<:NPProblem}})
 
     println("running")
 
-    results = run(suite, verbose=true, samples=10)
+    results = run(suite, verbose=true, seconds=10)
 
     pushfirst!(path, SAT3)
 
@@ -57,5 +57,5 @@ end
 
 # bench("test_data/lin_increase", "sat_", [])
 # bench("test_data/lin_increase_smaller", "cli_", [Clique, VertexCover, HittingSet])
-bench("test_data/lin_increase", "hit_", Vector{Type{<:NPProblem}}([HittingSet]))
-# bench("test_data/lin_increase", "hit_", [VertexCover, HittingSet])
+# bench("test_data/lin_increase", "hit_", Vector{Type{<:NPProblem}}([HittingSet]))
+bench("test_data/lin_increase_small", "hit_", Vector{Type{<:NPProblem}}([VertexCover, HittingSet]))

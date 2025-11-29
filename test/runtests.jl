@@ -68,6 +68,7 @@ println(solver)
       begin
         # global sat3 = SAT3([1 2 3 ; 1 -2 3; 1 2 -3])
         global ezsat3 = SAT3(matrix2)
+        global ezsat4 = SAT3(matrix3)
         global sat3 = SAT3("../test_data/uf20-91/uf20-02.cnf")
         # global sat3 = SAT3("../test_data/UF250.1065.100/uf250-01.cnf")
       end
@@ -77,6 +78,9 @@ println(solver)
 
       global ezsat3_sol = solve(solver, ezsat3)
       @test validate(ezsat3_sol, ezsat3)
+
+      global ezsat4_sol = solve(solver, ezsat4)
+      @test validate(ezsat4_sol, ezsat4)
     end
 
     @testset "CNFSAT->3SAT" begin
@@ -99,10 +103,6 @@ println(solver)
       global cli_sat3 = test_algo(Clique, sat3, sat3_sol)
     end
 
-    @testset "3SAT->SubsetSum" begin
-      global sub_sat3 = test_algo(SubsetSum, ezsat3, ezsat3_sol)
-    end
-
     @testset "Clique->VertexCover" begin
       global vc_cli = test_algo(VertexCover, cli_sat3...)
     end
@@ -122,6 +122,10 @@ println(solver)
 
     @testset "VertexCover->HittingSet" begin
       global hit_vc = test_algo(HittingSet, vc_sat3...)
+    end
+
+    @testset "3SAT->SubsetSum" begin
+      global sub_sat3 = test_algo(SubsetSum, ezsat4, ezsat4_sol)
     end
 
     @testset "SubsetSum->Partition" begin
