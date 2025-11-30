@@ -85,7 +85,7 @@
 #let tak = smallcaps[tak]
 #let nie = smallcaps[nie]
 
-#let num = `num`
+#let numb = `num`
 
 #let node = node.with(radius: 1.5em, shape: circle, fill:white)
 
@@ -122,7 +122,7 @@
   abstract: [
   Celem pracy jest analiza i implementacja wielomianowych redukcji między wybranymi problemami decyzyjnymi z klasy #np. W ramach projektu stworzono bibliotekę w języku Julia, realizującą drzewo transformacji z korzeniem w problemie #sat, obejmujące takie zagadnienia jak #sat3, #vc, #cli czy #uham .
   
-  W pracy przeprowadzono analizę porównawczą metod redukcji, wybierając dla problemu cyklu Hamiltona metodę Kleinberg-Tardos ze względu na optymalizację rozmiaru grafu. Zaimplementowano również mechanizmy rozwiązywania instancji oparte na redukcji do programowania całkowitoliczbowego. Zastosowanie typów generycznych w strukturach danych pozwoliło na obsługę problemów numerycznych o dużej skali, a przeprowadzone testy potwierdziły wielomianową złożoność opracowanych algorytmów.
+  W pracy przeprowadzono analizę porównawczą metod redukcji, m.in. wybierając dla problemu cyklu Hamiltona metodę Kleinberg-Tardos ze względu na optymalizację rozmiaru grafu. Zaimplementowano również mechanizmy rozwiązywania instancji oparte na redukcji do programowania całkowitoliczbowego. Zastosowanie typów generycznych w strukturach danych pozwoliło na obsługę problemów numerycznych o dużej skali, a przeprowadzone testy potwierdziły wielomianową złożoność opracowanych algorytmów.
 
   #heading(numbering: none)[Abstract]
 
@@ -270,7 +270,7 @@ Tak samo jak dla redukcji Karpa definiujemy redukcje wielomianowe oznaczane są 
   node((0,1),$I_P_2$),
   edge("->",$solve_P_2$, stroke:path),
   node((1,1),$S_P_2$),
-  edge((0,0),(0,1),"->",solve, stroke:path),
+  edge((0,0),(0,1),"->",tran, stroke:path),
   edge((1,0),(1,1),"->",con, shift:5pt, label-side:left),
   edge((1,0),(1,1),"<-",extr, shift:-5pt, stroke:path),
   edge((1,0),(1.7,0),"->", stroke:path),
@@ -716,6 +716,122 @@ $
 $
 
 #pagebreak()
+== Redukcja #sat3 do #subs
+
+Ustalmy problem #sat3 jako: $W = w_1 and w_2 and dots and w_m$ formuła w postaci koniunkcyjnej normalnej gdzie $w_j = u_(j,1) or u_(j,2) or u_(j,3)$ oraz $X = {x_1, x_2, dots, x_n}$ zbiór zmiennych używanych w formułach.
+
+Aby zredukować problem #sat3 do #subs musimy przedstawić egzemplarz problemu spełnialności jako zbiór liczb naturalnych a prawidłową ewaluację jako liczbę naturalną. Aby skonstruować tą nieoczywistą redukcję musimy rozpatrzyć liczbę jako ciąg cyfr gdzie każda z cyfr realizuje osobną funkcję.
+
+Wstępny przegląd literatury pokazał istnienie dwóch bardzo podobnych metod: metoda _Cormena_ @rivest_wprowadzenie_2024 oraz metoda _Sudkampa_ @sudkamp_languages_2006. Szybkie porównanie pokazało jednak że metoda Sudkampa pozwala na wykorzystanie liczb w systemie *czwórkowym* tzn. o bazie 4, co gdy operujemy na cyfrach liczb ma znaczący wpływ na ich wielkość. Dlatego ostatecznie została wykorzystana metoda Sudkampa @sudkamp_languages_2006[Tw. 16.3.3].
+
+W redukcji każda liczba $s in S$ będzie odpowiadała ewaluacji zmiennej $x$, tzn definiujemy $2n$ liczb z których połowa będzie odpowiadała pozytywnym ewaluacjom zmiennych a druga połowa negatywnym ewaluacjom zmiennych. Sprawia to że wynikowy podzbiór $S' subset.eq S$ będzie zawierał liczby odpowiadające odpowiednim ewaluacjom zmiennych, musimy jednak odpowiednio zdefiniować same liczby aby uniknąć wyboru dwóch ewaluacji dla jednej zmiennej oraz odpowiednio emulować specyfikę problemu #sat3.
+
+Liczby $s in S$ zdefiniujemy w następujący sposób:
+
+#figure(
+  table(
+    columns: 6,
+    align: (right,center,center,center,center,center),
+    stroke: (x,y) => if y == 0 and x >= 1 {
+    (bottom: 0.7pt + black)
+  } else if x == 0 and y >= 1 {
+    (right: 0.7pt + black)
+  },
+    table.header(
+      [],$w_2$, $w_1$, $x_3$, $x_2$, $x_1$, 
+    ),
+    $x_1$, [1], [0], [0], [0], [3],
+    $not x_1$, [0], [1], [0], [0], [3],
+    $dots.v$, [], [], $dots.c$, [], [],
+    table.hline(),
+    $k$, [3], [3], [3], [3], [3],
+  ),
+  caption: [Liczby odpowiadające ewaluacji zmiennych]
+)
+
+Każda z liczb będzie składać się z $n + m$ cyfr, gdzie cyfry $chevron 1, n chevron.r$ będą oznaczać wykorzystanie danej zmiennej, a cyfry $chevron n+1,n+m chevron.r$ będą oznaczać zaspokajanie danej klauzuli przez daną ewaluację zmiennej. Sumę docelową określimy natomiast jako liczbę odpowiedniej długości o wszystkich cyfrach równych 3. Możemy łatwo zauważyć że taka konstrukcja zapewnia nam wybór dokładnie jednej ewaluacji do podzbioru, wybór dwóch skutkowałby pojawieniem się w sumie cyfry 2 a nie wybranie ewaluacji sprawia że wystąpi tam cyfra 0.
+
+Widzimy jednak że taka konstrukcja powoduje że każda ze zmiennych w klauzuli musiałaby posiadać prawidłową ewaluację, co jest sprzeczne z definicją problemu #sat3. Dlatego wprowadzamy dodatkowe liczby wypełniające, pozwalające na wybór co najmniej jednej ewaluacji dla klauzuli. Liczby te nie mają żadnego wpływu na cyfry zmiennych, pozwalają one jednak na wypełnienie danej cyfry klauzuli aby osiągnąć wartość 3 w wypadku gdy dla sumy ewaluacji ta cyfra wynosi 1 lub 2.
+
+#figure(
+  table(
+    columns: 6,
+    align: (right,center,center,center,center,center),
+    stroke: (x,y) => if y == 0 and x >= 1 {
+    (bottom: 0.7pt + black)
+  } else if x == 0 and y >= 1 {
+    (right: 0.7pt + black)
+  },
+    table.header(
+      [],$w_2$, $w_1$, $x_3$, $x_2$, $x_1$, 
+    ),
+    $dots.v$, [], [], $dots.c$, [], [],
+    $y_1$, [0], [1], [0], [0], [0],
+    $y'_1$, [0], [1], [0], [0], [0],
+    $dots.v$, [], [], $dots.c$, [], [],
+  ),
+  caption: [Liczby wypełniające]
+)
+
+Widzimy że konstrukcja wzbogacona o liczby wypełniające jest już równoważna problemowi #sat3. Przeprowadzimy więc redukcję dla przykładowego egzemplarza: 
+
+$
+(x_1 or x_2 or not x_3) and (not x_1 or x_2 or not x_3)
+$
+
+#let chosen = (1,3,5,7,8,9)
+
+#figure(
+  grid(
+    columns: (1fr,1fr),
+    [
+#figure(
+  table(
+    columns: 6,
+    align: (right,center,center,center,center,center),
+    stroke: (x,y) => if y == 0 and x >= 1 {
+    (bottom: 0.7pt + black)
+  } else if x == 0 and y >= 1 {
+    (right: 0.7pt + black)
+  },
+    fill: (x,y) => if chosen.contains(y) {
+      luma(200)
+    },
+    table.header(
+      [],$w_2$, $w_1$, $x_3$, $x_2$, $x_1$, 
+    ),
+    $x_1$, [1], [0], [0], [0], [3],
+    $not x_1$, [0], [1], [0], [0], [3],
+    $x_2$, [1], [1], [0], [3], [0],
+    $not x_2$, [0], [0], [0], [3], [0],
+    $x_3$, [0], [0], [3], [0], [0],
+    $not x_3$, [1], [1], [3], [0], [0],
+    $y_1$, [0], [1], [0], [0], [0],
+    $y'_1$, [0], [1], [0], [0], [0],
+    $y_2$, [1], [0], [0], [0], [0],
+    $y'_2$, [1], [0], [0], [0], [0],
+    table.hline(),
+    $k$, [3], [3], [3], [3], [3],
+  ),
+)
+    ],
+    $
+    \ \ \ \ \
+    & 10003_4 + \
+    & 11030_4 + \
+    & 00300_4 + \
+    & 01000_4 + \
+    & 01000_4 + \
+    & 10000_4 \
+    = & 33333_4
+    $
+  ),
+  caption: [Przykładowy egzemplarz wynikowy #subs z zaznaczonym podzbiorem]
+)
+
+Widzimy że pokazany powyżej podzbiór liczb jest poprawnym rozwiązaniem, co pokazuje suma jego elementów pokazana na , co więcej odpowiada on ewaluacji $x_1 = 1, x_2 = 1, x_3 = 1$ która jest poprawnym rozwiązaniem źródłowego egzemplarza problemu #sat3.
+
+#pagebreak()
 == Redukcja #sat3 do #ham
 
 Ustalmy problem #sat3 jako: $W = w_1 and w_2 and dots and w_m$ formuła w postaci koniunkcyjnej normalnej gdzie $w_j = u_(j,1) or u_(j,2) or u_(j,3)$ oraz $X = {x_1, x_2, dots, x_n}$ zbiór zmiennych używanych w formułach.
@@ -888,6 +1004,8 @@ Mający ustalony podgraf, łączymy następnie podgrafy dla poszczególnych zmie
   edge((name:a, anchor:"south-east"),(name:b, anchor:"north-east"), shape, shift:-5pt)
 }
 
+#set math.equation(numbering: none)
+
 #sdiagram(
   pads:5pt,
   size:90%,
@@ -937,8 +1055,12 @@ Mający ustalony podgraf, łączymy następnie podgrafy dla poszczególnych zmie
 )
     ],
     caption: [Diagram połączenia podgrafów zmiennych w cykl - Graf ewaluacji],
-  )],
+  )<ccycles>],
 )
+\
+Jak widać na @ccycles[rysunku] tworzymy swego rodzaju "cykl" podgrafów, łącząc je w taki sposób aby ewaluacja każdej zmiennej była niezależna od ewaluacji innych. Połączenie takie wykorzystuje 4 krawędzie z których każda odpowiada osobnemu przypadkowi ewaluacji kolejnych zmiennych.
+
+#set math.equation(numbering: "(1.)")
 
 #let vars = (0,1,1,0,1,0)
     #figure(
@@ -1015,12 +1137,13 @@ Mający ustalony podgraf, łączymy następnie podgrafy dla poszczególnych zmie
     caption: [Zbliżenie na część przykładowego grafu ewaluacji z zaznaczonym Cyklem Hamiltona],
   )<przyklad>
 
-
 Jak widzimy, taki graf ewaluacji posiada $2^n$ cykli Hamiltona gdzie każdy cykl odpowiada konkretnej ewaluacji zmiennych $x_i$, np. pokazany na @przyklad[Rysunku] cykl odpowiada następującej ewaluacji zmiennych:
 
 $
   x_1 = bb(1) quad x_2 = bb(1) quad x_3 = bb(0) quad x_4 = bb(1) quad x_5 = bb(0) quad dots
 $
+
+  
 === Podgraf Klauzuli
 
 Mając już strukturę emulującą zachowanie zmiennych, musimy zająć się następnie klauzulami. Szukamy podgrafu który w zachowaniu względem cyklu Hamiltona będzie równoważny do napisu $x and y and z$ tzn. szukamy podgrafu który stanie się częścią poprawnego cyklu wtedy i tylko wtedy gdy jedna z odpowiadających mu zmiennych w grafie ewaluacji otrzyma odpowiednią wartość. Podgraf taki można skonstruować w następujący sposób:
@@ -1133,7 +1256,7 @@ Ostatecznie więc w podgrafie zmiennej jedynie co 3 krawędź w łańcuchu może
 
 #figure(
   sdiagram(
-    size: 100%,
+    size: 90%,
     node([$n_(1,1)$], name: "n1"),
     edge("-|>", shift: 5pt, stroke:path),
     edge("<|-", shift: -5pt),
@@ -1446,17 +1569,14 @@ Operacje realizujące transformacje łańcuchowe wykorzystują graf redukcji do 
 
 W tym rozdziale przedstawimy algorytmy realizujące wybrane, nietrywialne redukcje. Konstrukcja takiego algorytmu nie jest zazwyczaj wysoce skomplikowana, jeśli dobrze zrozumieliśmy proces redukcji. Wykorzystują one jednak pewną właściwość która może się wydać oczywista z programistycznego punktu widzenia, warto jednak o niej wspomnieć. Mowa tutaj o *numerowaniu* czyli przypisywaniu do jakichś obiektów liczb naturalnych. Formalnie możemy zapisać to w taki sposób $N : X -> NN$, dla dowolnego skończonego zbioru $X$. Numerowanie w komputerach jest powszechne i służy jako sposób identyfikacji obiektów, w szczególności w jakiejś strukturze danych. Wybór odpowiedniego numerowania w naszym wypadku jest o tyle ważny ponieważ pozwala on na odpowiednią identyfikację komponentów struktury egzemplarza danego problemu, co z kolei jest często niezbędne do ekstrakcji rozwiązania za pomocą algorytmu #extr. Dlatego właśnie często będziemy definiować specyficzne numerowanie dla egzemplarzy wynikowych algorytmu $cal(R)$ czego przykład możemy zobaczyć w @num_ex[Równaniu]
 
-== Redukcja #sat3 do #vc
-
-
-// === Algorytm
+== Algorytm redukcji #sat3 do #vc
 
 Algorytm jest dosyć elementarny i sam nasuwa się na myśl jeżeli zrozumieliśmy zasadę działania konwersji, wystarczy jedynie ustalić odpowiednie numerowanie wierzchołków aby ułatwić ich łączenie, wierzchołki numerujemy kolejnymi liczbami naturalnymi z przedziału $chevron 1 , 2n+3m chevron.r$ gdzie $n$ to ilość zmiennych a $m$ ilość klauzul.
 
 $
-num(x_i) &= i \
-num(not x_i) &= n + i \
-num(u_(i,j)) &= 2n + 3i + j  \
+numb(x_i) &= i \
+numb(not x_i) &= n + i \
+numb(u_(i,j)) &= 2n + 3i + j  \
 $ <num_ex>
 
 Numerowanie w tym wypadku oznacza uniklalne przyporządkowanie wierzchołkom liczb narutalnych, co jest bardzo naturalne jeśli rozważamy struktury komputerowe, jest to więc funckja róznowartościowa przyporządkowująca elementom liczby naturalne, przy czym implementacja komputerowa algorytmów wymaga aby była to funkcja "na" przedział liczb naturalnych rozpoczynający się od liczby 1.
@@ -1515,7 +1635,7 @@ Odpakowanie rozwiązania oryginalnego problemu #sat3 jest bardzo łatwe, dzięki
   kind: "algorithm",
   supplement: [Algorytm],
   pseudocode-list(booktabs: true, numbered-title: [Odzyskanie rozwiązania #sat3 z #vc])[
-  + *function* Unpack-Hamiltonian *begin*
+  + *function* Extract-VertexCover *begin*
     - *input:* $C,n$ #comm[zbiór #vc $C subset.eq V$, liczba zmiennych #sat3]
 
     - *output:* $A$ #comm[$A in {bb(0),bb(1)}^n$ ewaluacja zmienych dla #sat3]
@@ -1532,7 +1652,73 @@ Odpakowanie rozwiązania oryginalnego problemu #sat3 jest bardzo łatwe, dzięki
 
 Obecność w zbiorze #vc wierzchołka $v_i$ gdzie $i in chevron 1,n chevron.r$ oznacza ewaluację zmiennej $x_i$ na `true`, w p.p. jeśli nie ma tam tego wierzchołka, w zbiorze musi znajdować się wierzchołek $v_(n+i)$ a więc zmienna ewaluowana jest na `false`.
 
-== Redukcja #sat3 do #ham
+== Algorytm redukcji #sat3 do #subs
+Aby skonstruować algorytm realizujący tą redukcję musimy ponownie ustalić odpowiednie numerowanie, w tym wypadku w zupełności wystarczy pierwsze numerowanie nasuwające się na myśl tzn: liczby o numerze nieparzystym to ewaluacje pozytywne a liczby o numerze parzystym to ewaluacje negatywne, liczby wypełniające z kolei umieszczamy na końcu. Ustawienie takie pozwala na łatwe odczytanie czy zmienna została ewaluowana pozytywnie poprzez sprawdzenie czy liczba o numerze odpowiadającym zmiennej znajduje się w podzbiorze. Numerowanie jest realizowane poprzez funkcje:
+
+$
+"variable"(x) &= cases(
+  x > 0: 2x-1,
+  x <= 0: -2x
+) \
+
+"clause"(x) &= 2n + 2x
+$
+
+Algorytm będzie się składał z 2 pętli, z których pierwsza będzie konstruowała liczby odpowiadające ewaluacjom zmiennych a także liczby wypełnieniowe, w drugiej pętli będziemy przypisywać odpowiednie klauzule do zmiennych.
+
+Ponieważ operujemy na liczbach czwórkowych operacje na cyfrach okazują się być dosyć łatwe. Dzieje się tak ponieważ przez to że 4 jest potęgą 2 możemy operować bezpośrednio na bitach, zakładamy wtedy że każde 2 bity to jedna cyfra. Możemy przez to realizować bitowe operacje takie jak przesunięcie, z tą różnicą że przesuwamy o wartość dwukrotnie większą.
+
+Przypisanie klauzuli do zmiennej osiągnięto poprzez dodanie odpowiedniej liczby wypełnieniowej do liczby zmiennej. Operacja oferuje prostszy sposób dla ustalania cyfry w danej liczbie i jest bardzo szybka, przy czym brak kolizji bitów sprawia że jest równoważna bitowej operacji `OR`.
+
+
+#figure(
+  kind: "algorithm",
+  supplement: [Algorytm],
+  pseudocode-list(booktabs: true, numbered-title: [Redukcja #sat3 do #subs])[
+  + *function* SAT3-SubsetSum *begin*
+    - *input:* $W, n$ #comm[klauzule i liczba zmiennych problemu #sat3]
+    - *Output:* $S, t$ #comm[zbiór i docelowa suma problemu #subs]
+    + *for* $i in 1dots (n+m-1) $
+      + $c<-$ *if* $i <= 2n$ *then* 3 *else* 1
+      + $S[2i-1], S[2i] <- c << 2i$
+    + *end*
+    + *for* $i in 1dots |W| $
+      + *for* $x in W[i]$
+        + $S["variable(x)"] <- S["clause"(i)] + S["variable(x)"]$
+      + *end*
+    + *end*
+    + $t <- 333dots 3_4$ : liczba czwórkowa o długości $n+|W|$ cyfr
+   + *return* $S,t$
+  + *end*
+]
+)
+
+Możemy łatwo pokazać że algorytm ten działa w czasie liniowym poprzez analizę jego części składowych, zakładamy że pozostałe niewymienione operacje są złożoności $O(1)$
+
++ $O(n+m)$ - Pętla konstrukcji liczb
++ $O(m)$ - Pętla przypisania klauzul do zmiennych
++ $O(n+m)$ - Konstrukcja liczby $t$
+
+Co daje nam w sumie złożoność $O(n+m)$ a więc złożoność liniową. Ostatnią częścią redukcji jest pokazanie algorytmu ekstrakcji który dzięki odpowiedniemu numerowaniu jest dosyć elementarny.
+
+#figure(
+  kind: "algorithm",
+  supplement: [Algorytm],
+  pseudocode-list(booktabs: true, numbered-title: [Odzyskanie rozwiązania #sat3 z #subs])[
+  + *function* Extract-SubsetSum *begin*
+    - *input:* $S',n$ #comm[zbiór #subs $S' subset.eq S$, liczba zmiennych #sat3]
+
+    - *output:* $A$ #comm[$A in {bb(0),bb(1)}^n$ ewaluacja zmienych dla #sat3]
+    + $A = (fal, fal, dots, fal)$ #comm[tablica o długości $n$]
+    + *for* $s in S'$ *where* $numb(s) <= n$
+      + $A[numb(s)] = tru$
+    + *end* 
+   + *return* $A$
+  + *end*
+]
+)
+
+== Algorytm redukcji #sat3 do #ham
 
 Istnieje kilka równoważnych metod redukcji #sat3 do #ham, w pracy rozważone zostały metody _Sudkampa_ @sudkamp_languages_2006, oraz metoda _Kleinberg-Tardos_ @kleinberg_algorithm_2006, aby wybrać najlepszą metodę zbadaliśmy optymalność redukcji pod względem rozmiaru wynikowego egzemplarza problemu.  Podczas gdy najbardziej popularna jest metoda K-T, metoda Sudkampa jest bardziej przejrzysta, pomimo że jest zdecydowanie mniej optymalna. Sudkamp w książce @sudkamp_languages_2006 proponuje sprytny podgraf klauzuli który dobrze emuluje tą logikę, podczas gdy w książce @kleinberg_algorithm_2006 jako podgraf klauzuli wykorzystany jest jeden wierzchołek, uproszczenie to wymaga jednak znaczących zmian w podgrafie zmiennej. Jako podgraf zmiennej Sudkamp używa zaś bardziej skomplikowanego grafu który trudniej będzie dynamicznie konstruować w algorytmie.
 
@@ -1635,35 +1821,6 @@ Jak widzimy metoda K-T okazuje się być wyraźnie lepsza dla ilości wierzchoł
 
 Pozostało nam tylko skonstruować algorytm, co nie jest szczególnie skomplikowane. Przechodzimy w nim po klauzulach i stopniowo podłączamy je do odpowiednich zmiennych, dodając tam wierzchołki jeśli jest to wymagane, a na koniec łączymy ze sobą podgrafy zmiennych. Algorytm wykorzystuje funkcję `next_slot` która wybiera odpowiednie, wolne miejsce w podgrafie zmiennej do podłączenia klauzuli według opisanych wcześniej instrukcji. 
 
-#pseudocode-list[
-  + *function* next_slot *begin*
-    - *input:*
-      - $i,n$ #comm[Numer zmiennej, ilość wszystkich zmiennych]
-      - $Q_1,Q_2,G$ #comm[Wybrana kolejka, pozostała kolejka, konstruowany graf]       
-    - *output:* $(a,b)$ #comm[miejsce gdzie można podpiąć wierzchołek klauzuli]
-    + $l <- "len"(Q_1)$
-    + *if* $l = 0$ #comm[podgraf jest pusty]
-      + $a <- i$ 
-      + $b<-i+n$
-      + $c <-$ następny wolny wierzchołek z $V$
-      + $Q_1[i],Q_2[i] <- c$
-      + $E <- (a<->b),(b<->c)$
-    + *end*
-  
-    + *if* $l <= 3$ #comm[podgraf ma za mało wierzchołków]
-      + $a,b,c <-$ trzy następne wolne wierzchołki z $V$
-      + $Q_1[i] <- c$ #comm[w. $a$ zostanie od razu wykorzystany więc go nie dodajemy]
-      + $Q_2[i] <- a,c$ #comm[wierzchołek $a$ i $c$ dodajemy do 2 kolejki]
-      + $s <- Q_1[i]$
-      + $E <- (s<->a),(a<->b),(b<->c)$
-      + *return* $(s,a)$
-    + *else* #comm[mamy wystarczającą ilość wierzchołków w kolejce]
-      + $s, f <- Q_1[i]$    
-      + *return* $(s,f)$      
-    + *end*
-  + *end*
-]
-
 #figure(
   kind: "algorithm",
   supplement: [Algorytm],
@@ -1700,14 +1857,45 @@ Pozostało nam tylko skonstruować algorytm, co nie jest szczególnie skomplikow
 ]
 )
 
-
+#figure(
+  kind: "algorithm",
+  supplement: [Algorytm],
+  pseudocode-list(booktabs: true, numbered-title: [Funkcja obsługi miejsc w podgrafie zmiennej])[
+  + *function* next_slot *begin*
+    - *input:*
+      - $i,n$ #comm[Numer zmiennej, ilość wszystkich zmiennych]
+      - $Q_1,Q_2,G$ #comm[Wybrana kolejka, pozostała kolejka, konstruowany graf]       
+    - *output:* $(a,b)$ #comm[miejsce gdzie można podpiąć wierzchołek klauzuli]
+    + $l <- "len"(Q_1)$
+    + *if* $l = 0$ #comm[podgraf jest pusty]
+      + $a <- i$ 
+      + $b<-i+n$
+      + $c <-$ następny wolny wierzchołek z $V$
+      + $Q_1[i],Q_2[i] <- c$
+      + $E <- (a<->b),(b<->c)$
+    + *end*
+  
+    + *if* $l <= 3$ #comm[podgraf ma za mało wierzchołków]
+      + $a,b,c <-$ trzy następne wolne wierzchołki z $V$
+      + $Q_1[i] <- c$ #comm[w. $a$ zostanie od razu wykorzystany więc go nie dodajemy]
+      + $Q_2[i] <- a,c$ #comm[wierzchołek $a$ i $c$ dodajemy do 2 kolejki]
+      + $s <- Q_1[i]$
+      + $E <- (s<->a),(a<->b),(b<->c)$
+      + *return* $(s,a)$
+    + *else* #comm[mamy wystarczającą ilość wierzchołków w kolejce]
+      + $s, f <- Q_1[i]$    
+      + *return* $(s,f)$      
+    + *end*
+  + *end*
+]
+)
 
 
 Jak widać funkcja `next_slot` wybiera krawędź do której należy równolegle podłączyć wierzchołek klauzuli. Funkcja zachowuje odstępy pomiędzy klauzulami wstawiając odpowiednie wierzchołki pomocnicze i  wybierając co 3 wierzchołek.
 
 Wolne miejsca w podgrafach zmiennych są przechowywane w kolejkach zawartych w tablicach $P$ i $N$ odpowiednio dla zwyczajnych i zanegowanych zmiennych. Użycie dwóch kolejek może się wydawać marnowaniem pamięci, jednak w rzeczywistości zawsze co najmniej jedna z nich będzie miała długość równą 1.
 
-Jeśli zmienna nie została użyta w żadnej klauzuli odpowiadające jej kolejki są puste, usuwamy wtedy wierzchołek $b_i : num(b_i) = i $ z grafu za pomocą metody `rem_vertex!()`, aby nie interferował w znajdowaniu cyklu. Zamienia ona wierzchołek $b$ z ostatnim wierzchołkiem w grafie a następnie go usuwa, mając przy tym złożoność $O(max(deg(b),deg(|V|))^2)$ co w naszym grafie gdzie $forall v in V deg(v) <= 6$ oznacza w gruncie rzeczy złożoność $O(1)$. Nie przesuwa ona więc numerowania wierzchołków a na miejscu wierzchołka `b` znajdzie się losowy wierzchołek o numerowaniu: $num(v) >n$.
+Jeśli zmienna nie została użyta w żadnej klauzuli odpowiadające jej kolejki są puste, usuwamy wtedy wierzchołek $b_i : numb(b_i) = i $ z grafu za pomocą metody `rem_vertex!()`, aby nie interferował w znajdowaniu cyklu. Zamienia ona wierzchołek $b$ z ostatnim wierzchołkiem w grafie a następnie go usuwa, mając przy tym złożoność $O(max(deg(b),deg(|V|))^2)$ co w naszym grafie gdzie $forall v in V deg(v) <= 6$ oznacza w gruncie rzeczy złożoność $O(1)$. Nie przesuwa ona więc numerowania wierzchołków a na miejscu wierzchołka `b` znajdzie się losowy wierzchołek o numerowaniu: $numb(v) >n$.
 
 Pozostaje nam jedynie zbadać złożoność obliczeniową algorytmu, zawiera on operacje:
 
@@ -1721,7 +1909,7 @@ Ponieważ pozostałe operacje są $O(1)$, daje nam to w sumie złożoność $O(n
 === Odzyskanie rozwiązania
 Kolejnym ważnym krokiem jest odzyskanie rozwiązania tzn. odczytanie rozwiązania oryginalnego problemu #sat3 na podstawie rozwiązania utworzonej instancji #ham.
 
-Aby to zrobić musimy sprawdzić kierunek przejścia cyklu po podgrafach zmiennych co ułatwia nam fakt że ustaliliśmy numerowanie dla dwóch pierwszych wierzchołków w podgrafie zmiennej $x_i$ jako $num(p_i) = i and num(d_i) = n+i$, możemy dzięki temu sprawdzić czy w cyklu znajduje się krawędź $p_i->d_i$ a jeśli tak, cykl idzie w prawo a zmienna jest ewaluowana jako `true`, zaś w p.p. musi istnieć krawędź $d_i -> p_i$, cykl idzie w lewo a zmienna ewaluuje się jako `false`
+Aby to zrobić musimy sprawdzić kierunek przejścia cyklu po podgrafach zmiennych co ułatwia nam fakt że ustaliliśmy numerowanie dla dwóch pierwszych wierzchołków w podgrafie zmiennej $x_i$ jako $numb(p_i) = i and numb(d_i) = n+i$, możemy dzięki temu sprawdzić czy w cyklu znajduje się krawędź $p_i->d_i$ a jeśli tak, cykl idzie w prawo a zmienna jest ewaluowana jako `true`, zaś w p.p. musi istnieć krawędź $d_i -> p_i$, cykl idzie w lewo a zmienna ewaluuje się jako `false`
 
 #figure(
   kind: "algorithm",
@@ -1733,8 +1921,8 @@ Aby to zrobić musimy sprawdzić kierunek przejścia cyklu po podgrafach zmienny
     - *output:* $A$ #comm[$A in {bb(0),bb(1)}^n$ ewaluacja zmienych dla #sat3]
     + $A = [fal, fal, dots, fal]$ #comm[tablica o długości $n$]
     + *for* $(v,u) in C$
-      + $i <- num(v)$ #comm[numer wierzchołka $v$]
-      + *if* $i <= n$ *and* $i + n = num(u)$ #comm[jest to wierzchołek $p_i$ i cykl biegnie w prawo]
+      + $i <- numb(v)$ #comm[numer wierzchołka $v$]
+      + *if* $i <= n$ *and* $i + n = numb(u)$ #comm[jest to wierzchołek $p_i$ i cykl biegnie w prawo]
         + $A[i] = tru$ #comm[zmienna $x_i$ ewaluowana jest na `true`]
       + *end*
    + *end* 
@@ -1841,7 +2029,7 @@ W bibliotece zastosowano omówione wcześniej w @proj[rozdziale] interfejsy funk
     [*Funkcja*], [*Argumenty*], [*Rezultat*],
   ),
   [`transform`],[`I::NPProblem` \ `P::Type{<:NPProblem}`], [`NPProblem`],
-  [`solve`],[`solver` \ `I::NPProblem`], [`NPSolution` \ lub \ `nothing`],
+  [`solve`],[`model_IP` \ `I::NPProblem`], [`NPSolution` \ lub \ `nothing`],
   [`extract`],[`S::NPSolution` \ `I::NPProblem`], [`NPSolution`],
   [`validate`],[`S::NPSolution` \ `I::NPProblem`], [`bool`],
   [`construct`],[`P::Type{<:NPSolution}` \ `S::NPSolution` \ `I::NPProblem`], [`NPSolution`],
@@ -2382,7 +2570,7 @@ Stworzona biblioteka charakteryzuje się idiomatycznością, spójnością inter
 
 #heading(numbering: none, supplement: none)[Dodatek A - pliki źródłowe i wykorzystane narzędzia]
 
-Pliki źródłowe biblioteki możemy znaleźć w repozytorium Git pod adresem:
+Pliki źródłowe biblioteki, dokumentu pracy oraz strony z dokumentacją możemy znaleźć w repozytorium Git pod adresem:
 
 #let qrlink(addr) = figure(
   outlined: false,

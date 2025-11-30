@@ -304,7 +304,7 @@
     title: dict.figures_table,
     target: figure
       .where(kind: image)
-      .or(heading.where(level: 1, numbering: "1.1"))
+      // .or(heading.where(level: 1, numbering: "1.1"))
       .or(figure.where(kind: "chart")),
     indent: 0pt,
   )
