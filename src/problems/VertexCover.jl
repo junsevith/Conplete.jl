@@ -119,60 +119,6 @@ function construct(target::Type{VertexCoverSolution}, solution::SAT3Solution, sa
 
 end
 
-# function construct(solution::SAT3Solution, problem::VertexCover)
-#     n = length(solution.evaluation)
-#     vars = []
-
-#     if typeof(problem.record[1]) != sat3_vc
-#         return Nothing
-#     end
-
-#     for x in axes(solution.evaluation, 1)
-#         if solution.evaluation[x]
-#             push!(vars, x)
-#         else
-#             push!(vars, n + x)
-#         end
-#     end
-
-#     cover = Set(vars)
-
-#     clauses_num = (nv(problem.graph) - 2 * n - 1) / 2
-
-#     done = Set()
-
-#     for v in vars
-#         # println(neighbors(problem.graph, v))
-#         for clause in neighbors(problem.graph, v)
-
-#             if clause <= 2 * n
-#                 continue
-#             end
-
-#             cl_num = fld(clause - (2 * n + 1), 3)
-
-#             if cl_num in done
-#                 continue
-#             else
-#                 push!(done, cl_num)
-#             end
-
-#             for cl_el in neighbors(problem.graph, clause)
-#                 if cl_el != v
-#                     push!(cover, cl_el)
-#                 end
-#             end
-
-#             if length(done) == clauses_num
-#                 return VertexCoverSolution(cover)
-#             end
-
-#         end
-#     end
-
-#     return VertexCoverSolution(cover)
-# end
-
 function transform(parent::Clique, target::Type{VertexCover})
     return VertexCover(Graphs.complement(parent.graph), nv(parent.graph) - parent.size)
 end

@@ -1,4 +1,3 @@
 {
-    "sarif-viewer.connectToGithubCodeScanning": "off",
-    "julia.environmentPath": "c:\\Users\\pawel\\Documents\\GitHub\\Conplete.jl\\research_scripts"
+    "sarif-viewer.connectToGithubCodeScanning": "off"
 }
