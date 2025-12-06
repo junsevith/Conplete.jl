@@ -1,6 +1,6 @@
-# Conplete.jl Documentation
+# Conplete.jl
 
-**Conplete** is a library for Julia janguage implementing polynomial reductions for several NP-Complete problems. It utilizes interfaces described in the document below
+**Conplete** is a library for Julia janguage implementing polynomial reductions for several NP-Complete problems. It utilizes interfaces described in [this page](interfaces.md)
 
 Full list of structures describing problem instances implemented in library can be found in [this page](structures.md).
 
@@ -8,34 +8,14 @@ Library allows for extending its functionality by the user, which is described i
 
 Library was created for a master's thesis of Paweł Stanik in Wrocław university of science and technology.
 
-```@docs
-transform(instance::NPProblem, target_type::Type{<:NPProblem})
-```
 
-```@docs
-transform(instance::NPProblem, chain_path::Vector{Type{<:NPProblem}})
-```
+## Outline
 
-```@docs
-chain_transform(instance::NPProblem, target_type::Type{<:NPProblem})
+```@contents
+Pages = [
+    "interfaces.md",
+    "structures.md",
+    "extending.md",
+]
+Depth = 1
 ```
-
-```@docs
-chain_transform(instance::NPProblem, chain_path::Vector{Type{<:NPProblem}})
-```
-
-```@docs
-extract(solution::NPSolution, chain::Vector{NPProblem})
-```
-
-```@docs
-construct(solution::NPSolution, chain::Vector{NPProblem})
-```
-
-```@docs
-construct(target::Type{NPSolution}, solution::NPSolution, problem::NPProblem)
-```
-
-```@docs
-solve
-``
