@@ -4,8 +4,6 @@ using Documenter, Conplete
 
 makedocs(
     sitename="Conplete.jl", 
-    remotes = nothing,
-    repo = GitHub("Junsevith", "Conplete.jl"),
     pages = [
        "Home" => "index.md",
        "Interfaces" => "interfaces.md",
