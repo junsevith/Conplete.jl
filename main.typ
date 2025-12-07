@@ -2002,7 +2002,7 @@ $
 & x_(i j) in {0,1}, & i = 1, dots, n quad j = 1,dots,n   \
 $<dfj>
 
-Możemy jednak zauważyć że formulacja ta tworzy eksponencjalną liczbę ograniczeń (wszystkie podzbiory ${1,dots,n}$), dlatego ograniczenia te tworzymy dynamicznie. Przed-ostatnie ograniczenie na @dfj[równaniu] sprawia że nie możliwe jest wystąpienie rozwiązania złożonego z kilku mniejszych cykli, odpowiednie ograniczenie utworzymy więc dopiero gdy znajdziemy taki cykl w potencjalnym rozwiązaniu, podzbiorem $Q$ w tym wypadku będą wszystkie krawędzie w tym cyklu.
+Możemy jednak zauważyć że formulacja ta tworzy eksponencjalną liczbę ograniczeń (wszystkie podzbiory ${1,dots,n}$), dlatego ograniczenia te tworzymy dynamicznie. Ograniczenie oznaczone $(*)$ na @dfj[równaniu] sprawia że nie możliwe jest wystąpienie rozwiązania złożonego z kilku mniejszych cykli, odpowiednie ograniczenie utworzymy więc dopiero gdy znajdziemy taki cykl w potencjalnym rozwiązaniu, podzbiorem $Q$ w tym wypadku będą wszystkie krawędzie w tym cyklu.
 
 Z bardziej praktycznego punktu widzenia, funkcjonalność ta może być realizowana przez _solver-independent callbacks_ co jest rozwiązaniem szybszym (jeśli solver je obsługuje), lub dodanie ograniczeń do modelu i ponowne jego rozwiązanie.
 
