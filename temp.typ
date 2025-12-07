@@ -26,6 +26,7 @@
   language: "pl",
   keywords: none,
   popraw_sieroty: false,
+  appendix: none,
   body,
 ) = {
   // Set the document's basic properties.
@@ -103,6 +104,23 @@
       }
     },
   )
+
+  set math.equation(numbering: "(1)")
+  show ref: it => {
+  let eq = math.equation
+  let el = it.element
+  // Skip all other references.
+  if el == none or el.func() != eq { return it }
+  // Override equation references.
+  link(el.location())[ #it.supplement #numbering(
+    el.numbering,
+    ..counter(eq).at(el.location())
+  )]
+  }
+
+  show figure.where(
+  kind: table
+  ): set figure.caption(position: top)
 
 
   show heading: it => {
@@ -356,6 +374,8 @@
     target: figure.where(kind: "algorithm"),
   )
 
+  heading(numbering: none, supplement: none)[Dodatek]
+  
+  appendix
 
-  // pagebreak()
 }

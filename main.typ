@@ -15,7 +15,6 @@
 #codly(languages: codly-languages)
 #set text(lang: "pl")
 
-#set math.equation(numbering: "(1.)")
 
 #let weblink(..arg) = text(fill:rgb("c44"), weight: "bold" )[#underline[#link(..arg)] #footnote[#arg.pos().at(0)]]
 
@@ -28,6 +27,8 @@
   reflow: true,
   diagram(edge-stroke: 0.8pt, node-stroke: 0.8pt, ..args),
 ))
+
+// zrzut z dokumentacji
 
 #let (def,twi) = frames(
   def: ("Definicja", red),
@@ -122,9 +123,9 @@
   abstract: [
   Celem pracy jest analiza i implementacja wielomianowych redukcji między wybranymi problemami decyzyjnymi z klasy #np. W ramach projektu stworzono bibliotekę w języku Julia, realizującą drzewo transformacji z korzeniem w problemie #sat, obejmujące takie zagadnienia jak #sat3, #vc, #cli czy #uham .
   
-  W pracy przeprowadzono analizę porównawczą metod redukcji, m.in. wybierając dla problemu cyklu Hamiltona metodę Kleinberg-Tardos ze względu na optymalizację rozmiaru grafu. Zaimplementowano również mechanizmy rozwiązywania instancji oparte na redukcji do programowania całkowitoliczbowego. Zastosowanie typów generycznych w strukturach danych pozwoliło na obsługę problemów numerycznych o dużej skali, a przeprowadzone testy potwierdziły wielomianową złożoność opracowanych algorytmów.
+  W pracy przeprowadzono analizę porównawczą metod redukcji, m.in. wybierając dla problemu cyklu Hamiltona metodę Kleinberg-Tardos ze względu na optymalizację rozmiaru grafu. Zaimplementowano również mechanizmy rozwiązywania egzemplarzy oparte na redukcji do programowania całkowitoliczbowego. Zastosowanie typów generycznych w strukturach danych pozwoliło na obsługę problemów numerycznych o dużej skali, a przeprowadzone testy potwierdziły wielomianową złożoność opracowanych algorytmów.
 
-  #heading(numbering: none)[Abstract]
+  #heading(numbering: none, outlined: false)[Abstract]
 
   The objective of this thesis is to analyze and implement polynomial reductions between selected decision problems in the #np class. A library was created in the Julia language, implementing a transformation tree rooted in the #sat problem, covering problems such as #sat3, #vc, #cli, and #uham.
 
@@ -132,11 +133,58 @@
   
   ],
   popraw_sieroty: true,
+  appendix: [
+    Pliki źródłowe biblioteki, dokumentu pracy oraz strony z dokumentacją możemy znaleźć w repozytorium Git pod adresem:
+
+#let qrlink(addr) = figure(
+  outlined: false,
+  table(
+  stroke: none,
+  columns: (1fr,0.5fr),
+  align: (horizon + right, horizon + left ),
+  link(addr),
+  tiaoma.qrcode(addr),
+ )
+)
+
+#qrlink("https://github.com/junsevith/Conplete.jl")
+
+Dokumentacja biblioteki jest hostowana na stronie WWW pod adresem:
+
+#qrlink("https://junsevith.github.io/Conplete.jl/dev/")
+
+Ten dokument został utworzony za pomocą nowoczesnej aplikacji do składu tekstu o nazwie *Typst* oraz jej wielu rozszerzeń umożliwiających m.in. generowanie rysunków grafów czy wykresów. Poniżej wylistowano wszystkie użyte rozszerzenia:
+
+
+
+#table(
+stroke: none,
+columns: (auto,auto,1fr),
+align: horizon + left,
+[*Typst*], [\- skład tekstu], link("https://typst.app/"),
+[*Red Agora*], [\- baza wyglądu pracy], link("https://typst.app/universe/package/red-agora"),
+[*Fletcher*], [\- rysunki grafów], link("https://typst.app/universe/package/fletcher/"),
+[*Lilaq*], [\- wykresy], link("https://typst.app/universe/package/lilaq"),
+[*Lovelace*], [\- pseudokody], link("https://typst.app/universe/package/lovelace"),
+[*Farme-It*], [\- definicje i twierdzenia], link("https://typst.app/universe/package/frame-it"),
+[*Codly*], [\- programy i kod], link("https://typst.app/universe/package/codly"),
+[*Tiaoma*], [\- kody QR], link("https://typst.app/universe/package/tiaoma"),
+[*Zero*],[\- formatowanie liczb], link("https://typst.app/universe/package/zero"),
+)
+
+#pagebreak()
+Poniżej możemy zobaczyć zrzuty ekranu dokumentacji biblioteki, do której zamieszczono link. \
+\
+#image("Zrzut ekranu_20251207_041808.png")
+\
+#image("Zrzut ekranu_20251207_041703.png")
+
+  ]
 )
 
 #heading(numbering: none, supplement: none)[Wstęp]
 
-Teoria złożoności obliczeniowej i pytanie o równość klas $cal(P)$ i #np stanowią fundament współczesnej informatyki. Kluczowym narzędziem analizy w tym obszarze jest redukcja wielomianowa, która pozwala klasyfikować trudność problemów oraz dostarcza praktycznych metod ich rozwiązywania poprzez transformację instancji. 
+Teoria złożoności obliczeniowej i pytanie o równość klas $cal(P)$ i #np stanowią fundament współczesnej informatyki teoretycznej. Kluczowym narzędziem analizy w tym obszarze jest redukcja wielomianowa, która pozwala klasyfikować trudność problemów oraz dostarcza praktycznych metod ich rozwiązywania poprzez transformację egzemplarzy problemów. 
 
 Niniejsza praca dyplomowa koncentruje się na analizie oraz implementacji wielomianowych redukcji między wybranymi trudnymi problemami decyzyjnymi z klasy #np. 
 Głównym celem pracy jest stworzenie biblioteki programistycznej w języku Julia, realizującej część drzewa redukcji klasycznych problemów NP-zupełnych. Język Julia został wybrany ze względu na swoje ukierunkowanie na obliczenia naukowe oraz wysoką wydajność.
@@ -221,7 +269,7 @@ Istnienie takiej redukcji mówi nam że problem $P_2$ jest co najmniej tak trudn
   Mówimy że problem decyzyjny $P$ jest #np - trudny jeśli dla dowolnego problemu decyzyjnego $P_1 in np$ zachodzi $P_1 karp^p P$, i zapisujemy $P in np H$
 ]
 
-Jest to więc klasa problemów co najmniej tak trudnych jak dowolny problem z klasy #np. Redukowalność wielomianowa jest ważna w tym przypadku dlatego że zachowuje ona przynależność do klasy, tzn. redukcja wielomianowa $P_1 karp^p P_2$ pozwala rozwiązać problem $P_1$ w czasie wielomianowym o ile posiadamy algorytm rozwiązujący problem $P_2$ w czasie wielomianowym, taka sama zależność zachodzi dla niedeterministycznych algorytmów rozwiązujących. Wiąże się z tym jedna ciekawa właściwość, a mianowicie: jeśli znaleźli byśmy wielomianowy algorytm rozwiązujący dowolny problem w $np H$ od razu wynikałoby z tego że $#p = np$.
+Jest to więc klasa problemów co najmniej tak trudnych jak dowolny problem z klasy #np. Redukowalność wielomianowa jest ważna w tym przypadku dlatego że zachowuje ona przynależność do klasy, tzn. redukcja wielomianowa $P_1 karp^p P_2$ pozwala rozwiązać problem $P_1$ w czasie wielomianowym o ile posiadamy algorytm rozwiązujący problem $P_2$ w czasie wielomianowym, taka sama zależność zachodzi dla niedeterministycznych algorytmów rozwiązujących. Wiąże się z tym jedna ciekawa właściwość, a mianowicie: jeśli znaleźlibyśmy wielomianowy algorytm rozwiązujący dowolny problem w $np H$ od razu wynikałoby z tego że $#p = np$.
 
 #def[#np - zupełność][
 
@@ -499,18 +547,18 @@ Ostatnim z omawianych problemów a zarazem problemem w pewien sposób ukrytym je
   
     *Dane wejściowe* : #box(baseline: 100% - 7pt)[
     Układ równań liniowych (ograniczeń) postaci: \
-    $A = (a_(i j))$ - macierz liczb całkowitych wymiaru $n times m$\
-    $b = (b_i)$ - wektor liczb całkowitych wymiaru $m$, wektor prawych stron \
+    $bold(A) = (a_(i j))$ - macierz liczb całkowitych wymiaru $n times m$\
+    $bold(b) = (b_i)$ - wektor liczb całkowitych wymiaru $m$, wektor prawych stron \
     oraz\
-    $c = (c_j)$ - wektor liczb całkowitych wymiaru $n$, wektor funkcji celu \
+    $bold(c) = (c_j)$ - wektor liczb całkowitych wymiaru $n$, wektor funkcji celu \
     $B$ - liczba całkowita, ograniczenie funkcji celu
   ] 
 
-  *Pytanie* : Czy istnieje wektor liczb całkowitych $x = (x_j)$ wymiaru $n$ taki że:
+  *Pytanie* : Czy istnieje wektor liczb całkowitych $bold(x) = (x_j)$ wymiaru $n$ taki że:
 
   $
-  c^T x <= d \
-  A x <= b \
+  bold(c)^T bold(x) <= B \
+  bold(A) bold(x) <= b \
   x >= 0
   $
 ] <mip>
@@ -550,7 +598,7 @@ $C <= s$.
   caption:[Przykładowy podgraf zmiennej]
 )
 
-widzimy że ma ona 2 możliwe rozwiązania dla $s = 1$ tzn., wybór $x$ lub $not x$ spełnia warunek dla krawędzi $e$. Możemy utworzyć graf z wielu takich struktur jednocześnie ustalając $s$ jako ich ilość i mamy gotową ewaluację dla wielu zmiennych.
+widzimy że ma ona 2 możliwe rozwiązania dla $s = 1$ tzn., wybór $x$ lub $not x$ spełnia warunek dla krawędzi $e$. Możemy utworzyć graf z wielu takich struktur jednocześnie ustalając $s$ jako ich liczbę i mamy gotową ewaluację dla wielu zmiennych.
 
 W następnym kroku szukamy struktury emulującej klauzulę, gdzie odpowiednia ewaluacja zmiennej pozwala na spełnienie danej klauzuli.
 
@@ -722,7 +770,7 @@ Ustalmy problem #sat3 jako: $W = w_1 and w_2 and dots and w_m$ formuła w postac
 
 Aby zredukować problem #sat3 do #subs musimy przedstawić egzemplarz problemu spełnialności jako zbiór liczb naturalnych a prawidłową ewaluację jako liczbę naturalną. Aby skonstruować tą nieoczywistą redukcję musimy rozpatrzyć liczbę jako ciąg cyfr gdzie każda z cyfr realizuje osobną funkcję.
 
-Wstępny przegląd literatury pokazał istnienie dwóch bardzo podobnych metod: metoda _Cormena_ @rivest_wprowadzenie_2024 oraz metoda _Sudkampa_ @sudkamp_languages_2006. Szybkie porównanie pokazało jednak że metoda Sudkampa pozwala na wykorzystanie liczb w systemie *czwórkowym* tzn. o bazie 4, co gdy operujemy na cyfrach liczb ma znaczący wpływ na ich wielkość. Dlatego ostatecznie została wykorzystana metoda Sudkampa @sudkamp_languages_2006[Tw. 16.3.3].
+Wstępny przegląd literatury pokazał istnienie dwóch bardzo podobnych metod: metoda zawarta w książce Cormena i innych @rivest_wprowadzenie_2024 oraz metoda w książce Sudkampa @sudkamp_languages_2006. Szybkie porównanie pokazało jednak że druga z metod pozwala na wykorzystanie liczb w systemie *czwórkowym* tzn. o bazie 4, co gdy operujemy na cyfrach, ma znaczący wpływ na ich wielkość. Dlatego ostatecznie została wykorzystana metoda autorstwa Sudkampa @sudkamp_languages_2006[Tw. 16.3.3].
 
 W redukcji każda liczba $s in S$ będzie odpowiadała ewaluacji zmiennej $x$, tzn definiujemy $2n$ liczb z których połowa będzie odpowiadała pozytywnym ewaluacjom zmiennych a druga połowa negatywnym ewaluacjom zmiennych. Sprawia to że wynikowy podzbiór $S' subset.eq S$ będzie zawierał liczby odpowiadające odpowiednim ewaluacjom zmiennych, musimy jednak odpowiednio zdefiniować same liczby aby uniknąć wyboru dwóch ewaluacji dla jednej zmiennej oraz odpowiednio emulować specyfikę problemu #sat3.
 
@@ -817,13 +865,13 @@ $
     ],
     $
     \ \ \ \ \
-    & 10003_4 + \
-    & 11030_4 + \
-    & 00300_4 + \
-    & 01000_4 + \
-    & 01000_4 + \
-    & 10000_4 \
-    = & 33333_4
+    & (10003)_4 + \
+    & (11030)_4 + \
+    & (00300)_4 + \
+    & (01000)_4 + \
+    & (01000)_4 + \
+    & (10000)_4 \
+    = & (33333)_4
     $
   ),
   caption: [Przykładowy egzemplarz wynikowy #subs z zaznaczonym podzbiorem]
@@ -1060,7 +1108,7 @@ Mający ustalony podgraf, łączymy następnie podgrafy dla poszczególnych zmie
 \
 Jak widać na @ccycles[rysunku] tworzymy swego rodzaju "cykl" podgrafów, łącząc je w taki sposób aby ewaluacja każdej zmiennej była niezależna od ewaluacji innych. Połączenie takie wykorzystuje 4 krawędzie z których każda odpowiada osobnemu przypadkowi ewaluacji kolejnych zmiennych.
 
-#set math.equation(numbering: "(1.)")
+#set math.equation(numbering: "(1)")
 
 #let vars = (0,1,1,0,1,0)
     #figure(
@@ -1341,7 +1389,7 @@ Ostatecznie więc w podgrafie zmiennej jedynie co 3 krawędź w łańcuchu może
   caption: [Niepoprawny cykl Hamiltona skaczący po zmiennych],
 )
 
-Następnie wystarczy jedynie połączyć ze sobą poszczególne podgrafy i graf perfekcyjnie naśladował zachowanie tego problemu. Należy pamiętać jednak że każda klauzula podłączona jest do 3 zmiennych. Na przedstawionych rysunkach pominięto wiele krawędzi na potrzeby czytelności, w rzeczywistości jednak zawsze tam będą. Ilość wierzchołków w podgrafie zmiennej może być również różna - w zależności od potrzeb może zostać zwiększona.
+Następnie wystarczy jedynie połączyć ze sobą poszczególne podgrafy i graf perfekcyjnie naśladował zachowanie tego problemu. Należy pamiętać jednak że każda klauzula podłączona jest do 3 zmiennych. Na przedstawionych rysunkach pominięto wiele krawędzi na potrzeby czytelności, w rzeczywistości jednak zawsze tam będą. Liczba wierzchołków w podgrafie zmiennej może być również różna - w zależności od potrzeb może zostać zwiększona.
 
 #let omit = ((3,1),)
 
@@ -1524,9 +1572,9 @@ Poniższy graf prezentuje problemy dla których zaimplementowano funkcjonalnośc
     node((-1,2.5), part),
     edge((-1,4),"-|>"),
     edge("-|>"),
-    node((-0.3,4), knap, stroke:blue),
+    node((-0.3,4), knap),
 
-    node((-0,3), tsp, stroke:blue),
+    node((-0,3), tsp),
     
     node((-1,4), bin),
     
@@ -1571,7 +1619,7 @@ W tym rozdziale przedstawimy algorytmy realizujące wybrane, nietrywialne redukc
 
 == Algorytm redukcji #sat3 do #vc
 
-Algorytm jest dosyć elementarny i sam nasuwa się na myśl jeżeli zrozumieliśmy zasadę działania konwersji, wystarczy jedynie ustalić odpowiednie numerowanie wierzchołków aby ułatwić ich łączenie, wierzchołki numerujemy kolejnymi liczbami naturalnymi z przedziału $chevron 1 , 2n+3m chevron.r$ gdzie $n$ to ilość zmiennych a $m$ ilość klauzul.
+Algorytm jest dosyć elementarny i sam nasuwa się na myśl jeżeli zrozumieliśmy zasadę działania konwersji, wystarczy jedynie ustalić odpowiednie numerowanie wierzchołków aby ułatwić ich łączenie, wierzchołki numerujemy kolejnymi liczbami naturalnymi z przedziału $chevron 1 , 2n+3m chevron.r$ gdzie $n$ to liczba zmiennych a $m$ liczba klauzul.
 
 $
 numb(x_i) &= i \
@@ -1687,7 +1735,7 @@ Przypisanie klauzuli do zmiennej osiągnięto poprzez dodanie odpowiedniej liczb
         + $S["variable(x)"] <- S["clause"(i)] + S["variable(x)"]$
       + *end*
     + *end*
-    + $t <- 333dots 3_4$ : liczba czwórkowa o długości $n+|W|$ cyfr
+    + $t <- (333dots 3)_4$ : liczba czwórkowa o długości $n+|W|$ cyfr
    + *return* $S,t$
   + *end*
 ]
@@ -1720,9 +1768,9 @@ Co daje nam w sumie złożoność $O(n+m)$ a więc złożoność liniową. Ostat
 
 == Algorytm redukcji #sat3 do #ham
 
-Istnieje kilka równoważnych metod redukcji #sat3 do #ham, w pracy rozważone zostały metody _Sudkampa_ @sudkamp_languages_2006, oraz metoda _Kleinberg-Tardos_ @kleinberg_algorithm_2006, aby wybrać najlepszą metodę zbadaliśmy optymalność redukcji pod względem rozmiaru wynikowego egzemplarza problemu.  Podczas gdy najbardziej popularna jest metoda K-T, metoda Sudkampa jest bardziej przejrzysta, pomimo że jest zdecydowanie mniej optymalna. Sudkamp w książce @sudkamp_languages_2006 proponuje sprytny podgraf klauzuli który dobrze emuluje tą logikę, podczas gdy w książce @kleinberg_algorithm_2006 jako podgraf klauzuli wykorzystany jest jeden wierzchołek, uproszczenie to wymaga jednak znaczących zmian w podgrafie zmiennej. Jako podgraf zmiennej Sudkamp używa zaś bardziej skomplikowanego grafu który trudniej będzie dynamicznie konstruować w algorytmie.
+Istnieje kilka równoważnych metod redukcji #sat3 do #ham, w pracy rozważono metodę zawartą w książce @sudkamp_languages_2006 którą będziemy odtąd nazywać metodą _Sudkampa_, oraz metoda zawarta w @kleinberg_algorithm_2006 którą będziemy nazywać metodą _Kleinberg-Tardos_, aby wybrać najlepszą metodę zbadaliśmy optymalność redukcji pod względem rozmiaru wynikowego egzemplarza problemu.  Podczas gdy najbardziej popularna jest metoda K-T, metoda Sudkampa jest bardziej przejrzysta, pomimo że jest zdecydowanie mniej optymalna. Sudkamp w książce @sudkamp_languages_2006 proponuje sprytny podgraf klauzuli który dobrze emuluje tą logikę, podczas gdy w książce @kleinberg_algorithm_2006 jako podgraf klauzuli wykorzystany jest jeden wierzchołek, uproszczenie to wymaga jednak znaczących zmian w podgrafie zmiennej. Jako podgraf zmiennej Sudkamp używa zaś bardziej skomplikowanego grafu który trudniej będzie dynamicznie konstruować w algorytmie.
 
-Wzory na ilość wierzchołków i krawędzi w grafie $G=(V,E)$ wyglądają następująco dla $m$-ilość klauzul, $n$-ilość zmiennych, a $U(i)$ to maksimum z liczby wystąpień $x_i$ i wystąpień $not x_i$
+Wzory na liczbę wierzchołków i krawędzi w grafie $G=(V,E)$ wyglądają następująco dla $m$-liczba klauzul, $n$-liczba zmiennych, a $U(i)$ to maksimum z liczby wystąpień $x_i$ i wystąpień $not x_i$
 #v(5pt)
 $
 U(i) = max(|{w in u : x_i in w }|,|{w in u : not x_i in w}|) \
@@ -1768,7 +1816,7 @@ Metoda Sudkampa w większym stopniu zależy od ilości klauzul a metoda K-T zale
 \
 
 
-#show figure: set figure.caption(position: top)
+// #show figure: set figure.caption(position: top)
 
 #figure(
   lq.diagram(
@@ -1812,11 +1860,9 @@ Metoda Sudkampa w większym stopniu zależy od ilości klauzul a metoda K-T zale
   // supplement: [Wykres]
 )
 
-#show figure: set figure.caption(position: bottom)
-
 Jak widzimy metoda K-T okazuje się być wyraźnie lepsza dla ilości wierzchołków i nieznacznie lepsza co do ilości krawędzi, wybrałem więc ostatecznie tą metodę i to ona jest przedstawiona w powyższym rozdziale.
 
-
+#pagebreak()
  === Algorytm
 
 Pozostało nam tylko skonstruować algorytm, co nie jest szczególnie skomplikowane. Przechodzimy w nim po klauzulach i stopniowo podłączamy je do odpowiednich zmiennych, dodając tam wierzchołki jeśli jest to wymagane, a na koniec łączymy ze sobą podgrafy zmiennych. Algorytm wykorzystuje funkcję `next_slot` która wybiera odpowiednie, wolne miejsce w podgrafie zmiennej do podłączenia klauzuli według opisanych wcześniej instrukcji. 
@@ -1863,7 +1909,7 @@ Pozostało nam tylko skonstruować algorytm, co nie jest szczególnie skomplikow
   pseudocode-list(booktabs: true, numbered-title: [Funkcja obsługi miejsc w podgrafie zmiennej])[
   + *function* next_slot *begin*
     - *input:*
-      - $i,n$ #comm[Numer zmiennej, ilość wszystkich zmiennych]
+      - $i,n$ #comm[Numer zmiennej, liczba wszystkich zmiennych]
       - $Q_1,Q_2,G$ #comm[Wybrana kolejka, pozostała kolejka, konstruowany graf]       
     - *output:* $(a,b)$ #comm[miejsce gdzie można podpiąć wierzchołek klauzuli]
     + $l <- "len"(Q_1)$
@@ -1882,7 +1928,7 @@ Pozostało nam tylko skonstruować algorytm, co nie jest szczególnie skomplikow
       + $s <- Q_1[i]$
       + $E <- (s<->a),(a<->b),(b<->c)$
       + *return* $(s,a)$
-    + *else* #comm[mamy wystarczającą ilość wierzchołków w kolejce]
+    + *else* #comm[mamy wystarczającą liczbę wierzchołków w kolejce]
       + $s, f <- Q_1[i]$    
       + *return* $(s,f)$      
     + *end*
@@ -1951,7 +1997,7 @@ $
 "min" quad &1 \
 "przy ograniczeniach" quad & sum_(i=1,i!=j)^n x_(i j) = 1 & j = 1,dots,n \
 & sum_(j=1,i!=j)^n x_(i j) = 1 & i = 1,dots,n \
-& sum_(i in Q) sum_(j!=i, j in Q) x_(i j) <= |Q| - 1 quad & forall Q subset.neq {1,dots,n}, |Q| >=2 \
+(*)& sum_(i in Q) sum_(j!=i, j in Q) x_(i j) <= |Q| - 1 quad & forall Q subset.neq {1,dots,n}, |Q| >=2 \
 
 & x_(i j) in {0,1}, & i = 1, dots, n quad j = 1,dots,n   \
 $<dfj>
@@ -2072,7 +2118,7 @@ struct SAT3 <: NPProblem
 end
 ```
 
-Dla problemu #sat3 struktura wygląda w sposób następujący, ponieważ nazwa typu w języku nie może zaczynać się od litery musiała ona zostać nieznacznie zmieniona. Nie określamy zbioru zmiennych, zamiast tego stosujemy uproszczenie: zmienne zaczynają się zawsze od $x_1$ i przechowujemy jedynie ich ilość, czyli `variable_count` $= n$. Klauzule zostały przedstawione jako macierz liczb całkowitych $M_(3 times m)$ gdzie $m$ to liczba klauzul. W macierzy dodatnia liczba całkowita $i$ oznacza użycie zmiennej $x_i$ a liczba $-i$ oznacza użycie negacji tej zmiennej $not x_i$, jest to standardowe podejście używane do zapisu problemów w bazach danych egzemplarzy #sat3 dostępnych w internecie. W ogólności zakładamy również że każda z zmiennych została użyta w klauzuli co najmniej raz, w przeciwnym wypadku niektóre z algorytmów mogą działać niepoprawnie.
+Dla problemu #sat3 struktura wygląda w sposób następujący, ponieważ nazwa typu w języku nie może zaczynać się od litery musiała ona zostać nieznacznie zmieniona. Nie określamy zbioru zmiennych, zamiast tego stosujemy uproszczenie: zmienne zaczynają się zawsze od $x_1$ i przechowujemy jedynie ich liczbę, czyli `variable_count` $= n$. Klauzule zostały przedstawione jako macierz liczb całkowitych $M_(3 times m)$ gdzie $m$ to liczba klauzul. W macierzy dodatnia liczba całkowita $i$ oznacza użycie zmiennej $x_i$ a liczba $-i$ oznacza użycie negacji tej zmiennej $not x_i$, jest to standardowe podejście używane do zapisu problemów w bazach danych egzemplarzy #sat3 dostępnych w internecie. W ogólności zakładamy również że każda z zmiennych została użyta w klauzuli co najmniej raz, w przeciwnym wypadku niektóre z algorytmów mogą działać niepoprawnie.
 
 ```julia
 struct CNFSAT <: NPProblem
@@ -2326,7 +2372,7 @@ caption: [Średnie koszty czasowe poszczególnych redukcji]
 
 W @times[tabeli] przedstawiono średnie czasy działania algorytmów wraz z odchyleniem standardowym oraz współczynnikiem zmienności. Pokazuje nam to że zmiana czasu działania w zależności od danych wejściowych (dla danych o tym samym rozmiarze) jest znikoma - współczynnik zmienności wyniósł $<=5%$. Możemy również zobaczyć że trywialna redukcja $sat3 -> sat$ zajmuje stosunkowo mało czasu a redukcja do problemu #cli której wynikiem jest graf bliski pełnemu, zajmuje stosunkowo dużo czasu i pamięci z powodu $O(n^2)$ czasu konstrukcji takiego grafu, w porównaniu do liniowego czasu $O(n)$ działania większości innych algorytmów.
 
-Teoretyczna analiza algorytmów pokazuje nam że redukcje działają w czasie wielomianowym, postaramy się jednak pokazać rzeczywiste dane popierające te wyniki. Testy przeprowadzono dla jednostajnie losowych egzemplarzy #sat3 z bazy danych SATLIB o rozmiarze 20-250 zmiennych.
+Teoretyczna analiza algorytmów pokazuje nam że redukcje działają w czasie wielomianowym, postaramy się jednak pokazać rzeczywiste dane uzasadniające te wyniki. Testy przeprowadzono dla egzemplarzy #sat3 wygenerowanych losowo z rozkładem jednostajnym, z bazy danych SATLIB o rozmiarze 20-250 zmiennych.
 
 #let cliq = json("test_data/trans_n/cli_Clique20251124_00-42-00.856.json")
 #let subset = json("test_data/trans_n/bin_SubsetSum20251124_00-42-52.105.json")
@@ -2480,7 +2526,7 @@ caption: [Czas rozwiązywania problemów w stosunku do rozmiaru danych wejściow
 
 W przypadku bardziej złożonych problemów czas działania okazuje się jednak być eksponencjalny. Na @asd21[wykresie] możemy zobaczyć czasy działania dla problemów #vc and #hit przedstawione w skali logarytmicznej. 
 
-Testy wydają się pokazywać wzrost czasu działania dla konkretnego rozmiaru danych, na @asd21[wykresie] możemy zaobserwować gwałtowny wzrost czasu działania dla rozmiaru $x = 125$, bliższe zbadanie tego fenomenu zdaje się wykluczać czynniki zewnętrzne a jego dokładny powód nie jest znany.
+Testy wydają się pokazywać wzrost czasu działania dla konkretnego rozmiaru danych, na @asd21[wykresie] możemy zaobserwować gwałtowny wzrost czasu działania dla liczby zmiennych $x = 125$, bliższe zbadanie tego fenomenu zdaje się wykluczać czynniki zewnętrzne a jego dokładny powód nie jest znany.
 
 Następna grupa wykresów porównuje czasy rozwiązywania tego samego egzemplarza #sat3 przed i po kolejnych transformacjach. Wykresy odpowiadają wybranym ścieżki transformacji problemów w grafie redukcji. Na @asd22[wykresie] możemy zobaczyć znaczny wzrost czasu rozwiązania po transformacji do #cli następne transformacje nie mają jednak znacznego wpływu. Dzieje się tak ponieważ dalsze transformacje  to operacje dużo prostsze w porównaniu do tej pierwszej.
 
@@ -2568,45 +2614,7 @@ Przeprowadzone testy i analiza działania systemu (@tests) pozwoliły na sformu�
 
 Stworzona biblioteka charakteryzuje się idiomatycznością, spójnością interfejsów oraz otwartością na rozbudowę o kolejne problemy i redukcje przez użytkownika. Wykorzystanie mechanizmu multiple dispatch języka Julia pozwoliło na elastyczne zarządzanie metodami transformacji. System stanowi kompletne narzędzie prezentujące w praktyce teoretyczne zależności między trudnymi problemami obliczeniowymi, realizując założenia postawione we wstępie pracy.
 
-#heading(numbering: none, supplement: none)[Dodatek A - pliki źródłowe i wykorzystane narzędzia]
 
-Pliki źródłowe biblioteki, dokumentu pracy oraz strony z dokumentacją możemy znaleźć w repozytorium Git pod adresem:
-
-#let qrlink(addr) = figure(
-  outlined: false,
-  table(
-  stroke: none,
-  columns: (1fr,0.5fr),
-  align: (horizon + right, horizon + left ),
-  link(addr),
-  tiaoma.qrcode(addr),
- )
-)
-
-#qrlink("https://github.com/junsevith/Conplete.jl")
-
-Dokumentacja biblioteki jest hostowana na stronie WWW pod adresem:
-
-#qrlink("https://junsevith.github.io/Conplete.jl/dev/")
-
-Ten dokument został utworzony za pomocą nowoczesnej aplikacji do składu tekstu o nazwie *Typst* oraz jej wielu rozszerzeń umożliwiających m.in. generowanie rysunków grafów czy wykresów. Poniżej wylistowano wszystkie użyte rozszerzenia:
-
-
-
-#table(
-stroke: none,
-columns: (auto,auto,1fr),
-align: horizon + left,
-[*Typst*], [\- skład tekstu], link("https://typst.app/"),
-[*Red Agora*], [\- baza wyglądu pracy], link("https://typst.app/universe/package/red-agora"),
-[*Fletcher*], [\- rysunki grafów], link("https://typst.app/universe/package/fletcher/"),
-[*Lilaq*], [\- wykresy], link("https://typst.app/universe/package/lilaq"),
-[*Lovelace*], [\- pseudokody], link("https://typst.app/universe/package/lovelace"),
-[*Farme-It*], [\- definicje i twierdzenia], link("https://typst.app/universe/package/frame-it"),
-[*Codly*], [\- programy i kod], link("https://typst.app/universe/package/codly"),
-[*Tiaoma*], [\- kody QR], link("https://typst.app/universe/package/tiaoma"),
-[*Zero*],[\- formatowanie liczb], link("https://typst.app/universe/package/zero"),
-)
 
 
 // #heading(numbering: none, supplement: none)[Dodatek B]
