@@ -38,8 +38,10 @@ export NPSolution
 
 export add_problem
 export add_transformation
-export problems
-export solutions
+# export problems
+# export solutions
+export solution_type
+export problem_type
 
 # function interfaces
 export solve
@@ -91,6 +93,13 @@ export KnapsackSolution
     solve(solver, problem) -> solution
 Solve problem with JuMP using given solver
 JuMP is required to be added for methos to appear
+
+# Examples
+```jldoctest
+julia> using Conplete, JuMP, HiGHS
+julia> solve(HiGHS.Optimizer, SAT3([1 2 3]))
+SAT3Solution(Bool[1, 1, 0])
+```
 """
 function solve end
 

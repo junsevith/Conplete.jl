@@ -13,11 +13,11 @@ julia> shortest_chain(CNFSAT,Knapsack)
  SubsetSum
  Partition
  Knapsack
-    ```    
+```    
 """
 function shortest_chain(in::Type{<:NPProblem}, out::Type{<:NPProblem})
-    in_num = problems[in]
-    out_num = problems[out]
+    in_num = problems[clean_type(in)]
+    out_num = problems[clean_type(out)]
     path = a_star(problemGraph, in_num, out_num)
     return Type{<:NPProblem}[problems(dst(e)) for e in path]
 end
@@ -63,6 +63,7 @@ Check [`add_problem`](@ref) and [`add_transformation`](@ref) for adding transfor
 `instance::NPProblem`: input instance of the problem.
 
 `chain_path::Vector{DataType}`: chain of conversions as an Vector of problem types.
+
 # Examples
 ```jldoctest
 julia> using Conplete
@@ -102,6 +103,7 @@ Check [`add_problem`](@ref) and [`add_transformation`](@ref) for adding transfor
 `instance::NPProblem`: input instance of the problem.
 
 `chain_path::Vector{DataType}`: chain of conversions as an Vector of problem types.
+
 # Examples
 ```jldoctest
 julia> using Conplete

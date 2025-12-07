@@ -191,6 +191,32 @@ println(solver)
       @test typeof(target) == Knapsack{BigInt,BigInt}
 
     end
+
+    @testset "Chain Extract" begin
+      chaindata = chain_transform(sat3, HittingSet)
+
+      sol = solve(solver, last(chaindata))
+
+      ext = extract(sol, chaindata)
+
+      @test validate(ext, sat3)
+
+      # ext2 = extract(sol, sat3)
+
+      # @test validate(ext2, sat3)
+    end
+
+    @testset "Chain Construct" begin
+      chaindata = chain_transform(sat3, HittingSet)
+
+      con = construct(sat3_sol, chaindata)
+
+      @test validate(con, last(chaindata))
+
+      # con2 = construct(HittingSetSolution, sat3_sol, sat3)
+
+      # @test validate(con2, last(chaindata))
+    end
   end
 
   @testset "Optional parameters" begin

@@ -62,7 +62,7 @@ function Conplete.solve(model::Model, problem::HamCycle)
     if !callback
         cycle = find_subtour(getcycle_undir(value(model[:e])))
         while 1 < length(cycle) < n
-            println("Callback found cycle of length $(length(cycle))")
+            # println("Callback found cycle of length $(length(cycle))")
             S = [(i, j) for (i, j) in Iterators.product(cycle, cycle) if i < j]
             @constraint(
                 model,

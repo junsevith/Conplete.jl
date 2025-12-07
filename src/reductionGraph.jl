@@ -28,7 +28,52 @@ global solutions = Bijection{Type{<:NPProblem},Type{<:NPSolution}}(
     Partition => PartitionSolution,
     BinPacking => BinPackingSolution,
     Knapsack => KnapsackSolution
-    )
+)
+
+"""
+Clean the type from generic parameters so it can be stored properly
+"""
+clean_type(type) = Core.typename(type).wrapper
+
+"""
+    solution_type(problem_type)
+
+Get designated solution type for `problem_type`
+
+# Examples
+```jldoctest
+julia> using Conplete
+julia> solution_type(VertexCover)
+VertexCoverSolution
+```
+"""
+function solution_type(prob::Type{<:NPProblem})
+    solutions[clean_type(prob)]
+end
+
+function solution_type(prob::NPProblem)
+    solution_type(typeof(prob))
+end
+
+"""
+    problem_type(solution_type)
+
+Get designated problem type for `solution_type`
+
+# Examples
+```jldoctest
+julia> using Conplete
+julia> problem_type(KnapsackSolution)
+Knapsack
+```
+"""
+function problem_type(sol::Type{<:NPSolution})
+    solutions(clean_type(sol))
+end
+
+function problem_type(sol::NPSolution)
+    problem_type(typeof(sol))
+end
 
 global problemGraph = let
     local g = SimpleDiGraph(length(problems))
@@ -60,6 +105,20 @@ end
 
 Add a custom NP complete problem to the transformation graph.
 This makes it available for using `add_transformation`.
+
+# Examples
+```jldoctest
+julia> using Conplete
+julia> struct Pies <: NPProblem
+         dums::Int64
+       end
+
+julia> struct Ogon <: NPSolution
+         dums::Int64
+       end
+
+julia> add_problem(Pies, Ogon)
+```
 """
 function add_problem(inst::Type{<:NPProblem}, solution::Type{<:NPSolution})
     add_vertex!(problemGraph)
@@ -74,6 +133,16 @@ end
 
 Add a transformation to the transformation graph, 
 This makes it available for transformation using `transform` and `chain_transform` functions.
+
+# Examples
+```jldoctest
+julia> using Conplete
+julia> function Conplete.transform(inst::SAT3, target::Type{Pies})
+         return Pies(1)
+       end
+
+julia> add_transformation(Pies, SAT3)    
+```
 """
 function add_transformation(new::Type{<:NPProblem}, parent::Type{<:NPProblem})
     met = methods(transform, [parent, Type{new}])
